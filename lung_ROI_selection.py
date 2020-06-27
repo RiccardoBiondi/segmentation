@@ -111,14 +111,15 @@ def erode(img , kernel, iterations = 1):
 
 
 #read the data and organiza them into a DataFrame
+
 dicom_files = sorted(glob('./data/*[0-9].pkl.npy'))
-
-
 
 #starting the elaboration
 for Id in dicom_files:
 
     dicom = load(Id)
+    idx = os.path.basename(Id).replace('.pkl.npy','')
+
     #remove the tube
     dicom[dicom < 0] = 0
     dicom = rescale(dicom, dicom.max(), 0)
@@ -134,8 +135,8 @@ for Id in dicom_files:
     labels = erode(labels.astype('uint8'), kernel, iterations=1)
     #now I've created a mask for the patient body
 
-    #TODO:
-    #saving the results on results folder
+    np.save("./results/"+idx+"_body.pkl.npy",labels)
+
 
     #isolate the lung
     dicom = dicom * np.where(labels != 0, 1,0)
@@ -145,13 +146,9 @@ for Id in dicom_files:
     kernel = np.ones((5, 5), np.uint8)
     lung = filter_out_small_spots(lung, stats,kernel)
 
+    np.save("./results/"+idx+"_lung.pkl.npy", lung)
 
-    #TODO save mask to results
+    #define roi
+    
 
-    #find lung mask
-        #save results
-
-
-
-#define roi
     #save results
