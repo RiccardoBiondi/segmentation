@@ -39,7 +39,7 @@ def load(filename):
 
 def connectedComponentsWithStats(img):
     """
-    extend cv2.connectedComponentsWithStats to a stack of images
+    extension of cv2.connectedComponentsWithStats to images tensor
     img-> stack of input images
     """
     ret = []
@@ -56,9 +56,9 @@ def connectedComponentsWithStats(img):
 
 def background_discriminator(stats , labels):
     """
-    set the GL of the background region to 0 and the ther to 255
-    stats ->
-    labels ->
+    set the GL of the background region to 0 and the other to 255
+    stats -> list of stats from connectedComponentsWithStats
+    labels -> labels tensor from connectedComponentsWithStats
     """
     lab = np.empty(labels.shape)
     #ordina le stats in a dataframe
@@ -89,6 +89,26 @@ def filling(img, kernel) :
     return t_labels
 
 
+def filter_out_small_spots(img , stats, kernel) :
+    for i in range(img.shape[0]):
+        stats[i] = pd.DataFrame(stats[i], columns=['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA'])
+        for j in stats[i].query('AREA < 10').index:
+            img[i][img[i] == j] = 0
+        img[i] = np.where(img[i] != 0, 1, 0)
+        img[i] = cv2.dilate(img[i].astype('uint8'), kernel, iterations=1)
+        img[i] = imfill(img[i].astype('uint8'))
+    return img
+
+
+def erode(img , kernel, iterations = 1):
+    """
+    extension of cv2.erosion for a tensor of images
+    img -> image tensor
+    """
+    for i in range(img.shape[0]):
+        img[i] = cv2.erode(img[i], kernel, iterations)
+    return img
+
 
 #read the data and organiza them into a DataFrame
 dicom_files = sorted(glob('./data/*[0-9].pkl.npy'))
@@ -97,47 +117,37 @@ dicom_files = sorted(glob('./data/*[0-9].pkl.npy'))
 
 #starting the elaboration
 for Id in dicom_files:
-    dicom = load(Id)
 
+    dicom = load(Id)
     #remove the tube
     dicom[dicom < 0] = 0
     dicom = rescale(dicom, dicom.max(), 0)
 
     #find a body mask
     th= np.where(dicom < 0.1, 0,1)
-
     ret, labels, stats = connectedComponentsWithStats(th)
-
-
     labels = background_discriminator(stats, labels)
 
     kernel = np.ones((3,3), np.uint8)
     labels = filling(labels, kernel)
+    kernel = np.ones((20, 20), np.uint8)
+    labels = erode(labels.astype('uint8'), kernel, iterations=1)
     #now I've created a mask for the patient body
 
     #TODO:
     #saving the results on results folder
 
-    #isolate the body
+    #isolate the lung
     dicom = dicom * np.where(labels != 0, 1,0)
-    plt.imshow(dicom[130])
-    plt.show()
-
-    """
-    x = dicom[idx] * np.where(labels != 0, 1, 0)
-    th = np.where(((x < 0.2) & (x > 0)), 1, 0)
-    ret, lung, stats, _ = cv.connectedComponentsWithStats(th.astype('uint8'))
-    stats = pd.DataFrame(stats, columns=['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA'])
-    lung = lung * np.where(labels != 0, 1, 0)
-    # filter out small spots
-    for i in stats.query('AREA < 10').index:
-        lung[lung == i] = 0
-    lung = np.where(lung != 0, 1, 0)
+    th= np.where(((dicom < 0.2) & (dicom > 0)), 1, 0)
+    ret, lung, stats= connectedComponentsWithStats(th.astype('uint8'))
 
     kernel = np.ones((5, 5), np.uint8)
-    lung = cv.dilate(lung.astype('uint8'), kernel, iterations=1)
-    lung = imfill(lung.astype('uint8'))
-    """
+    lung = filter_out_small_spots(lung, stats,kernel)
+
+
+    #TODO save mask to results
+
     #find lung mask
         #save results
 
