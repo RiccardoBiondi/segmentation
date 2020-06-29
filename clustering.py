@@ -14,7 +14,7 @@ def load(filename):
 
 def save(filename, data):
     with open(filename, 'wb') as f:
-        pickle.dump(list, f)
+        pickle.dump(data, f)
 
 
 def shaping(img) :
@@ -43,7 +43,7 @@ def shaping(img) :
 def remap(labels, center,shape):
     """
     remap the labels into the original image
-    labels -> list of vector to remap
+    labels -> list of array to remap
     center -> center from cv2.kmeans function
     shape  -> list of shape of original stack of images
     retun a list of images
@@ -60,13 +60,13 @@ def kmeans(img, criteria, clusters) :
     """
     Extent cv2.kmeans for an image stack
     img -> list of input images
-    criteria ->
+    criteria -> It is the iteration termination criteria.
     clusters -> number of clusters
 
     return:
-    ret ->
-    labels ->
-    center ->
+    ret -> It is the list of the sum of squared distance from each point to their corresponding centers for each slice
+    labels -> list of label array
+    center -> list of array of centers of clusters.
     """
     ret = []
     labels = []
@@ -78,3 +78,44 @@ def kmeans(img, criteria, clusters) :
         labels.append(t_labels)
         center.append(t_center)
     return [ret,labels,center]
+
+
+#starting the script
+
+#global variable definition
+criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+n_clusters = 4
+
+ROI_files = sorted(glob('./results/*_blur_ROI.pkl.npy'))
+
+for i in range(len(ROI_files)):
+
+    #read the files
+    ROI = load(ROI_files[i])
+    id = os.path.basename(ROI_files[i]).replace('_blur_ROI.pkl.npy', '')
+    #convert image to array
+    vector,split, shape = shaping(ROI)
+    each_img = [np.float32(vector[i]) for i in range(len(vector))]
+    all_img = np.float32(np.concatenate(vector))
+
+    #perform the clustering
+    a_ret, a_label, a_center = cv2.kmeans(all_img, n_clusters, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+
+    e_ret, e_label, e_center = kmeans(each_img, criteria, n_clusters)
+
+    #rearrange all the labels to image
+    a_center = np.uint8(a_center)
+    e_center = [np.uint8(e_center[i]) for i in range(len(e_center))]
+
+    a_label = np.split(a_label, split)
+    a_res = remap(a_label, a_center, shape)
+
+    e_res = []
+    for i in range(len(shape)):
+        res = e_center[i][e_label[i].flatten()]
+        res2 =  res.reshape((shape[i]))
+        e_res.append(res2)
+
+    #save the results
+    save('./results/' + id + '_blur_clustered_all.pkl.npy', a_res)
+    save('./results/' + id + '_blur_clustered_each.pkl.npy', e_res)
