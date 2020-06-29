@@ -36,7 +36,6 @@ def load(filename):
     return data
 
 
-
 def connectedComponentsWithStats(img):
     """
     extension of cv2.connectedComponentsWithStats to images tensor
@@ -54,7 +53,7 @@ def connectedComponentsWithStats(img):
 
 
 
-def background_discriminator(stats , labels):
+def background_discriminator(stats, labels):
     """
     set the GL of the background region to 0 and the other to 255
     stats -> list of stats from connectedComponentsWithStats
@@ -67,7 +66,7 @@ def background_discriminator(stats , labels):
         stats[i].sort_values('AREA', inplace=True, ascending=False)
         stats[i].drop(stats[i].query('TOP == 0 and LEFT == 0').index, inplace=True)
         t_labels = labels[i]
-    #divide in large connected area and others
+        #divide in large connected area and others
         t_labels[t_labels != stats[i].index[0]] = 255
         t_labels[t_labels == stats[i].index[0]] = 0
         lab[i] = t_labels
@@ -89,9 +88,15 @@ def filling(img, kernel) :
     return t_labels
 
 
-def filter_out_small_spots(img , stats, kernel) :
+def filter_out_small_spots(img, stats, kernel) :
+    """
+    Function to remove small spots on a stack of binary images
+    img   -> stack of images
+    stats -> list of stats beloging from connectedComponentsWithStats
+    kernel -> kernel for ditation operation
+    """
     for i in range(img.shape[0]):
-        stats[i] = pd.DataFrame(stats[i], columns=['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA'])
+        stats[i] = pd.DataFrame(stats[i], columns=['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA'])
         for j in stats[i].query('AREA < 10').index:
             img[i][img[i] == j] = 0
         img[i] = np.where(img[i] != 0, 1, 0)
@@ -100,7 +105,7 @@ def filter_out_small_spots(img , stats, kernel) :
     return img
 
 
-def erode(img , kernel, iterations = 1):
+def erode(img, kernel, iterations = 1):
     """
     extension of cv2.erosion for a tensor of images
     img -> image tensor
@@ -116,26 +121,25 @@ dicom_files = sorted(glob('./data/*[0-9].pkl.npy'))
 
 #starting the elaboration
 for Id in dicom_files:
-
     dicom = load(Id)
-    idx = os.path.basename(Id).replace('.pkl.npy','')
+    idx = os.path.basename(Id).replace('.pkl.npy', '')
 
     #remove the tube
     dicom[dicom < 0] = 0
     dicom = rescale(dicom, dicom.max(), 0)
 
     #find a body mask
-    th= np.where(dicom < 0.1, 0,1)
+    th= np.where(dicom < 0.1, 0, 1)
     ret, labels, stats = connectedComponentsWithStats(th)
     labels = background_discriminator(stats, labels)
 
-    kernel = np.ones((3,3), np.uint8)
+    kernel = np.ones((3, 3), np.uint8)
     labels = filling(labels, kernel)
     kernel = np.ones((20, 20), np.uint8)
     labels = erode(labels.astype('uint8'), kernel, iterations=1)
     #now I've created a mask for the patient body
 
-    np.save("./results/"+idx+"_body.pkl.npy",labels)
+    np.save("./results/" + idx + "_body.pkl.npy", labels)
 
 
     #isolate the lung
@@ -144,11 +148,11 @@ for Id in dicom_files:
     ret, lung, stats= connectedComponentsWithStats(th.astype('uint8'))
 
     kernel = np.ones((5, 5), np.uint8)
-    lung = filter_out_small_spots(lung, stats,kernel)
+    lung = filter_out_small_spots(lung, stats, kernel)
 
     np.save("./results/"+idx+"_lung.pkl.npy", lung)
 
     #define roi
-    
+
 
     #save results

@@ -11,12 +11,12 @@ def load (filename):
         data = np.load(fp)
     return data
 
-def rescale(im,max,min):
-    return(im.astype(float)-min)*(1./(max-min))
+def rescale(im, max, min):
+    return(im.astype(float) - min) * (1. / (max - min))
 
 def apply_blurring(img) :
     """
-    extend cv2.medianBlur on a stack of images and subtract the blurred image
+    extends cv2.medianBlur on a stack of images and subtract the blurred image
     to the original one
     img -> input stack of images
     """
@@ -25,12 +25,12 @@ def apply_blurring(img) :
     for i in range(blur.shape[0]):
         blur[i] = cv2.medianBlur(img[i], 5)
         res[i] = (masked[i] - blur[i])**2
-    return [res,blur]
+    return [res, blur]
 
 
-def erode(img , kernel, iterations = 1):
+def erode(img, kernel, iterations = 1):
     """
-    extension of cv2.erosion for a tensor of images
+    extends cv2.erosion for a tensor of images
     img -> image tensor
     """
     for i in range(img.shape[0]):
@@ -46,7 +46,7 @@ for i in range(len(dicom_files)):
     lung  = load(lung_files[i])
     dicom = load(dicom_files[i])
 
-    id = os.path.basename(dicom_files[i]).replace('.pkl.npy','')
+    id = os.path.basename(dicom_files[i]).replace('.pkl.npy', '')
 
     dicom[dicom < 0] = 0
     dicom = rescale(dicom, dicom.max(), 0)
@@ -63,5 +63,5 @@ for i in range(len(dicom_files)):
     res = res * np.where(masked != 0, 1, 0)
     blur = blur * np.where(masked != 0, 1, 0)
 
-    np.save("./results/"+idx+"_blur.pkl.npy",blur)
-    np.save("./results/"+idx+"_res.pkl.npy",res)
+    np.save("./results/"+id+"_blur.pkl.npy",blur)
+    np.save("./results/"+id+"_res.pkl.npy",res)
