@@ -1,3 +1,11 @@
 #ignore folder
 data/
 results/
+
+#python cache
+__pycache__/
+
+#unit test and coverage
+.hypothesis/
+.pytest_cache/
+.coverage
