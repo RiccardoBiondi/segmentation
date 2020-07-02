@@ -55,7 +55,8 @@ def ROI (img, stats):
     return crop
 
 
-
+def rescale (im, max, min):
+    return (im.astype(float) - min) * (1. / (max - min))
 
 #read data
 dicom_files = sorted(glob('./data/*[0-9].pkl.npy'))
@@ -77,6 +78,8 @@ for i in range(len(blur_files)) :
     blur = load(blur_files[i])
     lung = load(lung_files[i])
 
+    dicom[dicom < 0] = 0
+    dicom = rescale(dicom, dicom.max(), 0)
     blur = blur.astype('uint8')
     lung = lung.astype('uint8')
 
@@ -86,7 +89,7 @@ for i in range(len(blur_files)) :
     tkinter.messagebox.showinfo(message = message)
 
     def on_trackbar(val):
-        cv2.imshow(id, lung[val])
+        cv2.imshow(id, dicom[val])
 
     #create the trackbar for the lower slice selection
     cv2.createTrackbar(trackbar_first, id, 0, lung.shape[0]-1, on_trackbar)
