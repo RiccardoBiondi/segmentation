@@ -1,6 +1,7 @@
 import cv2
 import pickle
 import numpy as np
+import pandas as pd
 from functools import partial
 
 
@@ -22,7 +23,6 @@ def load_pickle(filename) :
     data: array_like
         array loaded from a given file
     '''
-
     with open(filename, 'rb') as fp:
       data = np.load(fp, allow_pickle = True)
     return data
@@ -67,6 +67,7 @@ def rescale(img, max, min) :
     #TODO : condition to exclue min == max
     return (img.astype(float) - min) * (1. / (max - min))
 
+
 def erode(img, kernel, iterations = 1):
     '''
     Apply the erosion on the full image stack
@@ -90,6 +91,7 @@ def erode(img, kernel, iterations = 1):
 
     vectorized = np.vectorize(partial(cv2.erode, kernel=kernel, iterations=iterations), signature= '(m,n)->(m,n)')
     return vectorized(img.astype('uint8'))
+
 
 def dilate(img, kernel, iterations = 1 ):
     '''
@@ -116,9 +118,34 @@ def dilate(img, kernel, iterations = 1 ):
     return vectorized(img.astype('uint8'))
 
 
+def connectedComponentsWithStats(img):
+    '''
+    computes the connected components labeled image of boolean image and also
+    produces a statistics output for each label
+
+    Parameters
+    ----------
+    img: array-like
+        input image or stack of images
+
+    Results
+    -------
+    retval: array-like
+
+    labels: array-like
+        labelled image or stack
+    stats: list of array-like
+        statistic for each lablel for each image of the stack
+    centroids: array-like
+        centroid for each label fr each image of the stack
+    '''
+    if len(img.shape) == 2 :
+        retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype('uint8'))
+        return [retval, labels, stats, controids]
+    out = list(zip(*list(map(cv2.connectedComponentsWithStats, img.astype('uint8')))))
+    return [np.array(out[0]), np.array(out[1]), list(out[2]), list(out[3])]
 
 
-#TODO bitwise not
 def bitwise_not(img):
     '''
     Calculates per-element bit-wise inversion of the input array
@@ -138,4 +165,87 @@ def bitwise_not(img):
     return dst(img.astype('uint8'))
 
 
-#TODO to pandas
+def to_dataframe (arr, columns) :
+    '''
+    Convert  3D numpy array into a list of pandas dataframes
+
+    Parameter
+    ---------
+    arr: array-like
+        input array to convert in a dataframe
+    columns: list of string
+        labels of the dataframe
+    Return
+    ------
+    df: list of dataframe
+        list of dataframe made from arr
+    '''
+    #if len(arr) == 2 :
+        #return pd.DataFrame(arr, columns=columns)
+    df = list(map(partial(pd.DataFrame, columns=columns), arr))
+    return df
+
+
+def _imfill(img):
+    '''
+    Internal function. Fill the holes of a single image.
+    Parameters
+    ----------
+    img : array-like
+        Image to fill
+    Return
+    ------
+    filled : array-like
+        filled image
+    '''
+    # Copy the thresholded image.
+    img = np.pad(img.astype('uint8'), pad_width=((1, 1), (1, 1)),
+                      mode='constant', constant_values=(0., 0.))
+    im_floodfill = img.copy()
+    # Mask used to flood filling.
+    h, w = im_floodfill.shape[:2]
+    mask = np.zeros((h+2, w+2), np.uint8)
+    # Floodfill from point (0, 0)
+    cv2.floodFill(im_floodfill, mask, (0,0), 255);
+    # Invert floodfilled image
+    im_floodfill_inv = cv2.bitwise_not(im_floodfill)
+    # Combine the two images to get the foreground.
+    filled = img | im_floodfill_inv
+    return filled[1:-1, 1:-1]
+
+
+def imfill(img):
+    '''
+    Fill the holes of the input image or stack of images
+
+    Parameter
+    ---------
+    img: array-like
+        binary image to fill
+    Return
+    ------
+    filled: array-like
+        binary image or stack with filled holes
+    '''
+
+    if len(img.shape) == 2: #one image case
+        return _imfill(img.astype('uint8'))
+    filled = np.vectorize(_imfill, signature='(m,n)->(m,n)')
+    return filled(img.astype('uint8'))
+
+
+def medianBlur(img):
+    '''
+    Apply median blurring filter on an image or stack of images
+    Parameters
+    ----------
+    img: array-like
+        image or stack of images to filter
+    Return
+    ------
+    blurred : array-like
+        median blurred image
+    '''
+    if len(img.shape) == 2: #single image case
+        pass
+    pass
