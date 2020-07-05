@@ -2,21 +2,22 @@ import pytest
 import hypothesis.strategies as st
 from hypothesis import given, example, assume, settings
 
-import numpy as np
-from numpy import ones, zeros
-from numpy.random import rand
-
 from segmentation.method import save_pickle
 from segmentation.method import load_pickle
 from segmentation.method import rescale
 from segmentation.method import erode
 from segmentation.method import dilate
-from segmentation.method import connectedComponentsWithStats
+from segmentation.method import connectedComponentsWithStats#
 from segmentation.method import bitwise_not
+from segmentation.method import imfill#
+from segmentation.method import medianBlur#
 
-__author__  = ['Riccardo Biondi', 'Nico Curti']
-__email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
+import numpy as np
+from numpy import ones, zeros
+from numpy.random import rand
 
+__author__ = ['Riccardo Biondi', 'Nico Curti']
+__email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 image = st.just(rand)
@@ -48,15 +49,15 @@ def test_rescale(data, n_img, n_pixels):
 @given(image, kernel, st.integers(5,30), st.integers(300, 512), st.integers(3,11))
 @settings(max_examples = 20, deadline = None)
 def test_erode_stack(data, kernel, n_img, n_pix, k_dim):
-    eroded = erode(data(n_img, n_pix, n_pix), kernel((k_dim,k_dim)))
-    assert ( eroded.shape == (n_img, n_pix, n_pix))
+    eroded = erode(data(n_img, n_pix, n_pix), kernel((k_dim, k_dim)))
+    assert (eroded.shape == (n_img, n_pix, n_pix))
 
 
 #test erosion for a single images
 @given(image, kernel, st.integers(300, 512), st.integers(3,11))
 @settings(max_examples = 20, deadline = None)
 def test_erode(data, kernel, n_pix, k_dim):
-    eroded = erode(data(n_pix,n_pix), kernel((k_dim,k_dim)))
+    eroded = erode(data(n_pix, n_pix), kernel((k_dim, k_dim)))
     assert (eroded.shape == (n_pix, n_pix))
 
 
@@ -64,19 +65,16 @@ def test_erode(data, kernel, n_pix, k_dim):
 @given(image, kernel, st.integers(5,30), st.integers(300, 512), st.integers(3,11))
 @settings(max_examples = 20, deadline = None)
 def test_dilate_stack(data, kernel, n_img, n_pix, k_dim):
-    dilated = dilate(data(n_img, n_pix, n_pix), kernel((k_dim,k_dim)))
-    assert ( dilated.shape == (n_img, n_pix, n_pix))
+    dilated = dilate(data(n_img, n_pix, n_pix), kernel((k_dim, k_dim)))
+    assert (dilated.shape == (n_img, n_pix, n_pix))
 
 
 #test dilation for a single images
 @given(image, kernel, st.integers(300, 512), st.integers(3,11))
 @settings(max_examples = 3, deadline = None)
 def test_dilate(data, kernel, n_pix, k_dim):
-    dilated = dilate(data(n_pix,n_pix), kernel((k_dim,k_dim)))
+    dilated = dilate(data(n_pix, n_pix), kernel((k_dim, k_dim)))
     assert (dilated.shape == (n_pix, n_pix))
-
-
-
 
 
 #test bitwise not for a single images
@@ -87,10 +85,35 @@ def test_bitwise_not(input, expected_output, n_pix):
     assert ((inverted == 255 * expected_output((n_pix, n_pix))).all())
 
 
-
 #test bitwise not for a stack
 @given(black_image, white_imge, st.integers(2,30), st.integers(300,512))
 @settings(max_examples = 20, deadline = None)
 def test_bitwise_not_stack(input, expected_output, n_img, n_pix):
     inverted = bitwise_not(input((n_img, n_pix, n_pix)))
     assert((inverted == 255 * expected_output((n_img, n_pix, n_pix))).all())
+
+
+@given(image, st.integers(300, 512))
+@settings(max_examples = 20, deadline = None)
+def test_imfill(img, n_pix):
+    input = img(n_pix, n_pix)
+    filled = imfill(input)
+    assert(filled.shape == input.shape)
+    assert((filled != input).any())
+
+
+@given(image, st.integers(2, 30), st.integers(300, 512))
+@settings(max_examples = 20, deadline = None)
+def test_fill_stack(img, n_img, n_pix):
+    input = img(n_img, n_pix, n_pix)
+    filled = imfill(input)
+    assert(filled.shape == input.shape)
+    assert ((filled != input).any())
+
+
+@given(image, st.integers(2, 30), st.integers(300, 512))
+@settings(max_examples = 20, deadline = None)
+def test_medianBlur_stack (img, n_img, n_pix) :
+    input = img(n_img, n_pix, n_pix)
+    blurred = medianBlur(input)
+    assert(blurred.shape == input.shape)
