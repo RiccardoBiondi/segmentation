@@ -27,27 +27,10 @@ def parse_args():
     return args
 
 
-def filter_out_small_spots(img, stats, kernel) :
-    """
-    Function to remove small spots on a stack of binary images
-    img   -> stack of images
-    stats -> list of stats beloging from connectedComponentsWithStats
-    kernel -> kernel for ditation operation
-    """
-    for i in range(img.shape[0]):
-        stats[i] = pd.DataFrame(stats[i], columns=['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA'])
-        for j in stats[i].query('AREA < 10').index:
-            img[i][img[i] == j] = 0
-        img[i] = np.where(img[i] != 0, 1, 0)
-        img[i] = cv2.dilate(img[i].astype('uint8'), kernel, iterations=1)
-        img[i] = imfill(img[i].astype('uint8'))
-    return img
-
-
 def main():
 
     args = parse_args()
-    dicom = load_pickle(args.filename + 'RC90.pkl.npy')
+    dicom = load_pickle(args.filename)
     #remove the tube
     dicom[dicom < 0] = 0
     dicom = rescale(dicom, dicom.max(), 0)
@@ -70,9 +53,8 @@ def main():
     labels = imfill(labels)
     kernel = np.ones((20, 20), np.uint8)
     labels = erode(labels.astype('uint8'), kernel, iterations=1)
-    save_pickle(args.output + '_body_mask', labels)
-    #start to find lung Mask
 
+    #start to find lung Mask
     #connected components
     dicom = dicom * np.where(labels != 0, 1,0)
     th= np.where(((dicom < args.lung_thr) & (dicom > 0)), 1, 0)
@@ -86,7 +68,8 @@ def main():
     lung = dilate(lung, kernel)
     lung = imfill(lung.astype('uint8'))
 
-    save_pickle(args.output + '_lung_mask', lung)
+    save_pickle(args.output, lung)
+
 
 if __name__ == '__main__' :
     main()

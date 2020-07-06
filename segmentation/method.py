@@ -234,18 +234,21 @@ def imfill(img):
     return filled(img.astype('uint8'))
 
 
-def medianBlur(img):
+def medianBlur(img, k_size):
     '''
     Apply median blurring filter on an image or stack of images
     Parameters
     ----------
     img: array-like
         image or stack of images to filter
+    k_size : int
+        aperture linear size; it must be odd and greater than 1
     Return
     ------
     blurred : array-like
         median blurred image
     '''
     if len(img.shape) == 2: #single image case
-        pass
-    pass
+        return cv2.medianBlur(img.astype('uint8'), k_size)
+    blurred = np.vectorize(partial(cv2.medianBlur, ksize = k_size), signature = '(m,n)->(m,n)')
+    return blurred(img.astype('uint8'))
