@@ -1,67 +1,54 @@
 import cv2
-import os
 import numpy as np
 import pylab as plt
 import pandas as pd
-from glob import glob
+import argparse
+from segmentation.method import load_pickle, save_pickle, erode, medianBlur, rescale
+
+__author__ = ['Riccardo Biondi', 'Nico Curti']
+__email__ = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
-def load (filename):
-    with open(filename, 'rb') as fp:
-        data = np.load(fp)
-    return data
+def parse_args() :
+    description = 'Median Blurring'
 
-def rescale(im, max, min):
-    return(im.astype(float) - min) * (1. / (max - min))
+    parser = argparse.ArgumentParser(description=description)
+    parser.add_argument('--input', dest='filename', required=True, type=str, action='store', help='Input filename')
+    parser.add_argument('--mask', dest='mask', required=False, type=str, action='store', help='Lung mask filename', default = '')
+    parser.add_argument('--output', dest = 'output', required= True, type=str, action='store', help='Output filename')
+    parser.add_argument('--kernel_size', dest='kernel_size', required=False, type=int, action='store', help='Kernel Size', default = 14)
+    parser.add_argument('--blur_ksize', dest='k_size', required=False, type=int, action='store', help ='blur apertur linear size, must be odd', default=5)
 
-def apply_blurring(img) :
-    """
-    extends cv2.medianBlur on a stack of images and subtract the blurred image
-    to the original one
-    img -> input stack of images
-    """
-    blur = np.empty(img.shape, dtype= np.uint8)
-    res = np.empty(img.shape, dtype = np.uint8)
-    for i in range(blur.shape[0]):
-        blur[i] = cv2.medianBlur(img[i], 5)
-        res[i] = (masked[i] - blur[i])**2
-    return [res, blur]
+    args = parser.parse_args()
+    return args
 
 
-def erode(img, kernel, iterations = 1):
-    """
-    extends cv2.erosion for a tensor of images
-    img -> image tensor
-    """
-    for i in range(img.shape[0]):
-        img[i] = cv2.erode(img[i], kernel, iterations)
-    return img
 
 
-#starting the algorithm
-dicom_files = sorted(glob('./data/*[0-9].pkl.npy'))
-lung_files  = sorted(glob('./results/*_lung.pkl.npy'))
-
-for i in range(len(dicom_files)):
-    lung  = load(lung_files[i])
-    dicom = load(dicom_files[i])
-
-    id = os.path.basename(dicom_files[i]).replace('.pkl.npy', '')
-
+def main():
+    args = parse_args()
+    #load file
+    dicom = load_pickle(args.filename)
+    if args.mask !='' :
+        lung = load_pickle(args.mask)
+    else :
+        lung = np.ones(dicom.shape)
+    #rescale dicom
     dicom[dicom < 0] = 0
     dicom = rescale(dicom, dicom.max(), 0)
-
-    #select lung
+    #apply the mask
     masked = dicom * np.where(lung != 0, 1, 0)
     masked = (masked * 255).astype('uint8')
 
-    res,blur = apply_blurring(masked)
-
-    kernel = np.ones((14, 14), np.uint8)
+    blur = medianBlur(masked, args.k_size)
+    #reapply a mask
+    kernel = np.ones((args.kernel_size, args.kernel_size), np.uint8)
     masked = erode(lung.astype('uint8'), kernel, iterations=1)
-
-    res = res * np.where(masked != 0, 1, 0)
     blur = blur * np.where(masked != 0, 1, 0)
+    blur =255 * rescale(blur, blur.max(), 0)
 
-    np.save("./results/"+id+"_blur.pkl.npy",blur)
-    np.save("./results/"+id+"_res.pkl.npy",res)
+    save_pickle(args.output, blur.astype('uint8'))
+
+
+if __name__ == '__main__':
+    main()
