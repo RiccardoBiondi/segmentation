@@ -12,6 +12,7 @@ from segmentation.method import bitwise_not
 from segmentation.method import imfill#
 from segmentation.method import medianBlur#
 
+import cv2
 import numpy as np
 from numpy import ones, zeros
 from numpy.random import rand
@@ -22,7 +23,7 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 image = st.just(rand)
 black_image = st.just(zeros)
-white_imge = st.just(ones)
+white_image = st.just(ones)
 kernel = st.just(ones)
 
 
@@ -78,7 +79,7 @@ def test_dilate(data, kernel, n_pix, k_dim):
 
 
 #test bitwise not for a single images
-@given(black_image, white_imge, st.integers(300,512))
+@given(black_image, white_image, st.integers(300,512))
 @settings(max_examples = 20, deadline = None)
 def test_bitwise_not(input, expected_output, n_pix):
     inverted = bitwise_not(input((n_pix, n_pix)))
@@ -86,34 +87,39 @@ def test_bitwise_not(input, expected_output, n_pix):
 
 
 #test bitwise not for a stack
-@given(black_image, white_imge, st.integers(2,30), st.integers(300,512))
+@given(black_image, white_image, st.integers(2,30), st.integers(300,512))
 @settings(max_examples = 20, deadline = None)
 def test_bitwise_not_stack(input, expected_output, n_img, n_pix):
     inverted = bitwise_not(input((n_img, n_pix, n_pix)))
     assert((inverted == 255 * expected_output((n_img, n_pix, n_pix))).all())
 
 
-@given(image, st.integers(300, 512))
-@settings(max_examples = 20, deadline = None)
-def test_imfill(img, n_pix):
-    input = img(n_pix, n_pix)
-    filled = imfill(input)
-    assert(filled.shape == input.shape)
-    assert((filled != input).any())
-
-
-@given(image, st.integers(2, 30), st.integers(300, 512))
-@settings(max_examples = 20, deadline = None)
-def test_fill_stack(img, n_img, n_pix):
-    input = img(n_img, n_pix, n_pix)
-    filled = imfill(input)
-    assert(filled.shape == input.shape)
-    assert ((filled != input).any())
-
-
 @given(image, st.integers(2, 30), st.integers(300, 512))
 @settings(max_examples = 20, deadline = None)
 def test_medianBlur_stack (img, n_img, n_pix) :
-    input = img(n_img, n_pix, n_pix)
-    blurred = medianBlur(input)
+    input = 255 * img(n_img, n_pix, n_pix)
+    blurred = medianBlur(input, 5)
     assert(blurred.shape == input.shape)
+
+
+@given(white_image, st.integers(2, 300))
+@settings(max_examples = 20, deadline = None)
+def test_imfill(to_compare, n_img) :
+    image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
+    to_fill = np.array([image for i in range(n_img)])
+    compare = 255 * to_compare(image.shape)
+    filled = imfill(to_fill)
+    assert ( (im == compare).all() for im in filled)
+
+
+@given(st.integers(2,300))
+@settings(max_examples = 20, deadline = None )
+def test_connectedComponentsWithStats(n_img) :
+    image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
+    image = bitwise_not(image)
+    input =np.array([image for i in range(n_img)])
+    n_regions = 4
+    retval, labels, stats, centroids = connectedComponentsWithStats(input)
+    print(np.unique(labels))
+    assert (len(np.unique(labels)) == n_regions)
+    assert (len(np.unique(centroids)) == n_regions)
