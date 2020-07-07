@@ -1,121 +1,59 @@
 import cv2
-import os
 import numpy as np
-import pylab as plt
 import pandas as pd
-import pickle
-from glob import glob
+import argparse
+from functools import partial
+from segmentation.method import save_pickle, load_pickle
 
 
-def load(filename):
-    data = pickle.load( open(filename, "rb" ) )
-    return data
+__author__ = ['Riccardo Biondi', 'Nico Curti']
+__email__  = ['riccardo.biondi4@studio.unibo.it, nico.curti2@unibo.it']
 
 
-def save(filename, data):
-    with open(filename, 'wb') as f:
-        pickle.dump(data, f)
+def parse_args() :
+    description = 'kmeans clustering'
+    parser = argparse.ArgumentParser(description=description)
+
+    parser.add_argument('--input', dest='filename', required=True, type=str, action='store', help='Input filename')
+    parser.add_argument('--ROI', dest='ROI', required=False, type=str, action='store', help=' ', default='')
+    parser.add_argument('--output', dest='output', required=True, type=str, action='store', help = 'output file for centroids')
+    parser.add_argument('--labels', dest='labels', required=True, type=str, action='store', help='output file for labels')
+    parser.add_argument('--n_clust', dest='K', required=False, type=int, action='store', help='number of cluster', default=4)
+
+    args = parser.parse_args()
+    return args
 
 
-def shaping(img) :
-    """
-    reshape into a vector each image of a stack
-    img -> list of images
+def main() :
+    args = parse_args()
+    #load file and roi
+    stack = load_pickle(args.filename)
+    if args.ROI != '' :
+        ROI = load_pickle(args.ROI)
+    else :
+        ROI = np.array([np.array([0., 0., stack.shape[1], stack.shape[2]])])
+    #arrange all images into a vector
+    sample = np.float32(np.concatenate([stack[i, ROI[i,1]:ROI[i,3], ROI[i,0]:ROI[i,2]].reshape(-1,1) for i in range(stack.shape[0])]))
+    sizes =list(np.cumsum([np.absolute((R[1] - R[3]) * (R[2] - R[0])) for R in ROI]))
+    #compute kmenas clustering
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    ret, labels, centroids = cv2.kmeans(sample, args.K, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    #save centroids
+    save_pickle(args.output, centroids)
+    #remap labels
 
-    Return:
-    res -> list of reshaped images
-    split -> list of
-    shape -> list of original shape of each image
-    """
-    res = []
-    split = []
-    shape = []
-    value = 0
-    for el in img:
-        shape.append(el.shape)
-        el = np.reshape(el, (-1, 1))
-        value = value + el.shape[0]
-        split.append(value)
-        res.append(el)
-    return [res,split,shape]
-
-
-def remap(labels, center,shape):
-    """
-    remap the labels into the original image
-    labels -> list of array to remap
-    center -> center from cv2.kmeans function
-    shape  -> list of shape of original stack of images
-    retun a list of images
-    """
-    out = []
-    for i in range(len(labels)-1) :
-        res = center[labels[i].flatten()]
-        res2 =  res.reshape((shape[i]))
-        out.append(res2)
-    return out
+    labels = np.split(labels, sizes)
+    labeled = []
+    for i in range(ROI.shape[0]) :
+        res = centroids[labels[i].flatten()]
+        reshaped = res.reshape((np.absolute(ROI[i,3] - ROI[i,1]),np.absolute(ROI[i,2] - ROI[i,0])))
+            #made the image complete
+        output = np.zeros(stack[i].shape)
+        output[ROI[i,1] : ROI[i,3] , ROI[i,0] : ROI[i,2]] = reshaped
+        labeled.append(output)
+    #save results
+    save_pickle(args.labels, np.array(labeled))
 
 
-def kmeans(img, criteria, clusters) :
-    """
-    Extent cv2.kmeans for an image stack
-    img -> list of input images
-    criteria -> It is the iteration termination criteria.
-    clusters -> number of clusters
-
-    return:
-    ret -> It is the list of the sum of squared distance from each point to their corresponding centers for each slice
-    labels -> list of label array
-    center -> list of array of centers of clusters.
-    """
-    ret = []
-    labels = []
-    center = []
-
-    for i in img :
-        t_ret, t_labels, t_center = cv2.kmeans(i, clusters, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
-        ret.append(t_ret)
-        labels.append(t_labels)
-        center.append(t_center)
-    return [ret,labels,center]
-
-
-#starting the script
-
-#global variable definition
-criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-n_clusters = 4
-
-ROI_files = sorted(glob('./results/*_blur_ROI.pkl.npy'))
-
-for i in range(len(ROI_files)):
-
-    #read the files
-    ROI = load(ROI_files[i])
-    id = os.path.basename(ROI_files[i]).replace('_blur_ROI.pkl.npy', '')
-    #convert image to array
-    vector,split, shape = shaping(ROI)
-    each_img = [np.float32(vector[i]) for i in range(len(vector))]
-    all_img = np.float32(np.concatenate(vector))
-
-    #perform the clustering
-    a_ret, a_label, a_center = cv2.kmeans(all_img, n_clusters, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
-
-    e_ret, e_label, e_center = kmeans(each_img, criteria, n_clusters)
-
-    #rearrange all the labels to image
-    a_center = np.uint8(a_center)
-    e_center = [np.uint8(e_center[i]) for i in range(len(e_center))]
-
-    a_label = np.split(a_label, split)
-    a_res = remap(a_label, a_center, shape)
-
-    e_res = []
-    for i in range(len(shape)):
-        res = e_center[i][e_label[i].flatten()]
-        res2 =  res.reshape((shape[i]))
-        e_res.append(res2)
-
-    #save the results
-    save('./results/' + id + '_blur_clustered_all.pkl.npy', a_res)
-    save('./results/' + id + '_blur_clustered_each.pkl.npy', e_res)
+if __name__ == '__main__' :
+    main()
