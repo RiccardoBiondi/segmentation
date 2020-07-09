@@ -8,7 +8,7 @@ It takes as input the stack of images and performs the following operations :
 
 At the end of the execution the script save the lung and body mask as '.pkl.npy' in the output directory.
 
-![](./images/dicom.png)
+![](./images/dicom.png =200x200)
 
 ## Usage
 
