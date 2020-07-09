@@ -1,0 +1,18 @@
+site_name:          COVID-19 Lung Segmentation
+repo_url:           https://github.com/RiccardoBiondi/segmentation
+site_description:   Scripts for segmentation of lung TAC images
+
+
+markdown_extensions:
+  - extra
+  - tables
+  - fenced_code
+  - mdx_math
+
+include:
+  - index.md
+  - method.md
+  - pipeline/lungselection.md
+  - pipiline/medianBlur.md
+  - pipeline/slice_and_ROI.md
+  - pipeline/clustering.md
