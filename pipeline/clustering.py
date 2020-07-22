@@ -19,7 +19,7 @@ def parse_args() :
     parser.add_argument('--ROI', dest='ROI', required=False, type=str, action='store', help=' ', default='')
     parser.add_argument('--labels', dest='labels', required=True, type=str, action='store', help='output file for labels')
     parser.add_argument('--n_clust', dest='K', required=False, type=int, action='store', help='number of cluster', default=4)
-    prser.add_argument('--centr_init', dest='c_init', required=False,
+    parser.add_argument('--centr_init', dest='c_init', required=False,
     type=int, action='store', help='Centroid initialization technique', default=0)
 
     args = parser.parse_args()
