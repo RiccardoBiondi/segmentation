@@ -3,7 +3,8 @@ import numpy as np
 import pylab as plt
 import pandas as pd
 import argparse
-from segmentation.method import load_pickle, save_pickle, erode, medianBlur, rescale
+from segmentation.method import load_pickle, save_pickle
+from segmentation.method import erode, medianBlur, rescale
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__ = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']

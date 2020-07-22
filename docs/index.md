@@ -37,14 +37,11 @@ The scripts are:
 2. [medianBlur](./pipeline/medianBlur.md)
 3. [slice_and_ROI](./pipeline/slice_and_ROI.md)
 4. [clustering](./pipeline/clustering.md)
+5. [train](./pipeline/train.md)
+6. [labeling](./pipeline/labeling.md)
 
-And a library description is in [method](method.md).
+And a library descriptions are in [method](method.md) , [stats_method](stats_method.md)
 
-## Usage
-  **TODO**
-
-## Contribution
-  **TODO**
 
 ## Authors
 

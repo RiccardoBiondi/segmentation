@@ -8,7 +8,7 @@ This module contains functions useful for the script execution. This functions a
 4. [erode](#erode)
 5. [dilate](#dilate)
 6. [connectedComponentsWithStats](#connectedComponentsWithStats)
-7. [to_dataframe]([to_dataframe])
+7. [to_dataframe](#to_dataframe)
 8. [bitwise_not](#bitwise_not)
 9. [imfill](#imfill)
 10. [medianBlur](#medianBlur)
@@ -20,11 +20,11 @@ This function load the '.pkl.npy' file that contains the image or the stack of i
 
 **Parameter**
 
-filename: str, file name or path to load file as pickle
+*filename*: str, file name or path to load file as pickle
 
 **Return**
 
-data: array like, numpy nd.array that contains the stack of images-
+*data*: array like, numpy nd.array that contains the stack of images-
 
   ```python
     import cv2
@@ -39,13 +39,13 @@ data: array like, numpy nd.array that contains the stack of images-
 
 ## save_pickle
 
-  Save in '.pkl.npy' format the processed stack of images. Data must be in a np.ndarray like format. And the specified output file name doesn't requires to specify the extension.  
+  Save in the processed stack of images '.pkl.npy' format. Data must be in a np.ndarray like format and the specified output file name doesn't requires to specify the extension.  
 
 **Parameters**
 
-  filename: str, file name or path to dump as pickle file
+  *filename*: str, file name or path to dump as pickle file
 
-  data: array-like, image or stack to save
+  *data*: array-like, image or stack to save
 **Return** None
 
 ```python
@@ -64,13 +64,13 @@ Rescale the image according to max, min input
 
 **Parameters**
 
-  img: array-like, input image or stack to rescale
-  max: float, maximum value of the output array
-  min: float, minimum value of the output array
+  *img* : array-like, input image or stack to rescale
+  *max* : float, maximum value of the output array
+  *min* : float, minimum value of the output array
 
   **Return**
 
-  rescaled: array-like, image rescaled according to min, max
+  *rescaled* : array-like, image rescaled according to min, max
 
   ```python
     import cv2
@@ -79,63 +79,89 @@ Rescale the image according to max, min input
     from segmentation.method import rescale
 
     stack = load_pikle('./images/image.pkl.npy')
-    rescaled = rescale(stack, stack.max(), 0)
+    stack[stack < 0] = 0
+    rescaled = 255 * rescale(stack, stack.max(), 0)
     save_pickle('./output_dir/output_filename',  rescaled)
   ```
-  **TODO** add example images
+
+
+  <p style="text-align:center;"><img src="./images/not_rescaled.png" alt="original"
+  	title="original image" width="220" height="220" />
+    <caption>Original image</caption>
+    <img src="./images/rescaled.png" alt="ROI"
+  	title="ROI" width="220" height="220" />
+    <caption>Rescaled image</caption>
 
 ## erode
 Compute the erosion for the whole stack of images. It is the extension for a stack of images of   `cv2.erode()`.
 
 **Parameters**
 
-img: array-like, image or stack of images to erode
-kernel: (2D)array-like, kernel to apply to the input stack
-iterations: int, number of iterations to apply, default 1
+*img* : array-like, image or stack of images to erode
+*kernel* : (2D)array-like, kernel to apply to the input stack
+*iterations* : int, number of iterations to apply, default 1
 
 **Return**
 
-processed: array-like, eroded stack
+*processed* : array-like, eroded stack
 
 ```python
   import cv2
   import numpy as np
   from segmentation.method import load_pickle, save_pickle
+  from segmentation.method import rescale
   from segmentation.method import erode
 
   stack = load_pikle('./images/image.pkl.npy')
+  stack[stack < 0] = 0
+  stack = rescale(stack, stack.max(), 0)# apply a rescaling
+  stack = 255 * np.where(stack > 0.1, 0, 1)#apply a threshold
   kernel = np.ones((3,3), dtype='uint8') #erosion kernel
   eroded = erode(stack, kernel, iterations=1)
   save_pickle('./output_dir/output_filename',  eroded)
 ```
-  **TODO** add example images
+<p style="text-align:center;"><img src="./images/thresholded.png" alt="original"
+	title="input image" width="220" height="220" />
+  <caption>Thresholded image</caption>
+  <img src="./images/eroded.png" alt="ROI"
+	title="ROI" width="220" height="220" />
+  <caption>Eroded image</caption>
 
 ## dilate
 Compute the dilation for the whole stack of images. It is the extension for a stack of images of   `cv2.dilate()`.
 
 **Parameters**
 
-img: array-like, image or stack of images to dilate
-kernel: (2D)array-like, kernel to apply to the input stack
-iterations: int, number of iterations to apply, default 1
+*img* : array-like, image or stack of images to dilate
+*kernel* : (2D)array-like, kernel to apply to the input stack
+*iterations* : int, number of iterations to apply, default 1
 
 **Return**
 
-processed: array-like, dilated stack
+*processed* : array-like, dilated stack
 
 
 ```python
   import cv2
   import numpy as np
   from segmentation.method import load_pickle, save_pickle
+  from segmentation.method import rescale
   from segmentation.method import dilate
 
   stack = load_pikle('./images/image.pkl.npy')
+  stack[stack < 0] = 0
+  stack = rescale(stack, stack.max(), 0)# apply a rescaling
+  stack = 255 * np.where(stack > 0.1, 0, 1)#apply a threshold
   kernel = np.ones((3,3), dtype='uint8') #dilation kernel
   dilated = dilate(stack, kernel, iterations=1)
   save_pickle('./output_dir/output_filename',  dilated)
 ```
-  **TODO** add example images
+<p style="text-align:center;"><img src="./images/thresholded.png" alt="original"
+	title="thresholded image" width="220" height="220" />
+  <caption>Original image</caption>
+  <img src="./images/dilated.png" alt="ROI
+	title="ROI" width="220" height="220" />
+  <caption>Dilated image</caption>
 
 ## connectedComponentsWithStats
 
@@ -144,17 +170,17 @@ produces a statistics output for each label. Is the extension for a stack of ima
 
 **Parameters**
 
-img: array-like, input image or stack of images
+*img* : array-like, input image or stack of images
 
 **Return**
 
-retval: array-like
+*retval* : array-like
 
-labels: array-like, labelled image or stack
+*labels* : array-like, labelled image or stack
 
-stats: list of array-like, statistic for each label for each image of the stack
+*stats* : list of array-like, statistic for each label for each image of the stack
 
-centroids: array-like, centroid for each label for each image of the stack
+*centroids* : array-like, centroid for each label for each image of the stack
 
 
 ```python
@@ -174,13 +200,13 @@ This function is created in order to convert a list of np.array or a 3D np.array
 
 **Parameters**
 
-arr: array-like, input array of list to convert in a dataframe
+*arr* : array-like, input array of list to convert in a dataframe
 
-columns: list of string, labels of the dataframe
+*columns* : list of string, labels of the dataframe
 
 **Return**
 
-df: list of dataframe from arr
+*df* : list of dataframe from arr
 
 
 
@@ -203,11 +229,11 @@ Calculates per-element bit-wise inversion of the input stack of images
 
 **Parameters**
 
-img: array_like, image or stack of images to invert
+*img* : array_like, image or stack of images to invert
 
 **Returns**
 
-dst: array-like, inverted image or stack of images
+*dst* : array-like, inverted image or stack of images
 
 
 ```python
@@ -218,11 +244,15 @@ dst: array-like, inverted image or stack of images
 
   stack = load_pikle('./images/image.pkl.npy')
   stack = np.where(stack < 3, 0, 1) #apply a threshold to obtain boolean images
-
   inverted = bitwise_not(stack)
   save_pickle('./output_filename', inverted)
 ```
-  **TODO** add example images
+<p style="text-align:center;"><img src="./images/thresholded.png" alt="original"
+	title="input image" width="220" height="220" />
+  <caption>Thresholded image</caption>
+  <img src="./images/inverted.png" alt="ROI"
+	title="ROI" width="220" height="220" />
+  <caption>Inverted image</caption>
 
 ## imfill
 
@@ -230,26 +260,34 @@ This function, based on `cv2.floodFill()` function, is useful to fill holes in t
 
 **Parameter**
 
-img: array-like, binary image to fill
+*img* : array-like, binary image to fill
 
 **Return**
 
-filled: array-like, binary image or stack with filled holes
+*filled* : array-like, binary image or stack with filled holes
 
 
 ```python
   import cv2
   import numpy as np
   from segmentation.method import load_pickle, save_pickle
+  from segmentation.method import rescale
   from segmentation.method import imfill
 
   stack = load_pikle('./images/image.pkl.npy')
-  stack = np.where(stack < 3, 0, 1) #apply a threshold to obtain binary  images
+  stack[stack < 0] = 0
+  stack = rescale(stack, stack.max(), 0)# apply a rescaling
+  stack = 255 * np.where(stack > 0.1, 0, 1)#apply a threshold
   filled = imfill(stack)
 
   save_pickle('./output_filename', filled)
 ```
-  **TODO** add example images
+<p style="text-align:center;"><img src="./images/thresholded.png" alt="original"
+	title="image after threshold" width="220" height="220" />
+  <caption>image after threshold</caption>
+  <img src="./images/filled.png" alt="ROI"
+	title="ROI" width="220" height="220" />
+  <caption>Filled image</caption>
 
 ## medianBlur
 
@@ -257,25 +295,31 @@ Apply a median blur filter on the whole stack of images
 
 **Parameters**
 
-img: array-like, image or stack of images to filter
+*img* : array-like, image or stack of images to filter
 
-k_size : int, aperture linear size; it must be odd and greater than 1
+*k_size* : int, aperture linear size; it must be odd and greater than 1
 
 **Return**
 
-blurred : array-like, median blurred image or stack
+*blurred* : array-like, median blurred image or stack
 
 
 ```python
   import cv2
   import numpy as np
   from segmentation.method import load_pickle, save_pickle
+  from segmentation.method import rescale
   from segmentation.method import medianBlur
 
   stack = load_pikle('./images/image.pkl.npy')
-
-  blurred = medianBlur(stack, 3)
-
+  stack[stack < 0] = 0
+  stack = rescale(stack, stack.max(), 0)
+  blurred = medianBlur(stack, 5)
   save_pickle('./output_filename', blurred)
 ```
-  **TODO** add example images
+<p style="text-align:center;"><img src="./images/rescaled.png" alt="original"
+  title="rescaled" width="220" height="220" />
+  <caption>rescaled image</caption>
+  <img src="./images/blurred.png" alt="ROI"
+  title="ROI" width="220" height="220" />
+  <caption>blurred image</caption>

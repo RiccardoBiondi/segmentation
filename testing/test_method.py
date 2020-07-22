@@ -7,10 +7,11 @@ from segmentation.method import load_pickle
 from segmentation.method import rescale
 from segmentation.method import erode
 from segmentation.method import dilate
-from segmentation.method import connectedComponentsWithStats#
+from segmentation.method import connectedComponentsWithStats
 from segmentation.method import bitwise_not
-from segmentation.method import imfill#
-from segmentation.method import medianBlur#
+from segmentation.method import imfill
+from segmentation.method import medianBlur
+
 
 import cv2
 import numpy as np
@@ -21,16 +22,17 @@ __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
+
 image = st.just(rand)
 black_image = st.just(zeros)
 white_image = st.just(ones)
 kernel = st.just(ones)
 
-
 #testing save and load functions
 @given(image, st.integers(1,200), st.integers(300,512))
 @settings(max_examples = 20, deadline = None)
 def test_save_and_load(data, n_img, n_pixels):
+    #create a random stack of images
     input = data(n_img, n_pixels, n_pixels)
     save_pickle('./test_file', input)
     load = load_pickle('./test_file.pkl.npy')
@@ -123,3 +125,25 @@ def test_connectedComponentsWithStats(n_img) :
     print(np.unique(labels))
     assert (len(np.unique(labels)) == n_regions)
     assert (len(np.unique(centroids)) == n_regions)
+
+
+@given(st.integers(500, 12000), st.integers(2,8))
+@settings(max_examples = 20, deadline = None)
+def test_kMeansMod(data_len, K) :
+    data = 255 * rand(data_len)
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    ret, labels, centroid = kMeansMod(np.float32(data), K, criteria)
+
+    assert(centroid.shape[0] == K)
+    assert(len(labels) == data_len)
+
+
+
+@given(image, st.tuples(st.integers(3,9), st.integers(15, 30)))
+@settings(max_examples = 20, deadline = None)
+def test_fill_holes(imgs, k_size) :
+    input = imgs(100, 512, 512)
+    input = 255 * np.where(input > 0.5, 0, 1 )
+    output = fill_holes(input.astype('uint8'), k_size)
+    assert (output.shape == input.shape)
+    assert (np.unique(output).shape <= (2,))
