@@ -28,7 +28,7 @@ def parse_args():
     parser.add_argument('--body', dest='bodyname', required=False, type=str, action='store', help='body mask output filename', default='')
     parser.add_argument('--body_thr', dest='body_thr', required=False, type=float, action='store', help='Threshold to apply for the patient body segmentation', default=0.1)
     parser.add_argument('--lung_thr', dest='lung_thr', required=False, type=float, action='store', help='Threshold to apply for the patient lung segmentation', default=0.2)
-    parser.add_argument('--erosion_size', dest='k_er', required=False, type=int, action='store', help='Erosion kernel size', default=20)
+    parser.add_argument('--k_erosion', dest='k_er', required=False, type=int, action='store', help='Erosion kernel size', default=20)
     parser.add_argument('--min_hole_area', dest='area', required=False, type=int, action='store', help='', default=10)
     parser.add_argument('--k_dilation', dest='k_dil', required=False, type=int, action='store', help='Dilation kernel size', default=5)
 

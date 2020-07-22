@@ -112,7 +112,7 @@ def dilate(img, kernel, iterations = 1 ):
         dilated stack
     '''
     if len(img.shape) == 2 :
-        return cv2.erode(img.astype('uint8'), kernel, iterations)
+        return cv2.dilate(img.astype('uint8'), kernel, iterations)
 
     vectorized = np.vectorize(partial(cv2.dilate, kernel=kernel, iterations=iterations), signature = '(m,n)->(m,n)')
     return vectorized(img.astype('uint8'))
@@ -165,25 +165,6 @@ def bitwise_not(img):
     return dst(img.astype('uint8'))
 
 
-def to_dataframe (arr, columns) :
-    '''
-    Convert  3D numpy array into a list of pandas dataframes
-
-    Parameter
-    ---------
-    arr: array-like
-        input array to convert in a dataframe
-    columns: list of string
-        labels of the dataframe
-    Return
-    ------
-    df: list of dataframe
-        list of dataframe made from arr
-    '''
-    #if len(arr) == 2 :
-        #return pd.DataFrame(arr, columns=columns)
-    df = list(map(partial(pd.DataFrame, columns=columns), arr))
-    return df
 
 
 def _imfill(img):
@@ -252,3 +233,25 @@ def medianBlur(img, k_size):
         return cv2.medianBlur(img.astype('uint8'), k_size)
     blurred = np.vectorize(partial(cv2.medianBlur, ksize = k_size), signature = '(m,n)->(m,n)')
     return blurred(img.astype('uint8'))
+
+
+def fill_holes(imgs, kernel):
+    '''
+    Fill the remaining holes in the input binary images
+
+    Parameters
+    ----------
+    imgs : array-like
+        stack f binary images to fille
+    kernel: array-like
+        erosion kernel
+
+    Return
+    ------
+    filled : array-like
+        filled image stack
+    '''
+    filled = erode(imgs.astype('uint8'), kernel)
+    filled = bitwise_not(filled)
+    filled = imfill(filled)
+    return filled

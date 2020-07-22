@@ -15,10 +15,12 @@ def parse_args() :
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument('--input', dest='filename', required=True, type=str, action='store', help='Input filename')
+    parser.add_argument('--centroid', dest='output', required=True, type=str, action='store', help = 'output file for centroids')
     parser.add_argument('--ROI', dest='ROI', required=False, type=str, action='store', help=' ', default='')
-    parser.add_argument('--output', dest='output', required=True, type=str, action='store', help = 'output file for centroids')
     parser.add_argument('--labels', dest='labels', required=True, type=str, action='store', help='output file for labels')
     parser.add_argument('--n_clust', dest='K', required=False, type=int, action='store', help='number of cluster', default=4)
+    prser.add_argument('--centr_init', dest='c_init', required=False,
+    type=int, action='store', help='Centroid initialization technique', default=0)
 
     args = parser.parse_args()
     return args
@@ -37,22 +39,24 @@ def main() :
     sizes =list(np.cumsum([np.absolute((R[1] - R[3]) * (R[2] - R[0])) for R in ROI]))
     #compute kmenas clustering
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-    ret, labels, centroids = cv2.kmeans(sample, args.K, None, criteria, 10, cv2.KMEANS_RANDOM_CENTERS)
+    init = [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
+    ret, labels, centroids = cv2.kmeans(sample, args.K, None, criteria, 10, init[args.c_init])
     #save centroids
     save_pickle(args.output, centroids)
     #remap labels
-
     labels = np.split(labels, sizes)
     labeled = []
     for i in range(ROI.shape[0]) :
         res = centroids[labels[i].flatten()]
         reshaped = res.reshape((np.absolute(ROI[i,3] - ROI[i,1]),np.absolute(ROI[i,2] - ROI[i,0])))
-            #made the image complete
+        #conctruct fullsize image
         output = np.zeros(stack[i].shape)
         output[ROI[i,1] : ROI[i,3] , ROI[i,0] : ROI[i,2]] = reshaped
+        #set background to zero
+        output = np.where(output < 0, 0, output)
         labeled.append(output)
     #save results
-    save_pickle(args.labels, np.array(labeled))
+    save_pickle(args.labels, np.array(labeled).astype('uint8'))
 
 
 if __name__ == '__main__' :

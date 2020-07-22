@@ -17,7 +17,7 @@ def parse_args() :
     parser.add_argument('--input', dest='filename', required=True, type=str, action='store', help='Input filename')
     parser.add_argument('--mask', dest='mask', required=False, type=str, action='store', help='Lung mask filename', default = '')
     parser.add_argument('--output', dest = 'output', required= True, type=str, action='store', help='Output filename')
-    parser.add_argument('--kernel_size', dest='kernel_size', required=False, type=int, action='store', help='Kernel Size', default = 14)
+    parser.add_argument('--kernel_size', dest='kernel_size', required=False, type=int, action='store', help='Kernel Size', default = 15)
     parser.add_argument('--blur_ksize', dest='k_size', required=False, type=int, action='store', help ='blur apertur linear size, must be odd', default=5)
 
     args = parser.parse_args()
