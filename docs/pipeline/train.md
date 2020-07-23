@@ -18,3 +18,4 @@ To control these parameters you can provide the optional arguments:
 * --n : int, number of subsamples to use, default 100
 * --init: int, initialization technique if 0 will use the random center initialization ,if 1 will use the kmenas++ algorithm.
 * --intermediate: bool, if true allows to save the centroid of the subsamples
+* --ROI: str, path to ROI file folder, if provided allows ROI selection.

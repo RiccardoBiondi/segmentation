@@ -29,13 +29,25 @@ def parse_args():
 def main():
     init =  [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
     args = parse_args()
-
+    #read files and create the sample vector
     files = sorted(glob(args.folder + '/*.pkl.npy'))
-
-
     imgs = np.concatenate([load_pickle(f) for f in files])
+    print(imgs.shape, flush=True)
+    print(imgs.shape[1])
+    print(imgs.shape[2])
 
-    #TODO add ROI selection
+    if args.ROI != '':
+        ROI_files = sorted(glob(args.ROI + '/*.pkl.npy'))
+        ROI = np.concatenate([load_pickle(f) for f in ROI_files])
+
+    else :
+        ROI = np.full((imgs.shape[0],4),np.array([0., 0., imgs.shape[1], imgs.shape[2]]), dtype=np.uint16)
+    #start to create the sample
+    img = []
+    for i in range(imgs.shape[0]):
+        temp = imgs[i, ROI[i,1]:ROI[i,3], ROI[i,0]:ROI[i,2]]
+        img.append(np.array(temp, dtype= np.float32))
+
     sub_size = int(len(imgs)/args.n)
     sub = []
     length = np.arange(0, len(imgs) + 1 , sub_size)
@@ -56,7 +68,6 @@ def main():
     centr = np.array(centr).reshape(-1,)
     ret, labels, centroids = cv2.kmeans(centr, args.k, None, criteria, 10, init[args.init])
     save_pickle(args.out, centroids)
-
 
 if __name__ == '__main__' :
     main()
