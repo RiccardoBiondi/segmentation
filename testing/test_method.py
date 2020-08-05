@@ -11,6 +11,7 @@ from segmentation.method import connectedComponentsWithStats
 from segmentation.method import bitwise_not
 from segmentation.method import imfill
 from segmentation.method import medianBlur
+from segmentation.method import otsu
 
 
 import cv2
@@ -127,23 +128,11 @@ def test_connectedComponentsWithStats(n_img) :
     assert (len(np.unique(centroids)) == n_regions)
 
 
-@given(st.integers(500, 12000), st.integers(2,8))
+#testing otsu threshold
+@given(image, st.integers(300, 512))
 @settings(max_examples = 20, deadline = None)
-def test_kMeansMod(data_len, K) :
-    data = 255 * rand(data_len)
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-    ret, labels, centroid = kMeansMod(np.float32(data), K, criteria)
-
-    assert(centroid.shape[0] == K)
-    assert(len(labels) == data_len)
-
-
-
-@given(image, st.tuples(st.integers(3,9), st.integers(15, 30)))
-@settings(max_examples = 20, deadline = None)
-def test_fill_holes(imgs, k_size) :
-    input = imgs(100, 512, 512)
-    input = 255 * np.where(input > 0.5, 0, 1 )
-    output = fill_holes(input.astype('uint8'), k_size)
-    assert (output.shape == input.shape)
-    assert (np.unique(output).shape <= (2,))
+def test_otsu(data, n_imgs):
+    input = (255 * data(n_imgs, 512, 512)).astype(np.uint8)
+    out = otsu(input)
+    print(np.unique(out))
+    assert np.all(np.unique(out) == np.array([0, 1]))

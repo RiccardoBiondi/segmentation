@@ -65,7 +65,7 @@ def rescale(img, max, min) :
         Image rescaled according to min, max
     '''
     #TODO : condition to exclue min == max
-    return (img.astype(float) - min) * (1. / (max - min))
+    return (img.astype(np.float32) - min) * (1. / (max - min))
 
 
 def erode(img, kernel, iterations = 1):
@@ -235,23 +235,28 @@ def medianBlur(img, k_size):
     return blurred(img.astype('uint8'))
 
 
-def fill_holes(imgs, kernel):
+
+def otsu(img):
     '''
-    Fill the remaining holes in the input binary images
+    Compute the best threshld value for each slice of the input image stack by using otsu algorithm
 
     Parameters
     ----------
-    imgs : array-like
-        stack f binary images to fille
-    kernel: array-like
-        erosion kernel
+    img: array-like
+        input image or stack of images. must be uint8 type
 
     Return
     ------
-    filled : array-like
-        filled image stack
+    out: array-like
+        threshlded image stack
     '''
-    filled = erode(imgs.astype('uint8'), kernel)
-    filled = bitwise_not(filled)
-    filled = imfill(filled)
-    return filled
+    if len(img.shape) == 2  :
+        _, out = cv2.threshold(img, 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        return out
+
+    else:
+        out = []
+        for im in img :
+            _, thr = cv2.threshold(im.astype(np.uint8), 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+            out.append(np.array(thr))
+        return np.array(out)
