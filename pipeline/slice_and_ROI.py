@@ -25,6 +25,7 @@ def main():
     args = parse_args()
     #load data
     lung = load_pickle(args.filename)
+    lung = np.where(lung == 0, 0, 1)
     #find connected components
     ret, labels, stats, _ = connectedComponentsWithStats(lung.astype('uint8'))
     #manage stats into dataframe
