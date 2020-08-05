@@ -1,0 +1,7 @@
+exclude_paths:
+  - '.github/**'
+  - '**.md'
+  - 'docs/**'
+  - segmentation/__init__.py
+  - segmentation/__version__.py
+  - testing/**

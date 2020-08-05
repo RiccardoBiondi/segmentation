@@ -1,0 +1,25 @@
+version: 0.0.{build}
+pull_requests:
+  do_not_increment_build_number: true
+platform: x64
+
+clone_folder: c:\projects\segmentation
+
+environment:
+
+  WORKSPACE: C:\projects
+
+  matrix:
+
+  - PYTHON: '"C:\\Python38-x64"'
+    VERSION: 38
+    ARCH: x86
+
+build: off
+
+install:
+
+  - "%PYTHON%\\python.exe --version"
+  - cd %WORKSPACE%\segmentation
+  - "%PYTHON%\\python.exe -m pip install -U pip"
+  - "%PYTHON%\\python.exe -m pip install -r requirements.txt"
