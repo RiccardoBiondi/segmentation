@@ -4,7 +4,7 @@ This script allow to segment an image once you know the centroids.
 By using *sklearn.clustering.KMeans* this script will assign at each pixel the label such that the distance between the label centroid and the pixel GL is minimum. Notice that this script doesn't compute the centroids but only segment an image by using pre-existing ones.
 
 
-<p style="text-align:center;"><img src="./images/blur.png" alt="input"
+<p style="text-align:center;"><img src="./images/lung.png" alt="input"
 	title="Input image" width="250" height="250" />
   <caption>Input image</caption><img src="./images/labeled.png" alt="labeled"
 	title="body_mask slice" width="250" height="250" />

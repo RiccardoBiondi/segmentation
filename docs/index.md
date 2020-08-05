@@ -33,11 +33,10 @@ COVID-19 Lung segmentation is composed of scripts, stored in pipeline, and a lib
 
 The scripts are:
 
-1. [lungselection](./pipeline/lungselection.md)
-2. [medianBlur](./pipeline/medianBlur.md)
-3. [slice_and_ROI](./pipeline/slice_and_ROI.md)
-4. [clustering](./pipeline/clustering.md)
-5. [train](./pipeline/train.md)
+1. [lung_extraction](./pipeline/lung_extraction.md)
+2. [slice_and_ROI](./pipeline/slice_and_ROI.md)
+3. [clustering](./pipeline/clustering.md)
+4. [train](./pipeline/train.md)
 6. [labeling](./pipeline/labeling.md)
 
 And a library descriptions are in [method](method.md) , [stats_method](stats_method.md)

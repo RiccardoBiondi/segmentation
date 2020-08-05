@@ -26,6 +26,7 @@ def parse_args() :
     return args
 
 
+
 def main() :
     args = parse_args()
     #load file and roi
@@ -41,7 +42,7 @@ def main() :
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     init = [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
     ret, labels, centroids = cv2.kmeans(sample, args.K, None, criteria, 10, init[args.c_init])
-    #save centroids
+
     save_pickle(args.output, centroids)
     #remap labels
     labels = np.split(labels, sizes)

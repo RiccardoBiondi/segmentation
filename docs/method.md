@@ -8,10 +8,10 @@ This module contains functions useful for the script execution. This functions a
 4. [erode](#erode)
 5. [dilate](#dilate)
 6. [connectedComponentsWithStats](#connectedComponentsWithStats)
-7. [to_dataframe](#to_dataframe)
-8. [bitwise_not](#bitwise_not)
-9. [imfill](#imfill)
-10. [medianBlur](#medianBlur)
+7. [bitwise_not](#bitwise_not)
+8. [imfill](#imfill)
+9. [medianBlur](#medianBlur)
+10. [otsu](#otsu)
 
 
 ## load_pickle
@@ -194,35 +194,7 @@ produces a statistics output for each label. Is the extension for a stack of ima
   ret, label, stats, centroids = connectedComponentsWithStats(stack)
 ```
 
-## to_dataframe
 
-This function is created in order to convert a list of np.array or a 3D np.array into a list of pandas dataframe. The aim of this function is to create this list to stats output of connectedComponentsWithStats function.
-
-**Parameters**
-
-*arr* : array-like, input array of list to convert in a dataframe
-
-*columns* : list of string, labels of the dataframe
-
-**Return**
-
-*df* : list of dataframe from arr
-
-
-
-```python
-  import cv2
-  import numpy as np
-  from segmentation.method import load_pickle
-  from segmentation.method import connectedComponentsWithStats
-  from segmentation.method import to_dataframe
-
-  stack = load_pikle('./images/image.pkl.npy')
-  stack= np.where(stack < 3, 0, 1) #apply a threshold to obtain boolean images
-  ret, label, stats, centroids = connectedComponentsWithStats(stack)
-  columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA'] #labels of dataframe
-  stats = to_dataframe(stats, columns)
-```
 ## bitwise_not
 
 Calculates per-element bit-wise inversion of the input stack of images
@@ -323,3 +295,40 @@ Apply a median blur filter on the whole stack of images
   <img src="./images/blurred.png" alt="ROI"
   title="ROI" width="220" height="220" />
   <caption>blurred image</caption>
+
+
+## otsu
+
+Compute the best threshld value for each slice of the input image stack by using otsu algorithm
+
+**Parameters**
+
+*img*: array-like
+    input image or stack of images. must be uint8 type
+
+**Return**
+
+*out*: array-like
+    threshlded image stack
+
+```python
+  import cv2
+  import numpy as np
+  from segmentation.method import load_pickle, save_pickle
+  from segmentation.method import rescale
+  from segmentation.method import otsu
+
+  stack = load_pikle('./images/image.pkl.npy')
+  stack[stack < 0] = 0
+  stack = rescale(stack, stack.max(), 0)
+  stack = (255 * stack).astype(np.uint8)
+  thr = otsu(stack)
+  save_pickle('./output_filename', thr)
+```
+
+<p style="text-align:center;"><img src="./images/rescaled.png" alt="original"
+  title="rescaled" width="250" height="250" />
+  <caption>input image</caption>
+  <img src="./images/thresholded.png" alt="thr"
+  title="thr" width="250" height="250" />
+  <caption>thresholded image</caption>

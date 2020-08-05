@@ -3,11 +3,11 @@
 This script allow to perform a kmeans clustering on a stack of images. As output save two '.pkl.npy'. the first will contains the centroid information, the second contains the labelled images. This script use `cv2.kmeans()` function. Refers to `opencv-python` to more details
 
 
-<p style="text-align:center;"><img src="./images/blur.png" alt="blur"
-	title="input" width="220" height="220" />
+<p style="text-align:center;"><img src="./images/lung.png" alt="lung"
+	title="input" width="220" height="250" />
   <caption>Input image</caption>
   <img src="./images/labeled.png" alt="labeled"
-	title="labeled" width="220" height="220" />
+	title="labeled" width="250" height="250" />
   <caption>Labeled image</caption>
 
 

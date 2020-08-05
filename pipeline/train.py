@@ -32,9 +32,6 @@ def main():
     #read files and create the sample vector
     files = sorted(glob(args.folder + '/*.pkl.npy'))
     imgs = np.concatenate([load_pickle(f) for f in files])
-    print(imgs.shape, flush=True)
-    print(imgs.shape[1])
-    print(imgs.shape[2])
 
     if args.ROI != '':
         ROI_files = sorted(glob(args.ROI + '/*.pkl.npy'))
@@ -54,6 +51,13 @@ def main():
     #TODO: find a better way to split the subsamples
     for i in range(args.n) :
         sub.append(list([imgs[j] for j in range(length[i], length[i+1])]))
+    #Recap for better parameter control
+    print('*****Starting custering*****', flush=True)
+    print('Number of custers-->', args.k , flush=True)
+    print('Number of subsamples-->', args.n , flush=True)
+    print('Subsamples size-->', sub_size, flush=True)
+    print('Centroid initzialization technique-->', str(init[args.init]), flush=True)
+    print('Save intermediate centroids-->', args.intermediate , flush=True)
     #first clustering
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     centr = []
