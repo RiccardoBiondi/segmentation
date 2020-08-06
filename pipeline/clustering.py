@@ -1,9 +1,7 @@
 import cv2
 import numpy as np
-import pandas as pd
 import argparse
-from functools import partial
-from segmentation.method import save_pickle, load_pickle
+from segmentation.utils import save_pickle, load_pickle
 
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
@@ -31,13 +29,21 @@ def main() :
     args = parse_args()
     #load file and roi
     stack = load_pickle(args.filename)
+    print(stack.shape)
     if args.ROI != '' :
         ROI = load_pickle(args.ROI)
+        print(ROI.shape)
+
     else :
-        ROI = np.array([np.array([0., 0., stack.shape[1], stack.shape[2]])])
+        S = np.array([0., 0., stack.shape[1], stack.shape[2]])
+        print(S)
+        ROI = np.full((stack.shape[0], 4), S, dtype=np.int16)
+        print(ROI.shape)
     #arrange all images into a vector
     sample = np.float32(np.concatenate([stack[i, ROI[i,1]:ROI[i,3], ROI[i,0]:ROI[i,2]].reshape(-1,1) for i in range(stack.shape[0])]))
-    sizes =list(np.cumsum([np.absolute((R[1] - R[3]) * (R[2] - R[0])) for R in ROI]))
+
+    sizes = list(np.cumsum(np.array([np.absolute((R[1] - R[3]) * (R[2] - R[0])) for R in ROI], dtype=np.int16)))
+
     #compute kmenas clustering
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     init = [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
@@ -46,8 +52,10 @@ def main() :
     save_pickle(args.output, centroids)
     #remap labels
     labels = np.split(labels, sizes)
+    print(len(labels))
     labeled = []
     for i in range(ROI.shape[0]) :
+
         res = centroids[labels[i].flatten()]
         reshaped = res.reshape((np.absolute(ROI[i,3] - ROI[i,1]),np.absolute(ROI[i,2] - ROI[i,0])))
         #conctruct fullsize image

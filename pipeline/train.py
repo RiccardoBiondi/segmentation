@@ -1,9 +1,8 @@
-import os
 import cv2
 import argparse
 import numpy as np
 from glob import glob
-from segmentation.method import load_pickle, save_pickle
+from segmentation.utils import load_pickle, save_pickle
 
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
@@ -68,7 +67,7 @@ def main():
         if args.intermediate :#non molto performante
             save_pickle(args.out + '('+str(i)+')', centroids)
 
-    #starting the second clutering
+    #starting the second clustering
     centr = np.array(centr).reshape(-1,)
     ret, labels, centroids = cv2.kmeans(centr, args.k, None, criteria, 10, init[args.init])
     save_pickle(args.out, centroids)

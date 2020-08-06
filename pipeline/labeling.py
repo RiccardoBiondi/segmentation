@@ -1,8 +1,6 @@
-import cv2
 import argparse
-import numpy as np
 from sklearn.cluster import KMeans
-from segmentation.method import load_pickle, save_pickle
+from segmentation.utils import load_pickle, save_pickle
 
 __author__ = ['Riccado Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@tudio.unibo.it', 'nico.curti2@unibo.it']

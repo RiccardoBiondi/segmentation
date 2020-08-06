@@ -1,11 +1,9 @@
-import cv2
 import numpy as np
-import pandas as pd
 import argparse
-from segmentation.method import load_pickle, save_pickle
+from segmentation.utils import load_pickle, save_pickle
+from segmentation.utils import to_dataframe
 from segmentation.method import connectedComponentsWithStats
-from segmentation.stats_method import corner_finder
-from segmentation.stats_method import to_dataframe
+from segmentation.method import corner_finder
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
@@ -35,7 +33,8 @@ def main():
     corners = []
     for stat in stats:
         corners.append(corner_finder(stat))
-    save_pickle(args.output, np.array(corners))
+    corners = np.array(corners, dtype= np.int16)
+    save_pickle(args.output, corners)
 
 
 if __name__ == '__main__' :

@@ -1,10 +1,7 @@
 import pytest
 import hypothesis.strategies as st
-from hypothesis import given, example, assume, settings
+from hypothesis import given, settings
 
-from segmentation.method import save_pickle
-from segmentation.method import load_pickle
-from segmentation.method import rescale
 from segmentation.method import erode
 from segmentation.method import dilate
 from segmentation.method import connectedComponentsWithStats
@@ -12,7 +9,6 @@ from segmentation.method import bitwise_not
 from segmentation.method import imfill
 from segmentation.method import medianBlur
 from segmentation.method import otsu
-
 
 import cv2
 import numpy as np
@@ -29,32 +25,13 @@ black_image = st.just(zeros)
 white_image = st.just(ones)
 kernel = st.just(ones)
 
-#testing save and load functions
-@given(image, st.integers(1,200), st.integers(300,512))
-@settings(max_examples = 20, deadline = None)
-def test_save_and_load(data, n_img, n_pixels):
-    #create a random stack of images
-    input = data(n_img, n_pixels, n_pixels)
-    save_pickle('./test_file', input)
-    load = load_pickle('./test_file.pkl.npy')
-    assert((load == input).all())
-
-
-#testing rescale function
-@given(image, st.integers(1,200), st.integers(300,512))
-@settings(max_examples = 20, deadline = None)
-def test_rescale(data, n_img, n_pixels):
-    input =  255. * data(n_img, n_pixels, n_pixels)
-    rescaled = rescale(input, np.amax(input), 0 )
-    assert( np.amax(rescaled) <= 1. and np.amin(rescaled) >= 0)
-
 
 #testing erosion for a stack
 @given(image, kernel, st.integers(5,30), st.integers(300, 512), st.integers(3,11))
 @settings(max_examples = 20, deadline = None)
 def test_erode_stack(data, kernel, n_img, n_pix, k_dim):
     eroded = erode(data(n_img, n_pix, n_pix), kernel((k_dim, k_dim)))
-    assert (eroded.shape == (n_img, n_pix, n_pix))
+    assert eroded.shape == (n_img, n_pix, n_pix)
 
 
 #test erosion for a single images
@@ -62,7 +39,7 @@ def test_erode_stack(data, kernel, n_img, n_pix, k_dim):
 @settings(max_examples = 20, deadline = None)
 def test_erode(data, kernel, n_pix, k_dim):
     eroded = erode(data(n_pix, n_pix), kernel((k_dim, k_dim)))
-    assert (eroded.shape == (n_pix, n_pix))
+    assert eroded.shape == (n_pix, n_pix)
 
 
 #testing dilation for a stack
@@ -70,7 +47,7 @@ def test_erode(data, kernel, n_pix, k_dim):
 @settings(max_examples = 20, deadline = None)
 def test_dilate_stack(data, kernel, n_img, n_pix, k_dim):
     dilated = dilate(data(n_img, n_pix, n_pix), kernel((k_dim, k_dim)))
-    assert (dilated.shape == (n_img, n_pix, n_pix))
+    assert dilated.shape == (n_img, n_pix, n_pix)
 
 
 #test dilation for a single images
@@ -78,7 +55,7 @@ def test_dilate_stack(data, kernel, n_img, n_pix, k_dim):
 @settings(max_examples = 3, deadline = None)
 def test_dilate(data, kernel, n_pix, k_dim):
     dilated = dilate(data(n_pix, n_pix), kernel((k_dim, k_dim)))
-    assert (dilated.shape == (n_pix, n_pix))
+    assert dilated.shape == (n_pix, n_pix)
 
 
 #test bitwise not for a single images
@@ -86,7 +63,7 @@ def test_dilate(data, kernel, n_pix, k_dim):
 @settings(max_examples = 20, deadline = None)
 def test_bitwise_not(input, expected_output, n_pix):
     inverted = bitwise_not(input((n_pix, n_pix)))
-    assert ((inverted == 255 * expected_output((n_pix, n_pix))).all())
+    assert (inverted == 255 * expected_output((n_pix, n_pix))).all()
 
 
 #test bitwise not for a stack
@@ -94,7 +71,7 @@ def test_bitwise_not(input, expected_output, n_pix):
 @settings(max_examples = 20, deadline = None)
 def test_bitwise_not_stack(input, expected_output, n_img, n_pix):
     inverted = bitwise_not(input((n_img, n_pix, n_pix)))
-    assert((inverted == 255 * expected_output((n_img, n_pix, n_pix))).all())
+    assert (inverted == 255 * expected_output((n_img, n_pix, n_pix))).all()
 
 
 @given(image, st.integers(2, 30), st.integers(300, 512))
@@ -102,7 +79,7 @@ def test_bitwise_not_stack(input, expected_output, n_img, n_pix):
 def test_medianBlur_stack (img, n_img, n_pix) :
     input = 255 * img(n_img, n_pix, n_pix)
     blurred = medianBlur(input, 5)
-    assert(blurred.shape == input.shape)
+    assert blurred.shape == input.shape
 
 
 @given(white_image, st.integers(2, 300))
@@ -112,7 +89,7 @@ def test_imfill(to_compare, n_img) :
     to_fill = np.array([image for i in range(n_img)])
     compare = 255 * to_compare(image.shape)
     filled = imfill(to_fill)
-    assert ( (im == compare).all() for im in filled)
+    assert  ((im == compare).all() for im in filled)
 
 
 @given(st.integers(2,300))
@@ -124,8 +101,8 @@ def test_connectedComponentsWithStats(n_img) :
     n_regions = 4
     retval, labels, stats, centroids = connectedComponentsWithStats(input)
     print(np.unique(labels))
-    assert (len(np.unique(labels)) == n_regions)
-    assert (len(np.unique(centroids)) == n_regions)
+    assert len(np.unique(labels)) == n_regions
+    assert len(np.unique(centroids)) == n_regions
 
 
 #testing otsu threshold
@@ -134,5 +111,4 @@ def test_connectedComponentsWithStats(n_img) :
 def test_otsu(data, n_imgs):
     input = (255 * data(n_imgs, 512, 512)).astype(np.uint8)
     out = otsu(input)
-    print(np.unique(out))
     assert np.all(np.unique(out) == np.array([0, 1]))

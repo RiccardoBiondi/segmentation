@@ -1,11 +1,10 @@
-import cv2
 import numpy as np
-import pandas as pd
 import argparse
-from segmentation.method import load_pickle, save_pickle
-from segmentation.method import erode, dilate, imfill
-from segmentation.method import rescale,medianBlur
-from segmentation.method import otsu
+from segmentation.utils import load_pickle, save_pickle
+from segmentation.utils import preprocess, rescale
+from segmentation.method import erode, dilate
+from segmentation.method import imfill, remove_spots
+from segmentation.method import medianBlur, otsu
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
@@ -17,8 +16,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument('--input', dest='input', required=True, type=str, action='store', help='Input filename, must be .pkl.npy format')
-    parser.add_argument('--output', dest='output', required=True, type=str, action='store', help='Masked image filename')
-    parser.add_argument('--lung', dest='lung', required=False, type=str, action='store', help='Lung mask filename')
+    parser.add_argument('--lung', dest='lung', required=True, type=str, action='store', help='Masked image filename')
+    parser.add_argument('--mask', dest='mask', required=False, type=str, action='store', help='Lung mask filename')
+    parser.add_argument('--int_spot_area', dest='isa', required=False, type=int, action='store', default=700, help='minimum internal spot area')
+    parser.add_argument('--ext_spot_area', dest='esa', required=False, type=int, action='store', default=200, help='minimum external spot area')
 
     args = parser.parse_args()
     return args
@@ -31,8 +32,7 @@ def main():
     args = parse_args()
 
     DICOM = load_pickle(args.input)
-    DICOM[DICOM < 0] = 0
-    DICOM = (255 * rescale(DICOM, DICOM.max(), 0)).astype(np.uint8)
+    DICOM = preprocess(DICOM)
     imgs = DICOM.copy()
     DICOM = medianBlur(DICOM, 5)
 
@@ -50,12 +50,20 @@ def main():
     #lung mask
     imgs = np.where(imgs == 0, 1, 0)
     imgs = imgs * body
+    #refine the mask
+    imgs = np.where(imgs == 0, 1, 0)
+    imgs = remove_spots(imgs, args.isa)
+    imgs = np.where(imgs == 0, 1, 0)
+    #filter out small external spots
+    imgs = remove_spots(imgs, args.esa)
     #apply mask
     DICOM = DICOM * imgs
     DICOM = rescale(DICOM, DICOM.max(),0)
-    if args.lung != '' :
-        save_pickle(args.lung, imgs.astype(np.uint8))
-    save_pickle(args.output, DICOM.astype(np.float32))
+    DICOM = DICOM * imgs
+
+    if args.mask != '' :
+        save_pickle(args.mask, imgs.astype(np.uint8))
+    save_pickle(args.lung, DICOM.astype(np.float32))
 
 
 

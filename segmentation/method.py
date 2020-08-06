@@ -1,71 +1,12 @@
 import cv2
 import pickle
 import numpy as np
-import pandas as pd
+import segmentation.utils as utils
 from functools import partial
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
-
-
-def load_pickle(filename) :
-    '''
-    Load the pickle image file
-
-    Parameters
-    ----------
-    filename: str
-        file name or path to load file as pickle
-
-    Returns
-    -------
-    data: array_like
-        array loaded from a given file
-    '''
-    with open(filename, 'rb') as fp:
-      data = np.load(fp, allow_pickle = True)
-    return data
-
-
-def save_pickle(filename, data):
-    '''
-    Save the image stack as pickle
-
-    Parameters
-    ----------
-    filename: str
-        file name or path to dump as pickle file
-    data: array-like
-        image or stack to save
-
-    Return
-    ------
-    None
-    '''
-    with open('{}.pkl.npy'.format(filename), 'wb') as fp:
-        pickle.dump(data, fp)
-
-
-def rescale(img, max, min) :
-    '''
-    Rescale the image accodring to max, min input
-
-    Parameters
-    ----------
-    img: array-like
-        input image or stack to rescale
-    max: float
-        Maximum value of the output array
-    min: float
-        minimum value of the output array
-    Return
-    ------
-    rescaled: array-like
-        Image rescaled according to min, max
-    '''
-    #TODO : condition to exclue min == max
-    return (img.astype(np.float32) - min) * (1. / (max - min))
 
 
 def erode(img, kernel, iterations = 1):
@@ -167,34 +108,6 @@ def bitwise_not(img):
 
 
 
-def _imfill(img):
-    '''
-    Internal function. Fill the holes of a single image.
-    Parameters
-    ----------
-    img : array-like
-        Image to fill
-    Return
-    ------
-    filled : array-like
-        filled image
-    '''
-    # Copy the thresholded image.
-    img = np.pad(img.astype('uint8'), pad_width=((1, 1), (1, 1)),
-                      mode='constant', constant_values=(0., 0.))
-    im_floodfill = img.copy()
-    # Mask used to flood filling.
-    h, w = im_floodfill.shape[:2]
-    mask = np.zeros((h+2, w+2), np.uint8)
-    # Floodfill from point (0, 0)
-    cv2.floodFill(im_floodfill, mask, (0,0), 255);
-    # Invert floodfilled image
-    im_floodfill_inv = cv2.bitwise_not(im_floodfill)
-    # Combine the two images to get the foreground.
-    filled = img | im_floodfill_inv
-    return filled[1:-1, 1:-1]
-
-
 def imfill(img):
     '''
     Fill the holes of the input image or stack of images
@@ -210,9 +123,9 @@ def imfill(img):
     '''
 
     if len(img.shape) == 2: #one image case
-        return _imfill(img.astype('uint8'))
-    filled = np.vectorize(_imfill, signature='(m,n)->(m,n)')
-    return filled(img.astype('uint8'))
+        return utils.imfill(img.astype(np.uint8))
+    filled = np.vectorize(utils.imfill, signature='(m,n)->(m,n)')
+    return filled(img.astype(np.uint8))
 
 
 def medianBlur(img, k_size):
@@ -260,3 +173,54 @@ def otsu(img):
             _, thr = cv2.threshold(im.astype(np.uint8), 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
             out.append(np.array(thr))
         return np.array(out)
+
+
+
+def corner_finder(stats) :
+    '''
+    Found the upper and lower corner of the rectangular ROI according to the connected region stats
+
+    Parameter
+    ---------
+    stats: pandas dataframe
+        dataframe that contains the stats of the connected regions
+
+    Return
+    ------
+    corners: array-like
+        array which contains the coordinates of the upper and lower corner of the ROI organized as [x_top, y_top, x_bottom, y_bottom]
+    '''
+    stats = stats.drop([0], axis = 0)
+    x_top = stats.min(axis = 0)['LEFT']
+    y_top = stats.min(axis = 0)['TOP']
+    x_bottom = np.max(stats['LEFT'] + stats['WIDTH'])
+    y_bottom = np.max(stats['TOP'] + stats['HEIGHT'])
+    return np.array([x_top,y_top,x_bottom,y_bottom])
+
+
+def remove_spots(img, area):
+    '''
+    Set to zero the GL of all the connected region with area lesser than area
+
+    Parameters
+    ----------
+    img: array-like
+        binary image from which remove spots
+    area: int
+        maximun area in pixels of the removed spots
+
+    Returns
+    -------
+    filled: array-like
+        binary image with spot removed
+    '''
+    columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
+    r, lab, stats, _ = connectedComponentsWithStats(img.astype(np.uint8))
+
+    stats = utils.to_dataframe(stats, columns)
+    for i,stat in enumerate(stats):
+        for j in stat.query('AREA <' + str(area)).index:
+            lab[i][lab[i] == j] = 0
+
+    lab = np.where(lab == 0, 0, 1)
+    return lab.astype(np.uint8)
