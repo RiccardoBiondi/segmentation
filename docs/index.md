@@ -1,6 +1,7 @@
 | **Authors**  | **Project** |  **Build Status** | **License** | **Code Quality** | **Coverage** |
 |:------------:|:-----------:|:-----------------:|:-----------:|:----------------:|:------------:|
-| [**R. Biondi**](https://github.com/RiccardoBiondi) <br/> [**N. Curti**](https://github.com/Nico-Curti) | **COVID-19 Lung Segmentation** | **Linux/MacOS** : [![travis]()]() <br/>  **Windows** : [![appveyor]()]() | [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/RiccardoBiondi/segmentation/blob/master/LICENSE.md) | **Codacy** : [![Codacy]()]() <br/> **Codebeat** : [![CODEBEAT]()]() | [![codecov]()]() |
+| [**R. Biondi**](https://github.com/RiccardoBiondi) <br/> [**N. Curti**](https://github.com/Nico-Curti) | **COVID-19 Lung Segmentation** | **Linux/MacOS** : **TODO** <br/>  **Windows** : [![Build status](https://ci.appveyor.com/api/projects/status/om6elsnkoi22xii3?svg=true)](https://ci.appveyor.com/project/RiccardoBiondi/segmentation) | [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/RiccardoBiondi/segmentation/blob/master/LICENSE.md) | **Codacy** : [![Codacy](https://app.codacy.com/project/badge/Grade/38d6614cd0e04e7db2c38648e195087a)](https://www.codacy.com/manual/RiccardoBiondi/segmentation?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RiccardoBiondi/segmentation&amp;utm_campaign=Badge_Grade) <br/> **Codebeat** : [![CODEBEAT](https://codebeat.co/badges/927db14b-36fc-42ed-88f1-09b2a9e1b9c0)](https://codebeat.co/projects/github-com-riccardobiondi-segmentation-master) | [![codecov](226de693-2815-426c-a3ee-d1169e09913c)]() |
+
 
 ![Project CI](https://github.com/RiccardoBiondi/segmentation/workflows/Project%20CI/badge.svg)
 
@@ -39,7 +40,7 @@ The scripts are:
 4. [train](./pipeline/train.md)
 6. [labeling](./pipeline/labeling.md)
 
-And a library descriptions are in [method](method.md) , [stats_method](stats_method.md)
+And a library descriptions are in [method](./segmentation/method.md) , [stats_method](./segmentation/stats_method.md)
 
 
 ## Authors

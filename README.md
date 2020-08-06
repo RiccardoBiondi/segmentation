@@ -1,6 +1,6 @@
 | **Authors**  | **Project** |  **Build Status** | **License** | **Code Quality** | **Coverage** |
 |:------------:|:-----------:|:-----------------:|:-----------:|:----------------:|:------------:|
-| [**R. Biondi**](https://github.com/RiccardoBiondi) <br/> [**N. Curti**](https://github.com/Nico-Curti) | **COVID-19 Lung Segmentation** | **Linux/MacOS** : **TODO** <br/>  **Windows** : [![Build status](https://ci.appveyor.com/api/projects/status/om6elsnkoi22xii3?svg=true)](https://ci.appveyor.com/project/RiccardoBiondi/segmentation) | [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/RiccardoBiondi/segmentation/blob/master/LICENSE.md) | **Codacy** : [![Codacy](https://app.codacy.com/project/badge/Grade/38d6614cd0e04e7db2c38648e195087a)](https://www.codacy.com/manual/RiccardoBiondi/segmentation?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RiccardoBiondi/segmentation&amp;utm_campaign=Badge_Grade) <br/> **Codebeat** : [![CODEBEAT](https://codebeat.co/badges/927db14b-36fc-42ed-88f1-09b2a9e1b9c0)](https://codebeat.co/projects/github-com-riccardobiondi-segmentation-master) | [![codecov](226de693-2815-426c-a3ee-d1169e09913c)]() |
+| [**R. Biondi**](https://github.com/RiccardoBiondi) <br/> [**N. Curti**](https://github.com/Nico-Curti) | **COVID-19 Lung Segmentation** | **Linux/MacOS** : **TODO** <br/>  **Windows** : [![Build status](https://ci.appveyor.com/api/projects/status/om6elsnkoi22xii3?svg=true)](https://ci.appveyor.com/project/RiccardoBiondi/segmentation) | [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/RiccardoBiondi/segmentation/blob/master/LICENSE.md) | **Codacy** : [![Codacy Badge](https://app.codacy.com/project/badge/Grade/cc0fd47ae8e44ab1943b1f74c2a3d7e2)](https://www.codacy.com/manual/RiccardoBiondi/segmentation?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RiccardoBiondi/segmentation&amp;utm_campaign=Badge_Grade) <br/> **Codebeat** : [![CODEBEAT](https://codebeat.co/badges/927db14b-36fc-42ed-88f1-09b2a9e1b9c0)](https://codebeat.co/projects/github-com-riccardobiondi-segmentation-master) | [![codecov](226de693-2815-426c-a3ee-d1169e09913c)]() |
 
 ![Project CI](https://github.com/RiccardoBiondi/segmentation/workflows/Project%20CI/badge.svg)
 
@@ -12,7 +12,7 @@
 
 # COVID-19 Lung Segmentation
 
-The project is developed in order to provide an easy to use and fast way to segment lung TAC images. It will offers a series of script to pre-process and cluster the stack of lung images. This program allows to isolate body an lung regions, apply a median blurring  and reduce the background by selecting a ROI and in the clustering by using the kmeans clustering algorithm to perform the colour quantization.
+The project is developed in order to provide an fast and easy to use way to extract lung and identify ground glass lesions on TAC images. The program consist in a series of scripts to pre-process and cluster the stack of lung images. This program allows to isolate body an lung regions, reduce the background by selecting a ROI and to segment the ground glass lesions by using the colour quantization
 
 
 1. [Contents](#Contents)
@@ -26,15 +26,20 @@ The project is developed in order to provide an easy to use and fast way to segm
 
 ## Contents
 
-In pipeline is implemented a series of script to segment lung TAC images:
+In *pipeline* is implemented a series of script to segment lung TAC images:
 
-1. [lung_extraction](./docs/pipeline/lung_extraction.md)
-2. [slice_and_ROI](./docs/pipeline/slice_and_ROI.md)
-3. [clustering](./docs/pipeline/clustering.md)
-4. [train](./docs/pipeline/train.md)
-5. [labeling](./docs/pipeline/labeling.md)
+| **Script name** | **Description** |
+|---              |---              |
+|[lung_extraction](./docs/pipeline/lung_extraction.md)   |  Extract lung from TAC images |
+| [slice_and_ROI](./docs/pipeline/slice_and_ROI.md)  | Select the regions of image with lung  |
+| [clustering](./docs/pipeline/clustering.md) |  Apply the colour quantzation to the input stack |
+| [train](./docs/pipeline/train.md)  | Apply colour quantization on a series of stacks in order to estimate the centroid to use to segment other images  |
+| [labeling](./docs/pipeline/labeling.md)  |  Segment the input image by using pre-estimated centroids |
 
-Instead in segmentation is implemented the libraries [method](./docs/method.md) and [stats_method](./docs/stats_method.md) contains the functions used to implement the script and can be used as a useful library to process stack of images.
+
+In *segmentation* are stored [utils](./docs/segmentation/utils.md) and [method](./docs/segmentation/method.md) libraries that implements useful functions to use in the scripts.
+
+Refer to [docs](./docs/index.md) for more information.
 
 ## Prerequisites
 
@@ -46,7 +51,7 @@ Please ensure that your python version support these libraries before use these 
 Lets consider the segmentation of a stack of lung TAC images saved as `stack.pkl.npy` in `data` folder.
 First of all you have to extract the lung region by calling `lung_extraction` script from powershell or bash.
 ```
-python -m pipeline.lung_extraction --input='path/to/data/folder/stack.pkl.npy' --output='path/to/data/folder/lung_extracted'
+python -m pipeline.lung_extraction --input='path/to/data/folder/stack.pkl.npy' --lung='path/to/data/folder/lung_extracted'
 ```
 This will extract lungs for each slice of `stack.pkl.npy` and save it in `data` folder as `lung_extracted.pkl.npy`
 
@@ -75,7 +80,7 @@ Refers to [docs](./docs/index.md) for more information about each script.
 
 ## License
 
-The `COVID-19 Lung Segmentation` package is licensed under the MIT "Expat" License. [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/RiccardoBiondi/segmentation/blob/master/LICENSE.md)
+The `COVID-19 Lung Segmentation` package is licensed under the MIT "Expat" License. [![License](https://img.shields.io/github/license/mashape/apistatus.svg)](LICENSE.md)
 
 ## Contribution
 

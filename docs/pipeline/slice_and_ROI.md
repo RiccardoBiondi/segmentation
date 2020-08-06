@@ -2,12 +2,56 @@
 This script allow to find the rectangular region with the smallest area which still contains the lung. It requires as input the path to the lung mask and save as output an np.ndarray which contains the top left and bottom right corner of the ROI. To find the ROI this script will use the stats provided by
 `cv2.connectedComponentsWithStats` function. Refers to `opencv-python` for more details.
 
-<p style="text-align:center;"><img src="./images/lung.png" alt="lung"
-	title="input image" width="250" height="250" />
-  <caption>Input image</caption>
-  <img src="./images/ROI.png" alt="ROI"
-	title="ROI" width="250" height="250" />
-  <caption>Draw of the selected ROI</caption>
+
+
+
+<html>
+  <head>
+	<style>
+	figure {
+		border: thin #c0c0c0 solid;
+    display: flex;
+    flex-flow: column;
+    padding: 5px;
+		max-width: 500px;
+	}
+
+	figcaption {
+		background-color: black;
+    color: gray;
+    font: italic smaller sans-serif;
+    padding: 7px;
+    text-align: center;
+	}
+</style>
+</head>
+<body>
+
+
+<figure>
+<img src="./images/lung.png" alt="lung"
+	title="input image"/>
+	<figcaption>
+	Input image
+	</figcaption>
+</figure>
+
+<figure>
+<img src="./images/ROI.png" alt="ROI"
+title="ROI"/>
+	<figcaption>
+Draw of the selected ROI
+	</figcaption>
+</figure>
+
+
+</body>
+</html>
+
+
+
+
+
 
 
 ## Usage

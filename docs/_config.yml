@@ -12,7 +12,10 @@ markdown_extensions:
 include:
   - index.md
   - method.md
-  - pipeline/lungselection.md
-  - pipiline/medianBlur.md
+  - pipeline/lung_extraction.md
   - pipeline/slice_and_ROI.md
   - pipeline/clustering.md
+  - pipeline/train.md
+  - pipeline/labeling.md
+  - segmentation/method.md
+  - segmentation/utils.md

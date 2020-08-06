@@ -1,96 +1,18 @@
 # Method
 
-This module contains functions useful for the script execution. This functions allow to load and save pickle files, rescale image and extend some open-cv functions to a stack of images.
-
-1. [load_pickle](#load_pickle)
-2. [save_pickle](#save_pickle)
-3. [rescale](#rescale)
-4. [erode](#erode)
-5. [dilate](#dilate)
-6. [connectedComponentsWithStats](#connectedComponentsWithStats)
-7. [bitwise_not](#bitwise_not)
-8. [imfill](#imfill)
-9. [medianBlur](#medianBlur)
-10. [otsu](#otsu)
+This module contains functions useful for the script execution. This functions extend some open-cv functions  and allow to perform operations on a stack of images.
 
 
-## load_pickle
+1. [erode](#erode)
+2. [dilate](#dilate)
+3. [connectedComponentsWithStats](#connectedComponentsWithStats)
+4. [bitwise_not](#bitwise_not)
+5. [imfill](#imfill)
+6. [medianBlur](#medianBlur)
+7. [otsu](#otsu)
+8. [corner_finder](#corner_finder)
+9. [remove_spots](#remove_spots)
 
-This function load the '.pkl.npy' file that contains the image or the stack of images to process
-
-**Parameter**
-
-*filename*: str, file name or path to load file as pickle
-
-**Return**
-
-*data*: array like, numpy nd.array that contains the stack of images-
-
-  ```python
-    import cv2
-    import numpy as np
-    from segmentation.method import load_pickle
-
-    stack = load_pikle('./images/image.pkl.npy')
-    #
-    #Processing
-    #
-  ```
-
-## save_pickle
-
-  Save in the processed stack of images '.pkl.npy' format. Data must be in a np.ndarray like format and the specified output file name doesn't requires to specify the extension.  
-
-**Parameters**
-
-  *filename*: str, file name or path to dump as pickle file
-
-  *data*: array-like, image or stack to save
-**Return** None
-
-```python
-  import cv2
-  import numpy as np
-  from segmentation.method import load_pickle, save_pickle
-
-  stack = load_pikle('./images/image.pkl.npy')
-  #
-  #Stack processing
-  #
-  save_pickle('./output_dir/output_filename', stack)
-```
-## rescale
-Rescale the image according to max, min input
-
-**Parameters**
-
-  *img* : array-like, input image or stack to rescale
-  *max* : float, maximum value of the output array
-  *min* : float, minimum value of the output array
-
-  **Return**
-
-  *rescaled* : array-like, image rescaled according to min, max
-
-  ```python
-    import cv2
-    import numpy as np
-    from segmentation.method import load_pickle, save_pickle
-    from segmentation.method import rescale
-
-    stack = load_pikle('./images/image.pkl.npy')
-    stack[stack < 0] = 0
-    rescaled = 255 * rescale(stack, stack.max(), 0)
-    save_pickle('./output_dir/output_filename',  rescaled)
-  ```
-
-
-  <p style="text-align:center;"><img src="./images/not_rescaled.png" alt="original"
-  	title="original image" width="220" height="220" />
-    <caption>Original image</caption>
-    <img src="./images/rescaled.png" alt="ROI"
-  	title="ROI" width="220" height="220" />
-    <caption>Rescaled image</caption>
 
 ## erode
 Compute the erosion for the whole stack of images. It is the extension for a stack of images of   `cv2.erode()`.
@@ -108,8 +30,8 @@ Compute the erosion for the whole stack of images. It is the extension for a sta
 ```python
   import cv2
   import numpy as np
-  from segmentation.method import load_pickle, save_pickle
-  from segmentation.method import rescale
+  from segmentation.utils import load_pickle, save_pickle
+  from segmentation.utils import rescale
   from segmentation.method import erode
 
   stack = load_pikle('./images/image.pkl.npy')
@@ -144,8 +66,8 @@ Compute the dilation for the whole stack of images. It is the extension for a st
 ```python
   import cv2
   import numpy as np
-  from segmentation.method import load_pickle, save_pickle
-  from segmentation.method import rescale
+  from segmentation.utils import load_pickle, save_pickle
+  from segmentation.utils import rescale
   from segmentation.method import dilate
 
   stack = load_pikle('./images/image.pkl.npy')
@@ -186,7 +108,7 @@ produces a statistics output for each label. Is the extension for a stack of ima
 ```python
   import cv2
   import numpy as np
-  from segmentation.method import load_pickle
+  from segmentation.utils import load_pickle
   from segmentation.method import connectedComponentsWithStats
 
   stack = load_pikle('./images/image.pkl.npy')
@@ -211,7 +133,7 @@ Calculates per-element bit-wise inversion of the input stack of images
 ```python
   import cv2
   import numpy as np
-  from segmentation.method import load_pickle, save_pickle
+  from segmentation.utils import load_pickle, save_pickle
   from segmentation.method import bitwise_not
 
   stack = load_pikle('./images/image.pkl.npy')
@@ -242,8 +164,8 @@ This function, based on `cv2.floodFill()` function, is useful to fill holes in t
 ```python
   import cv2
   import numpy as np
-  from segmentation.method import load_pickle, save_pickle
-  from segmentation.method import rescale
+  from segmentation.utils import load_pickle, save_pickle
+  from segmentation.utils import rescale
   from segmentation.method import imfill
 
   stack = load_pikle('./images/image.pkl.npy')
@@ -279,8 +201,8 @@ Apply a median blur filter on the whole stack of images
 ```python
   import cv2
   import numpy as np
-  from segmentation.method import load_pickle, save_pickle
-  from segmentation.method import rescale
+  from segmentation.utils import load_pickle, save_pickle
+  from segmentation.utils import rescale
   from segmentation.method import medianBlur
 
   stack = load_pikle('./images/image.pkl.npy')
@@ -314,8 +236,8 @@ Compute the best threshld value for each slice of the input image stack by using
 ```python
   import cv2
   import numpy as np
-  from segmentation.method import load_pickle, save_pickle
-  from segmentation.method import rescale
+  from segmentation.utils import load_pickle, save_pickle
+  from segmentation.utils import rescale
   from segmentation.method import otsu
 
   stack = load_pikle('./images/image.pkl.npy')
@@ -332,3 +254,54 @@ Compute the best threshld value for each slice of the input image stack by using
   <img src="./images/thresholded.png" alt="thr"
   title="thr" width="250" height="250" />
   <caption>thresholded image</caption>
+
+
+## corner_finder
+
+Found the upper and lower corner of the smallest rectangle that still contains the lung regions for each image of the input stack
+
+**Parameter**
+
+*stats*: pandas dataframe
+    dataframe that contains the stats of the connected regions. columns must be ...
+
+**Return**
+
+*corners*: array-like
+    array which contains the coordinates of the upper and lower corner of the ROI organized as [x_top, y_top, x_bottom, y_bottom]
+
+
+## remove_spots
+
+Set to zero the GL of all the connected region with area lesser than area
+
+**Parameters**
+
+*img*: array-like
+    binary image from which remove spots
+
+*area*: int
+    maximun area in pixels of the removed spots
+
+**Return**
+
+*filled*: array-like
+    binary image with spot removed
+
+```python
+
+from segmentation.utils import load_pickle, save_pickle
+from segmentation.utils import preprocess
+from segmentation.method import remove_spots
+from segmentation.method import otsu
+
+#load the image
+img = load_pikle('./images/image.pkl.npy')
+img = preprocess(img)
+
+#apply a threshold
+img = otsu(img)
+#fill the smallest holes
+filled = remove_spots(img, 500)
+save_pickle('./images/filled.pkl.npy')
+```
