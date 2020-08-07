@@ -3,7 +3,7 @@ import argparse
 from segmentation.utils import load_pickle, save_pickle
 from segmentation.utils import to_dataframe
 from segmentation.method import connectedComponentsWithStats
-from segmentation.method import corner_finder
+from segmentation.method import find_ROI
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
@@ -14,7 +14,10 @@ def parse_args() :
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument('--input', dest='filename', required=True, type=str, action='store', help='Input filename')
-    parser.add_argument('--output', dest='output', required=True, type=str, action='store', help='output filename')
+    parser.add_argument('--reduced', dest='red', required=True, type=str, action='store', help='output filename')
+    parser.add_argument('--ROI', dest='ROI', required=False, type=str, action='store', help='output filename')
+    parser.add_argument('--area', dest='area', required=False, type=int, action='store', default= 1000, help='area under which we can consider the slice doesn t contains lungs' )
+
     args = parser.parse_args()
     return args
 
@@ -23,18 +26,27 @@ def main():
     args = parse_args()
     #load data
     lung = load_pickle(args.filename)
+    img = lung.copy()
     lung = np.where(lung == 0, 0, 1)
     #find connected components
-    ret, labels, stats, _ = connectedComponentsWithStats(lung.astype('uint8'))
+    ret, labels, stats, _ = connectedComponentsWithStats(lung.astype(np.uint8))
     #manage stats into dataframe
     columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     stats = to_dataframe(stats, columns)
-    #for each slice find the upper left and lower righ corner
-    corners = []
-    for stat in stats:
-        corners.append(corner_finder(stat))
-    corners = np.array(corners, dtype= np.int16)
-    save_pickle(args.output, corners)
+    print('Starting ROI selection', flush=True)
+    ROI = np.array([find_ROI(s) for s in stats], dtype = np.int16)
+    #starting the slice selection
+    AREAS = np.array([np.absolute((R[1] - R[3]) * (R[0] - R[2])) for R in ROI], dtype = np.int32)
+    #Remove all the regions that do not contains the lung
+    print('starting slice selection:', flush = True)
+    print('\tAll slices with ROI area less than ', args.area, 'will be removed', flush = True)
+    ROI = ROI[AREAS > args.area]
+    img = img[AREAS > args.area]
+    print('\tSelected ', img.shape[0], 'slices of', AREAS.shape[0], flush = True)
+    #save the results
+    save_pickle(args.ROI, ROI)
+    save_pickle(args.red, img)
+
 
 
 if __name__ == '__main__' :

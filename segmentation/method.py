@@ -1,5 +1,4 @@
 import cv2
-import pickle
 import numpy as np
 import segmentation.utils as utils
 from functools import partial
@@ -82,7 +81,7 @@ def connectedComponentsWithStats(img):
     '''
     if len(img.shape) == 2 :
         retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype('uint8'))
-        return [retval, labels, stats, controids]
+        return [retval, labels, stats, centroids]
     out = list(zip(*list(map(cv2.connectedComponentsWithStats, img.astype('uint8')))))
     return [np.array(out[0]), np.array(out[1]), list(out[2]), list(out[3])]
 
@@ -176,7 +175,7 @@ def otsu(img):
 
 
 
-def corner_finder(stats) :
+def find_ROI(stats) :
     '''
     Found the upper and lower corner of the rectangular ROI according to the connected region stats
 
@@ -191,11 +190,9 @@ def corner_finder(stats) :
         array which contains the coordinates of the upper and lower corner of the ROI organized as [x_top, y_top, x_bottom, y_bottom]
     '''
     stats = stats.drop([0], axis = 0)
-    x_top = stats.min(axis = 0)['LEFT']
-    y_top = stats.min(axis = 0)['TOP']
-    x_bottom = np.max(stats['LEFT'] + stats['WIDTH'])
-    y_bottom = np.max(stats['TOP'] + stats['HEIGHT'])
-    return np.array([x_top,y_top,x_bottom,y_bottom])
+    corner = np.array([stats.min(axis = 0)['LEFT'], stats.min(axis = 0)['TOP'], np.max(stats['LEFT'] + stats['WIDTH']), np.max(stats['TOP'] + stats['HEIGHT'])])
+
+    return np.where(corner == np.nan, np.int16(0), np.int16(corner))
 
 
 def remove_spots(img, area):

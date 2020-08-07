@@ -50,9 +50,8 @@ Draw of the selected ROI
 
 
 
-
-
-
+After the ROI selection this script will automatically removed all the slices in which the ROI has an area in pixels smaller than a specified value(default 1000), since we  can  notice that the ROI with the smallest areas usually does not contains lung regions but other oragan, like trachea.
+In the end will save the array of the selected slices and ROI coordinates.
 
 ## Usage
 
@@ -65,4 +64,9 @@ python -m pipeline.slice_and_ROI --input='path/to/input/folder/filename.pkl.npy'
 Required arguments:
 
 * --input :str, path to the input file, must be the stack of images with the extracted lung
-* --output :str, path to the output file in which data are stored
+* --results :str, path to the output file to save the selected slices
+* --ROI :str, path to the file to save the ROI coordinates vector.
+
+Optional arguments:
+
+* -area: int, minimum ROI area in pixels to select the slice

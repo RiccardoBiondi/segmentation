@@ -10,7 +10,7 @@ This module contains functions useful for the script execution. This functions e
 5. [imfill](#imfill)
 6. [medianBlur](#medianBlur)
 7. [otsu](#otsu)
-8. [corner_finder](#corner_finder)
+8. [find_ROI](#corner_finder)
 9. [remove_spots](#remove_spots)
 
 
@@ -256,7 +256,7 @@ Compute the best threshld value for each slice of the input image stack by using
   <caption>thresholded image</caption>
 
 
-## corner_finder
+## find_ROI
 
 Found the upper and lower corner of the smallest rectangle that still contains the lung regions for each image of the input stack
 
