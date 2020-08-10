@@ -1,6 +1,6 @@
 import pytest
 import hypothesis.strategies as st
-from hypothesis import given, settings
+from hypothesis import given, settings, example
 
 from segmentation.utils import load_pickle
 from segmentation.utils import save_pickle
@@ -8,12 +8,15 @@ from segmentation.utils import load_npz
 from segmentation.utils import save_npz
 from segmentation.utils import rescale
 from segmentation.utils import preprocess
+from segmentation.utils import subsamples
 from segmentation.utils import imfill
 from segmentation.utils import to_dataframe
+from segmentation.utils import imcrop
 
 import cv2
 import numpy as np
 from numpy.random import rand
+from numpy.random import random_integers as ran_int
 from numpy import ones, zeros
 
 
@@ -70,6 +73,17 @@ def test_preprocess(data, n_img, n_pixels):
     assert np.amin(out) == 0
 
 
+#test subsamples
+@given(st.integers(200, 1000), st.integers(2, 200))
+@settings(max_examples  = 20, deadline = None)
+def test_subsamples(n_sample, n_subsamples):
+    #create the sample array
+    sample = np.array([np.ones((ran_int(1,300), ran_int(1, 300))) for i in range(n_sample)])
+    #split it into subsamples
+    sub = subsamples(sample, n_subsamples)
+    assert sub.shape[0] == n_subsamples
+
+
 #testing imfill
 @given(white_image)
 @settings(max_examples = 20, deadline = None)
@@ -89,3 +103,14 @@ def test_to_dataframe(n_slices, cc):
     input = [np.empty(shape) for i in range(n_slices)]
     df = to_dataframe(input , columns)
     assert len(df) == n_slices
+
+
+#test imcrop
+@given(st.integers(0, 200), st.integers(0, 200), st.integers(1, 200), st.integers(1, 200))
+@settings(max_examples = 20, deadline = None)
+@example(x = 0, y = 0, h = 0, w = 0)
+def test_imcrop(x, y, w, h) :
+    img = ones((512, 512))
+    roi = np.array([x, y, x + w, y + h], dtype = np.int16)
+    crop = imcrop(img.astype(np.int8), roi)
+    assert crop.shape == (h, w)

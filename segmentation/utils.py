@@ -1,11 +1,12 @@
 import cv2
 import pickle
-import pydicom
 import numpy as np
 import pandas as pd
-import nrrd as pynrrd
-import nibabel as nib
+
+
+from random import shuffle
 from functools import partial
+
 
 
 
@@ -162,7 +163,11 @@ def subsamples(data, n_sub):
     out: list of array-like
         list of random subsamples
     '''
-    pass
+    #shuffle the sample list
+    img = data.copy()
+    np.random.shuffle(img)
+    img = np.array_split(img, n_sub)
+    return np.array(img)
 
 
 
@@ -214,3 +219,22 @@ def to_dataframe (arr, columns) :
     '''
     df = list(map(partial(pd.DataFrame, columns=columns), arr))
     return df
+
+
+def imcrop(img, ROI) :
+    '''
+    Crop the image according to ROI
+
+    Parameters
+    ----------
+    img : array-like
+        image to crop
+    ROI : array-like
+        array with the coordinate of ROI vertex
+
+    Return
+    ------
+    cropped : array-like
+        cropped image
+    '''
+    return img[ROI[1] : ROI[3], ROI[0] : ROI[2]]

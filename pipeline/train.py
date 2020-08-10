@@ -1,9 +1,10 @@
 import cv2
 import argparse
+import progressbar
 import numpy as np
 from glob import glob
 from segmentation.utils import load_pickle, save_pickle
-
+from segmentation.utils import imcrop, subsamples
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it']
@@ -15,7 +16,6 @@ def parse_args():
 
     parser.add_argument('--input', dest='folder', required=True, type=str, action='store', help='Input folder')
     parser.add_argument('--output', dest='out', required=True, type=str, action='store', help='dst folder')
-    parser.add_argument('--ROI', dest='ROI', required=False, type=str, action='store', help='Folder with ROI files', default='')
     parser.add_argument('--k', dest='k', required=False, type=int, action='store', help='number of clusters', default=4)
     parser.add_argument('--n', dest='n', required=False, type=int, action='store', help='number of subsamples', default=100)
     parser.add_argument('--init', dest='init', required=False, type=int, action='store', help='centroid initialization technique', default=0)
@@ -29,48 +29,46 @@ def main():
     init =  [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
     args = parse_args()
     #read files and create the sample vector
+    print('Loading...', flush=True )
+
     files = sorted(glob(args.folder + '/*.pkl.npy'))
-    imgs = np.concatenate([load_pickle(f) for f in files])
+    imgs = np.concatenate(np.array([load_pickle(f) for f in files]))
 
-    if args.ROI != '':
-        ROI_files = sorted(glob(args.ROI + '/*.pkl.npy'))
-        ROI = np.concatenate([load_pickle(f) for f in ROI_files])
+    print('Loaded ', len(files), ' files from ', args.folder, flush=True)
 
-    else :
-        ROI = np.full((imgs.shape[0],4),np.array([0., 0., imgs.shape[1], imgs.shape[2]]), dtype=np.uint16)
-    #start to create the sample
-    img = []
-    for i in range(imgs.shape[0]):
-        temp = imgs[i, ROI[i,1]:ROI[i,3], ROI[i,0]:ROI[i,2]]
-        img.append(np.array(temp, dtype= np.float32))
-
-    sub_size = int(len(imgs)/args.n)
-    sub = []
-    length = np.arange(0, len(imgs) + 1 , sub_size)
-    #TODO: find a better way to split the subsamples
-    for i in range(args.n) :
-        sub.append(list([imgs[j] for j in range(length[i], length[i+1])]))
+    samples = subsamples(imgs, args.n)
     #Recap for better parameter control
     print('*****Starting custering*****', flush=True)
     print('Number of custers-->', args.k , flush=True)
     print('Number of subsamples-->', args.n , flush=True)
-    print('Subsamples size-->', sub_size, flush=True)
+    print('Total images --> ', imgs.shape[0])
     print('Centroid initzialization technique-->', str(init[args.init]), flush=True)
     print('Save intermediate centroids-->', args.intermediate , flush=True)
     #first clustering
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     centr = []
-    for i,el in enumerate(sub) :
-        sample = np.concatenate([x.reshape(-1, 1) for x in el]).astype(np.float32)
+
+    widgets = ['Computing:', progressbar.Bar('*')]
+    bar = progressbar.ProgressBar(widgets=widgets).start()
+
+    for i,el in enumerate(samples) :
+        for x in el :
+            sample = np.concatenate(x.reshape(-1, 1))
+        sample = sample.astype(np.float32)
         ret, labels, centroids = cv2.kmeans(sample, args.k, None, criteria, 10,init[args.init])
         centr.append(np.array(centroids))
         if args.intermediate :#non molto performante
             save_pickle(args.out + '('+str(i)+')', centroids)
+        bar.update(i)
 
     #starting the second clustering
+    print("\nStarting second clustering", flush=True)
+
     centr = np.array(centr).reshape(-1,)
     ret, labels, centroids = cv2.kmeans(centr, args.k, None, criteria, 10, init[args.init])
     save_pickle(args.out, centroids)
+    
+    print('Complete', flush =True)
 
 if __name__ == '__main__' :
     main()

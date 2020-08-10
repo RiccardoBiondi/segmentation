@@ -2,6 +2,7 @@ import numpy as np
 import argparse
 from segmentation.utils import load_pickle, save_pickle
 from segmentation.utils import to_dataframe
+from segmentation.utils import imcrop
 from segmentation.method import connectedComponentsWithStats
 from segmentation.method import find_ROI
 
@@ -14,8 +15,7 @@ def parse_args() :
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument('--input', dest='filename', required=True, type=str, action='store', help='Input filename')
-    parser.add_argument('--reduced', dest='red', required=True, type=str, action='store', help='output filename')
-    parser.add_argument('--ROI', dest='ROI', required=False, type=str, action='store', help='output filename')
+    parser.add_argument('--output', dest='out', required=True, type=str, action='store', help='output filename')
     parser.add_argument('--area', dest='area', required=False, type=int, action='store', default= 1000, help='area under which we can consider the slice doesn t contains lungs' )
 
     args = parser.parse_args()
@@ -38,14 +38,12 @@ def main():
     #starting the slice selection
     AREAS = np.array([np.absolute((R[1] - R[3]) * (R[0] - R[2])) for R in ROI], dtype = np.int32)
     #Remove all the regions that do not contains the lung
-    print('starting slice selection:', flush = True)
-    print('\tAll slices with ROI area less than ', args.area, 'will be removed', flush = True)
     ROI = ROI[AREAS > args.area]
     img = img[AREAS > args.area]
-    print('\tSelected ', img.shape[0], 'slices of', AREAS.shape[0], flush = True)
-    #save the results
-    save_pickle(args.ROI, ROI)
-    save_pickle(args.red, img)
+    print('Selected ', img.shape[0], 'slices of', AREAS.shape[0], flush = True)
+    #crop the resulting images and save
+    res = np.array([imcrop(im.astype(np.float32), r) for (im, r) in zip(img, ROI)])
+    save_pickle(args.out, res)
 
 
 
