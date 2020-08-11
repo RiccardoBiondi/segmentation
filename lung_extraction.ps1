@@ -2,8 +2,8 @@
 
 $input_dir = $args[0]
 $output_dir = $args[1]
-$other = $args[2]
-
+$optional_1= $args[2]
+$optional_2 = $args[3]
 
 If ( $input_dir -eq $null )
 {
@@ -46,7 +46,7 @@ For ($i = 0; $i -lt $files.Length; $i++)
   $BaseName = Get-Item $files[$i] | Select-Object -ExpandProperty BaseName
   $lung_name = $output_dir + $BaseName
 
-  python -m pipeline.lung_extraction --input $files[$i] --lung $lung_name $other
+  python -m pipeline.lung_extraction --input $files[$i] --lung $lung_name $optional_1 $optional_2
   If ( $? )
   {
     Write-Host -NoNewLine "[done]" -ForegroundColor Green
