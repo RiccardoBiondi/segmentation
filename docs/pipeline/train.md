@@ -18,4 +18,8 @@ To control these parameters you can provide the optional arguments:
 * --n : int, number of subsamples to use, default 100
 * --init: int, initialization technique: if 0 will use the random center initialization ,if 1 will use the kmenas++ algorithm.
 * --intermediate: bool, if true allows to save the centroid of the subsamples
-* --ROI: str, path to ROI file folder, if provided allows ROI selection.
+
+You can also call this script by using the implemented powershell sctipt by providing as first argument the path t the inpt folder and as second argument the path to output file. the other arguments will be the optional ones:
+```
+C:\User\userName\your\working\directory\segmentation> & "./train.ps1" path/to/input/folder/ path/to/output/folder/output_name  --k=5
+```

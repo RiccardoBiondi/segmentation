@@ -2,6 +2,4 @@ numpy
 scikit-learn
 opencv-python
 pandas
-pydicom
-pynrrd
-nibabel
+progressbar

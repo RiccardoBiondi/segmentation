@@ -79,3 +79,16 @@ Optional arguments:
 * --int_spot_area :int, default=700 **TODO**
 
 * --ext_spot_area :int, default=200 **TODO**
+
+
+You can also run this script on multiple samples by calling it from the provided powershell script. In this case you have to create two folders: the first one(input) will contains the *.pkl.npy* files to process, the second one the results. Now you simply call the script from powershell by providing as the first parameter the path to the input older and as second the path to output folder:
+```
+C:\User\userName\your\working\directory\segmentation> & "./lung_extraction.ps1" path/to/input/folder/ path/to/output/folder/
+```
+
+If you want to provide the optional arguments you have to wite them as third argument as follows:
+```
+C:\User\userName\your\working\directory\segmentation> & "./lung_extraction.ps1" path/to/input/folder/ path/to/output/folder/  --int_spot_area=300
+```
+
+**NOTE** : in this case you can't provide the *--mask* argument as optional.

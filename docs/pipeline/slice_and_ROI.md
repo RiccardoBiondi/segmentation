@@ -50,8 +50,8 @@ Draw of the selected ROI
 
 
 
-After the ROI selection this script will automatically removed all the slices in which the ROI has an area in pixels smaller than a specified value(default 1000), since we  can  notice that the ROI with the smallest areas usually does not contains lung regions but other oragan, like trachea.
-In the end will save the array of the selected slices and ROI coordinates.
+After the ROI selection this script will automatically removed all the slices in which the ROI has an area in pixels smaller than a specified value(default 1000), since we  can  notice that the ROI with the smallest areas usually does not contains lung regions but other organ, like trachea and heart. After the ROI selection the script will remove all the slices with ROI area less then a certain values, that because the smallest ROI usually does not contains the lung regions.
+Thus script will return the reduced stack of cropped images
 
 ## Usage
 
@@ -64,9 +64,19 @@ python -m pipeline.slice_and_ROI --input='path/to/input/folder/filename.pkl.npy'
 Required arguments:
 
 * --input :str, path to the input file, must be the stack of images with the extracted lung
-* --results :str, path to the output file to save the selected slices
-* --ROI :str, path to the file to save the ROI coordinates vector.
+* --output :str, path to the output file to save the selected and cropped slices
 
 Optional arguments:
 
 * -area: int, minimum ROI area in pixels to select the slice
+
+
+You can also run this script on multiple samples by calling it from the provided powershell script. In this case you have to create two folders: the first one(input) will contains the *.pkl.npy* files to process, the second one the results. Now you simply call the script from powershell by providing as the first parameter the path to the input older and as second the path to output folder:
+```
+C:\User\userName\your\working\directory\segmentation> & "./slice_and_ROI.ps1" path/to/input/folder/ path/to/output/folder/
+```
+
+If you want to provide the optional arguments you have to write them as third argument as follows:
+```
+C:\User\userName\your\working\directory\segmentation> & "./slice_and_ROI.ps1" path/to/input/folder/ path/to/output/folder/  --area=300
+```
