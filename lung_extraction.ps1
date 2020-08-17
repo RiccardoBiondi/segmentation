@@ -5,26 +5,26 @@ $output_dir = $args[1]
 $optional_1= $args[2]
 $optional_2 = $args[3]
 
-If ( $input_dir -eq $null )
+If ( $null -eq $input_dir )
 {
-  Write-Host "Error! Input directory not set" -ForegroundColor Red
+  Write-Output "Error! Input directory not set" -ForegroundColor Red
   exit 1
 }
 ElseIf (-not (Test-Path -Path $input_dir -PathType Container))
 {
-  Write-Host "Error! Input directory not found" -ForegroundColor Red
+  Write-Output "Error! Input directory not found" -ForegroundColor Red
   exit 1
 }
 
 
-If ( $output_dir -eq $null )
+If ( $null -eq $output_dir)
 {
-  Write-Host "Error! Output directory not set" -ForegroundColor Red
+  Write-Output "Error! Output directory not set" -ForegroundColor Red
   exit 1
 }
 ElseIf ( -not (Test-Path -Path $output_dir -PathType Container) )
 {
-  Write-Host "Error! Output directory not found" -ForegroundColor Red
+  Write-Output "Error! Output directory not found" -ForegroundColor Red
   exit 1
 }
 
@@ -34,7 +34,7 @@ ElseIf ( -not (Test-Path -Path $output_dir -PathType Container) )
 
 
 $files = Get-ChildItem -Path $input_dir* -Include *.pkl.npy
-Write-Host "Found "$files.Length" files to process"
+Write-Output "Found "$files.Length" files to process"
 
 
 
@@ -42,18 +42,19 @@ Write-Host "Found "$files.Length" files to process"
 
 For ($i = 0; $i -lt $files.Length; $i++)
 {
-  Write-Host  "* Processing " $files[$i]
+  Write-Output  "* Processing " $files[$i]
   $BaseName = Get-Item $files[$i] | Select-Object -ExpandProperty BaseName
+  $BaseName = $BaseName -replace "\..+"
   $lung_name = $output_dir + $BaseName
 
   python -m pipeline.lung_extraction --input $files[$i] --lung $lung_name $optional_1 $optional_2
   If ( $? )
   {
-    Write-Host -NoNewLine "[done]" -ForegroundColor Green
+    Write-Output -NoNewLine "[done]" -ForegroundColor Green
   }
   Else
   {
-    Write-Host -NoNewLine "[failed]" -ForegroundColor Red
+    Write-Output -NoNewLine "[failed]" -ForegroundColor Red
     exit 1
   }
 }

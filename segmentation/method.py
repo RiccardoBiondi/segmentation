@@ -212,7 +212,7 @@ def remove_spots(img, area):
         binary image with spot removed
     '''
     columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
-    r, lab, stats, _ = connectedComponentsWithStats(img.astype(np.uint8))
+    _, lab, stats, _ = connectedComponentsWithStats(img.astype(np.uint8))
 
     stats = utils.to_dataframe(stats, columns)
     for i,stat in enumerate(stats):

@@ -7,21 +7,22 @@ $optional_2 = $args[3]
 $optional_3 = $args[4]
 $optional_4 = $args[5]
 
-If ( $input_dir -eq $null )
+If ( $null -eq $input_dir)
 {
-  Write-Host "Error! Input directory not set" -ForegroundColor Red
+  Write-Error -Message "Input directory not set" -Category NotSpecified -RecommendedAction "Set a path to the input directory"
   exit 1
 }
 ElseIf (-not (Test-Path -Path $input_dir -PathType Container))
 {
-  Write-Host "Error! Input directory not found" -ForegroundColor Red
+  Write-Error -Message "Input directory not found" -Category ObjectNotFound
   exit 1
 }
 
 
-If ( $output_dir -eq $null )
+If ( $null -eq $output_dir)
 {
-  Write-Host "Error! Output directory not set" -ForegroundColor Red
+  Write-Error -Message "Output directory not set" -Category NotSpecified -RecommendedAction "Set a path t the output directory"
+
   exit 1
 }
 

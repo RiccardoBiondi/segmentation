@@ -3,8 +3,6 @@ import pickle
 import numpy as np
 import pandas as pd
 
-
-from random import shuffle
 from functools import partial
 
 
@@ -105,7 +103,7 @@ def save_npz(filename, data):
         np.savez_compressed(file=fp, a=data)
 
 
-def rescale(img, max, min):
+def rescale(img, Max, Min):
     '''
     Rescale the image accodring to max, min input
 
@@ -124,7 +122,7 @@ def rescale(img, max, min):
     '''
     if min == max :
         raise ZeroDivisionError
-    return (img.astype(np.float32) - min) * (1. / (max - min))
+    return (img.astype(np.float32) - Min) * (1. / (Max - Min))
 
 
 def preprocess(img):

@@ -5,60 +5,63 @@ $centroids = $args[2]
 
 
 
-If ( $input_dir -eq $null )
+If ( $null -eq $input_dir )
 {
-  Write-Host "Error! Input directory not set" -ForegroundColor Red
+  Write-Error -Message "Input directory not set" -Category NotSpecified
   exit 1
 }
 ElseIf (-not (Test-Path -Path $input_dir -PathType Container))
 {
-  Write-Host "Error! Input directory not found" -ForegroundColor Red
+  Write-Error -Message "Error! Input directory not found" -Category ObjectNotFound
   exit 1
 }
 
 
-If ( $output_dir -eq $null )
+If ( $null -eq $output_dir)
 {
-  Write-Host "Error! Output directory not set" -ForegroundColor Red
+  Write-Error -Message "Error! Output directory not set"-Category NotSpecified
   exit 1
 }
 ElseIf ( -not (Test-Path -Path $output_dir -PathType Container) )
 {
-  Write-Host "Error! Output directory not found" -ForegroundColor Red
+  Write-Error -Message " Output directory not found" -Category ObjectNotFound
   exit 1
 }
 
 
-If ( $centroids -eq $null )
+If ( $null -eq $centroids)
 {
-  Write-Host "Error! No centroids provided" -ForegroundColor Red
+  Write-Error -Message "No centroids file provided"-Category NotSpecified
   exit 1
 }
-ElseIf ( -not (Test-Path -Path $centroids -PathType Container) )
+ElseIf ( -not (Test-Path $centroids) )
 {
-  Write-Host "Error! Centroids file not found" -ForegroundColor Red
+  Write-Error -Message "Centroids file not found" -Category ObjectNotFound
   exit 1
 }
 
 
 $files = Get-ChildItem -Path $input_dir* -Include *.pkl.npy
-Write-Host "Found "$files.Length" files to process"
+Write-Output "Found "$files.Length" files to process"
 
 
 For ($i = 0; $i -lt $files.Length; $i++)
 {
-  Write-Host  "* Processing " $files[$i]
+  Write-Output  "* Processing " $files[$i]
   $BaseName = Get-Item $files[$i] | Select-Object -ExpandProperty BaseName
+  $BaseName = $BaseName -replace "\..+"
   $lung_name = $output_dir + $BaseName
+
+
 
   python -m pipeline.labeling --input $files[$i] --output $lung_name --centroids $centroids
   If ( $? )
   {
-    Write-Host -NoNewLine "[done]" -ForegroundColor Green
+    Write-Output  '[done]'
   }
   Else
   {
-    Write-Host -NoNewLine "[failed]" -ForegroundColor Red
+    Write-Output '[failed]'
     exit 1
   }
 }

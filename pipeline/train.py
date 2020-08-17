@@ -4,7 +4,7 @@ import progressbar
 import numpy as np
 from glob import glob
 from segmentation.utils import load_pickle, save_pickle
-from segmentation.utils import imcrop, subsamples
+from segmentation.utils import subsamples
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it']
@@ -67,7 +67,7 @@ def main():
     centr = np.array(centr).reshape(-1,)
     ret, labels, centroids = cv2.kmeans(centr, args.k, None, criteria, 10, init[args.init])
     save_pickle(args.out, centroids)
-    
+
     print('Complete', flush =True)
 
 if __name__ == '__main__' :
