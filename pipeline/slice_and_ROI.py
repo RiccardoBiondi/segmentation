@@ -42,7 +42,7 @@ def main():
     img = img[AREAS > args.area]
     print('Selected ', img.shape[0], 'slices of', AREAS.shape[0], flush = True)
     #crop the resulting images and save
-    res = np.array([imcrop(im.astype(np.float32), r) for (im, r) in zip(img, ROI)])
+    res = np.array([imcrop(im.astype(np.float32), r) for (im, r) in zip(img, ROI)], dtype=np.ndarray)
     save_pickle(args.out, res)
 
 

@@ -47,7 +47,7 @@ def main() :
     #compute kmenas clustering
     criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     init = [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
-    ret, labels, centroids = cv2.kmeans(sample, args.K, None, criteria, 10, init[args.c_init])
+    _, labels, centroids = cv2.kmeans(sample, args.K, None, criteria, 10, init[args.c_init])
 
     save_pickle(args.output, centroids)
     #remap labels

@@ -50,11 +50,11 @@ For ($i = 0; $i -lt $files.Length; $i++)
   python -m pipeline.lung_extraction --input $files[$i] --lung $lung_name $optional_1 $optional_2
   If ( $? )
   {
-    Write-Output -NoNewLine "[done]" -ForegroundColor Green
+    Write-Output  -InputObject "[done]"
   }
   Else
   {
-    Write-Output -NoNewLine "[failed]" -ForegroundColor Red
+    Write-Output -InputObject "[failed]"
     exit 1
   }
 }
