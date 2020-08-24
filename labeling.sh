@@ -54,14 +54,8 @@ elif [ ! -f "$centroids" ]; then
 fi
 
 # list all the pickle files into the input directory
-input_files=$(ls $input_dir)
+input_files=$(ls "$input_dir")
 echo "Found ${#input_files[@]} files to process"
-
-# define a logfile
-logfile=$PWD/log_processing.txt
-
-# eventually create the output directory
-mkdir -p $output_dir
 
 # apply the pipeline on the input files
 
@@ -72,10 +66,10 @@ for file in $input_files; do
   #f= basename "$file" .pkl.npy
 
   f="${file%%.*}"
-  
-  python3 -m pipeline.labeling --input=$input_dir$file --output=$output_dir$f --centroids=$centroids
 
-  if [ $? = 0 ]; then
+  python3 -m pipeline.labeling --input="$input_dir$file" --output="$output_dir$f" --centroids="$centroids"
+
+  if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"
   else
     echo -e "${red}[failed]${reset}"

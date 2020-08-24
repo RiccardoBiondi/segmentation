@@ -1,7 +1,6 @@
 #!/bin/bash
 
 red='\033[1;31m'
-green='\033[1;32m'
 reset='\033[0m]' #No Color
 
 input_dir=$1
@@ -37,4 +36,4 @@ fi
 
 # apply the pipeline on the input files
 
-python3 -m pipeline.train --input=$input_dir --output=$output_file $optional1 $optional2 $optional3 $optional4
+python3 -m pipeline.train --input="$input_dir" --output="$output_file" $optional1 $optional2 $optional3 $optional4

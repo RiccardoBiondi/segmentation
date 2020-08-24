@@ -42,14 +42,9 @@ fi
 
 
 # list all the pickle files into the input directory
-input_files=$(ls $input_dir)
+input_files=$(ls "$input_dir")
 echo "Found ${#input_files[@]} files to process"
 
-# define a logfile
-logfile=$PWD/log_processing.txt
-
-# eventually create the output directory
-mkdir -p $output_dir
 
 # apply the pipeline on the input files
 
@@ -58,9 +53,9 @@ for file in $input_files; do
   printf "* Processing $file ...       "
 
   f="${file%%.*}"
-  python3 -m pipeline.lung_extraction --input=$input_dir$file --lung=$output_dir$f $optional1 $optional2
+  python3 -m pipeline.lung_extraction --input="$input_dir$file" --lung="$output_dir$f" $optional1 $optional2
 
-  if [ $? = 0 ]; then
+  if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"
   else
     echo -e "${red}[failed]${reset}"
