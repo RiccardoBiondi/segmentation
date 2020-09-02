@@ -127,14 +127,14 @@ def imfill(img):
     return filled(img.astype(np.uint8))
 
 
-def medianBlur(img, k_size):
+def medianBlur(img, ksize):
     '''
     Apply median blurring filter on an image or stack of images
     Parameters
     ----------
     img: array-like
         image or stack of images to filter
-    k_size : int
+    ksize : int
         aperture linear size; it must be odd and greater than 1
     Return
     ------
@@ -142,9 +142,36 @@ def medianBlur(img, k_size):
         median blurred image
     '''
     if len(img.shape) == 2: #single image case
-        return cv2.medianBlur(img.astype('uint8'), k_size)
-    blurred = np.vectorize(partial(cv2.medianBlur, ksize = k_size), signature = '(m,n)->(m,n)')
-    return blurred(img.astype('uint8'))
+        return cv2.medianBlur(img, ksize)
+    blurred = np.vectorize(partial(cv2.medianBlur, ksize = ksize), signature = '(m,n)->(m,n)')
+    return blurred(img)
+
+
+def gaussianBlur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
+    '''
+    Apply a gaussian blurring filter on an image or stack of images
+    Parameters
+    ----------
+    img: array-like
+        image or stack of images to filter
+    ksize : tuple of int 
+        aperture linear size; it must be odd and greater than 1
+    sigmaX: float
+        Gaussian kernel standard deviation in X direction
+    sigmaY: float
+        Gaussian kernel standard deviation in Y direction; if sigmaY is zero, it is set to be equal to sigmaX, if both sigmas are zeros, they are computed from ksize
+    borderType:
+        Specifies image boundaries while kernel is applied on image borders
+    Return
+    ------
+    blurred : array-like
+        blurred image
+        '''
+    if len(img.shape) == 2: #single image case
+        return cv2.GaussianBlur(img, ksize,sigmaX=tuple(sigmaX), sigmaY=tuple(sigmaY), borderType = borderType)
+
+    blurred = np.vectorize(partial(cv2.GaussianBlur, ksize = ksize,sigmaX=sigmaX, sigmaY=sigmaY, borderType = borderType), signature = '(m,n)->(m,n)')
+    return blurred(img)
 
 
 

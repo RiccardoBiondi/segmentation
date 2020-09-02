@@ -8,6 +8,7 @@ from segmentation.method import connectedComponentsWithStats
 from segmentation.method import bitwise_not
 from segmentation.method import imfill
 from segmentation.method import medianBlur
+from segmentation.method import gaussianBlur
 from segmentation.method import otsu
 
 import cv2
@@ -78,7 +79,16 @@ def test_bitwise_not_stack(input, expected_output, n_img, n_pix):
 @settings(max_examples = 20, deadline = None)
 def test_medianBlur_stack (img, n_img, n_pix) :
     input = 255 * img(n_img, n_pix, n_pix)
-    blurred = medianBlur(input, 5)
+    blurred = medianBlur(input.astype(np.float32), 5)
+    assert blurred.shape == input.shape
+
+
+#Test gaussian blur filter function
+@given(image, st.integers(2, 30), st.integers(300, 512))
+@settings(max_examples = 20, deadline = None)
+def test_gaussianBlur_stack (img, n_img, n_pix) :
+    input = 255 * img(n_img, n_pix, n_pix)
+    blurred = gaussianBlur(input.astype(np.float32), ksize=(5, 5))
     assert blurred.shape == input.shape
 
 
