@@ -1,6 +1,6 @@
 import numpy as np
 import argparse
-from segmentation.utils import load_pickle, save_pickle
+from segmentation.utils import load_image, save_pickle
 from segmentation.utils import to_dataframe
 from segmentation.utils import imcrop
 from segmentation.method import connectedComponentsWithStats
@@ -25,11 +25,11 @@ def parse_args() :
 def main():
     args = parse_args()
     #load data
-    lung = load_pickle(args.filename)
+    lung = load_image(args.filename)
     img = lung.copy()
     lung = np.where(lung == 0, 0, 1)
     #find connected components
-    ret, labels, stats, _ = connectedComponentsWithStats(lung.astype(np.uint8))
+    _, labels, stats, _ = connectedComponentsWithStats(lung.astype(np.uint8))
     #manage stats into dataframe
     columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     stats = to_dataframe(stats, columns)

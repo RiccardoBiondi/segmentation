@@ -3,7 +3,7 @@ import argparse
 import progressbar
 import numpy as np
 from glob import glob
-from segmentation.utils import load_pickle, save_pickle
+from segmentation.utils import load_image, save_pickle
 from segmentation.utils import subsamples
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
@@ -32,7 +32,7 @@ def main():
     print('Loading...', flush=True )
 
     files = sorted(glob(args.folder + '/*.pkl.npy'))
-    imgs = np.concatenate(np.array([load_pickle(f) for f in files]))
+    imgs = np.concatenate(np.array([load_image(f) for f in files]))
 
     print('Loaded ', len(files), ' files from ', args.folder, flush=True)
 

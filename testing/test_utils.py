@@ -6,6 +6,8 @@ from segmentation.utils import load_pickle
 from segmentation.utils import save_pickle
 from segmentation.utils import load_npz
 from segmentation.utils import save_npz
+from segmentation.utils import load_dicom
+from segmentation.utils import load_image
 from segmentation.utils import rescale
 from segmentation.utils import preprocess
 from segmentation.utils import subsamples
@@ -48,6 +50,25 @@ def test_save_and_load_npz(data, n_img, n_pixels):
     save_npz('./testing/images/test_file', input)
     load = load_npz('./testing/images/test_file.npz')
     assert (load == input).all()
+
+'''
+#testing load_dicom
+def test_load_dicom():
+    ref = load_pickle('./testing/images/test_dicom/DICOM_gt.pkl.npy')
+    img = load_dicom('./testing/images/test_dicom/DICOM/')
+    assert (ref == img).all()
+'''
+
+def test_load_img() :
+    ref = load_pickle('./testing/images/test_dicom/DICOM_gt.pkl.npy')
+    img_pkl = load_image('./testing/images/test_dicom/DICOM_gt.pkl.npy')
+#    img_dcm = load_image('./testing/images/test_dicom/DICOM/')
+
+    assert (ref == img_pkl).all()
+#    assert (ref == img_dcm).all()
+    with pytest.raises(FileNotFoundError) :
+        assert load_image('./testing/images/DICOM_gt.pkl.npy')
+
 
 
 #testing rescale function

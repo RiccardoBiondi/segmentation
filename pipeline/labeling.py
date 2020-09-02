@@ -20,8 +20,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    images = load_pickle(args.filename)
-    centroid = load_pickle(args.centroids)
+    images = load_image(args.filename)
+    centroid = load_image(args.centroids)
     n_clusters = centroid.shape[0]
 
     shape = images.shape

@@ -7,24 +7,23 @@ $optional_2 = $args[3]
 
 If ( $null -eq $input_dir )
 {
-  Write-Output "Error! Input directory not set" -ForegroundColor Red
+  Write-Error -Message "Error! Input directory not set" -Category NotSpecified -RecommendedAction "Set path to input directory"
   exit 1
 }
 ElseIf (-not (Test-Path -Path $input_dir -PathType Container))
 {
-  Write-Output "Error! Input directory not found" -ForegroundColor Red
-  exit 1
+  Write-Error -Message "Error! Input directory not found" -Category NotSpecified
 }
 
 
 If ( $null -eq $output_dir)
 {
-  Write-Output "Error! Output directory not set" -ForegroundColor Red
+  Write-Error -Message "Error! Output directory not set" -Category NotSpecified-RecommendedAction "Set path to output directory"
   exit 1
 }
 ElseIf ( -not (Test-Path -Path $output_dir -PathType Container) )
 {
-  Write-Output "Error! Output directory not found" -ForegroundColor Red
+  Write-Error -Message "Error! Output directory not found" -Category NotSpecified
   exit 1
 }
 
@@ -33,12 +32,9 @@ ElseIf ( -not (Test-Path -Path $output_dir -PathType Container) )
 
 
 
-$files = Get-ChildItem -Path $input_dir* -Include *.pkl.npy
+$files = get-ChildItem -Path $input_dir*
 Write-Output "Found "$files.Length" files to process"
 
-
-
-#New-Item -Path $output_dir -ItemType directory -Force
 
 For ($i = 0; $i -lt $files.Length; $i++)
 {

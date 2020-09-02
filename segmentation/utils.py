@@ -1,10 +1,12 @@
+import os
 import cv2
 import pickle
+import pydicom
 import numpy as np
 import pandas as pd
 
 from functools import partial
-
+from glob import glob
 
 
 
@@ -52,8 +54,25 @@ def load_npz(filename):
     return np.array(data)
 
 
-def load_dicom(filename):
-    pass
+def load_dicom(filedir):
+    """
+    Load image and store it into a 3D numpy array
+
+    Parameter
+    ---------
+    filedir: str
+        path to the directory that contains the dicom files
+    Returns
+    -------
+    imgs: array-like
+        image tensor
+    """
+    dicoms = glob('{}/*'.format(filedir))
+    z = [float(pydicom.dcmread(f, force = True)[('0020', '0032')][-1]) for f in dicoms]
+    order = np.argsort(z)
+    dicoms = np.asarray(dicoms)[order]
+    imgs = np.asarray([pydicom.dcmread(f, force = True).pixel_array for f in dicoms])
+    return imgs
 
 
 def load_nifti(filename):
@@ -61,7 +80,27 @@ def load_nifti(filename):
 
 
 def load_image(filename):
-    pass
+    '''
+    Load a stack of images and return a 3D numpy array. The input file format can by .pkl.npy, .npz or a folder that contains .dcm files.
+
+    Parameter
+    ---------
+    filename: str
+        path to the image file(.pkl.npy or .npz) or folder that contains .dcm files.
+    Return
+    ------
+    imgs: array-like
+        image tensor
+    '''
+    if os.path.exists(filename) :
+        if os.path.isfile(filename) :
+            imgs = load_pickle(filename)
+        else :
+            imgs = load_dicom(filename)
+    else :
+        raise FileNotFoundError()
+    return imgs
+
 
 
 def save_pickle(filename, data):
@@ -141,7 +180,7 @@ def preprocess(img):
     '''
     out = img.copy()
     out[out < 0] = 0
-    out = 255 * rescale(out, np.amax(out), 0)
+    out = 255 * rescale(out, np.amax(out), 0)#???
     return out.astype(np.uint8)
 
 

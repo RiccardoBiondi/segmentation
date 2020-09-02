@@ -7,7 +7,7 @@ $centroids = $args[2]
 
 If ( $null -eq $input_dir )
 {
-  Write-Error -Message "Input directory not set" -Category NotSpecified
+  Write-Error -Message "Error! Input directory not set" -Category NotSpecified
   exit 1
 }
 ElseIf (-not (Test-Path -Path $input_dir -PathType Container))
@@ -24,24 +24,24 @@ If ( $null -eq $output_dir)
 }
 ElseIf ( -not (Test-Path -Path $output_dir -PathType Container) )
 {
-  Write-Error -Message " Output directory not found" -Category ObjectNotFound
+  Write-Error -Message "Error! Output directory not found" -Category ObjectNotFound
   exit 1
 }
 
 
 If ( $null -eq $centroids)
 {
-  Write-Error -Message "No centroids file provided"-Category NotSpecified
+  Write-Error -Message "Error! No centroids file provided"-Category NotSpecified
   exit 1
 }
 ElseIf ( -not (Test-Path $centroids) )
 {
-  Write-Error -Message "Centroids file not found" -Category ObjectNotFound
+  Write-Error -Message "Error! Centroids file not found" -Category ObjectNotFound
   exit 1
 }
 
 
-$files = Get-ChildItem -Path $input_dir* -Include *.pkl.npy
+$files = get-ChildItem -Path $input_dir*
 Write-Output "Found "$files.Length" files to process"
 
 
