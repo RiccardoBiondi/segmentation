@@ -9,13 +9,22 @@ markdown_extensions:
   - fenced_code
   - mdx_math
 
+
+plugins:
+  - jekyll-relative-links
+relative_links:
+  enabled: true
+  collections: true
+
 include:
   - index.md
-  - method.md
-  - pipeline/lung_extraction.md
-  - pipeline/slice_and_ROI.md
-  - pipeline/clustering.md
-  - pipeline/train.md
-  - pipeline/labeling.md
-  - segmentation/method.md
-  - segmentation/utils.md
+  - docs/pipeline/lung_extraction.md
+  - docs/pipeline/slice_and_ROI.md
+  - docs/pipeline/clustering.md
+  - docs/pipeline/train.md
+  - docs/pipeline/labeling.md
+  - docs/segmentation/method.md
+  - docs/segmentation/utils.md
+
+
+theme:              jekyll-theme-slate

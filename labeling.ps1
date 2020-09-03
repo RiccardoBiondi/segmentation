@@ -54,7 +54,7 @@ For ($i = 0; $i -lt $files.Length; $i++)
 
 
 
-  python -m pipeline.labeling --input $files[$i] --output $lung_name --centroids $centroids
+  python -m CTLungSeg.labeling --input $files[$i] --output $lung_name --centroids $centroids
   If ( $? )
   {
     Write-Output  '[done]'

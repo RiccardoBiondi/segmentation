@@ -53,7 +53,7 @@ for file in $input_files; do
   printf "* Processing $file ...       "
 
   f="${file%%.*}"
-  python3 -m pipeline.lung_extraction --input="$input_dir$file" --lung="$output_dir$f" $optional1 $optional2
+  python3 -m CTLungSeg.lung_extraction --input="$input_dir$file" --lung="$output_dir$f" $optional1 $optional2
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

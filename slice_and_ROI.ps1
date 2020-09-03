@@ -40,7 +40,7 @@ For ($i = 0; $i -lt $files.Length; $i++)
   $BaseName = $BaseName -replace "\..+"
   $lung_name = $output_dir + $BaseName
 
-  python -m pipeline.slice_and_ROI --input $files[$i] --output $lung_name $other
+  python -m CTLungSeg.slice_and_ROI --input $files[$i] --output $lung_name $other
   If ( $? )
   {
     Write-Output   "[done]"

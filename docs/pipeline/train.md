@@ -7,8 +7,8 @@ This algorithm will divide all the sample in several subsamples and compute the 
 
 First of all you have to organize all the training files into the same folder in *.pkl.npy* and use the powershell or the bash to run the script and provide the required arguments:
 
-```
-python -m pipeline.train --input='path/to/input/folder' --output='path/to/output/folder/output_name'
+```bash
+python -m CTLungSeg.train. --input='path/to/inputfolder' --output='path/to/output/folder/output_name'
 ```
 
 And this will use all the image stored in the input folder to compute the  centroid and save them into output folder with output_name as *.pkl.npy*. The number of clusters is 4 as default and the number of subsamples is 100 as default.
@@ -20,6 +20,7 @@ To control these parameters you can provide the optional arguments:
 * --intermediate: bool, if true allows to save the centroid of the subsamples
 
 You can also call this script by using the implemented powershell sctipt by providing as first argument the path t the inpt folder and as second argument the path to output file. the other arguments will be the optional ones:
-```
-C:\User\userName\your\working\directory\segmentation> & "./train.ps1" path/to/input/folder/ path/to/output/folder/output_name  --k=5
+
+```powershell
+> ./train.ps1 path/to/input/folder/ path/to/output/folder/output_name  --k=5
 ```

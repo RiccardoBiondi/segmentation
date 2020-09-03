@@ -53,10 +53,8 @@ title="body_mask slice"  />
 
 To use this script call it from powershell or bash and provide the required arguments.
 
-```
-python -m pipeline.lungselection --input='path/to/image/to/segment/filename.pkl.npy'
---centroids='path/to/centroids/file/centroids.pkl.npy'
---output='path/to/output/folder/outputname'
+```bash
+python -m CTLungSeg.labeling --input='path/to/image/to/segment/filename.pkl.npy' --centroids='path/to/centroids/file/centroids.pkl.npy' --output='path/to/output/folder/outputname'
 ```
  All the input files must be in *.pkl.npy* format, such as the output one.
 
@@ -67,6 +65,6 @@ Required parameters:
 * *--output* :str, path to the output folder, here we be saved the lung mask in *pkl.npy* format
 
 You can also run this script on multiple samples by calling it from the provided powershell script. In this case you have to create two folders: the first one(input) will contains the *.pkl.npy* files to label(the ones with the extracted lung), the second one the results. Now you simply call the script from powershell by providing as the first parameter the path to the input older, as second parameter the path to output folder and as third parameter the path to the centroids file:
-```
-C:\User\userName\your\working\directory\segmentation> & "./labeling.ps1" path/to/input/folder/ path/to/output/folder/ path/to/centroids/file/centroids.pkl.npy
+```powershell
+> ./labeling.ps1 path/to/input/folder/ path/to/output/folder/ path/to/centroids/file/centroids.pkl.npy
 ```

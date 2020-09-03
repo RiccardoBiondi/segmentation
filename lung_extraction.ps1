@@ -43,7 +43,7 @@ For ($i = 0; $i -lt $files.Length; $i++)
   $BaseName = $BaseName -replace "\..+"
   $lung_name = $output_dir + $BaseName
 
-  python -m pipeline.lung_extraction --input $files[$i] --lung $lung_name $optional_1 $optional_2
+  python -m CTLungSeg.lung_extraction --input $files[$i] --lung $lung_name $optional_1 $optional_2
   If ( $? )
   {
     Write-Output  -InputObject "[done]"

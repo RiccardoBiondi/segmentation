@@ -2,18 +2,18 @@ import pytest
 import hypothesis.strategies as st
 from hypothesis import given, settings, example
 
-from segmentation.utils import load_pickle
-from segmentation.utils import save_pickle
-from segmentation.utils import load_npz
-from segmentation.utils import save_npz
-from segmentation.utils import load_dicom
-from segmentation.utils import load_image
-from segmentation.utils import rescale
-from segmentation.utils import preprocess
-from segmentation.utils import subsamples
-from segmentation.utils import imfill
-from segmentation.utils import to_dataframe
-from segmentation.utils import imcrop
+from CTLungSeg.utils import load_pickle
+from CTLungSeg.utils import save_pickle
+from CTLungSeg.utils import load_npz
+from CTLungSeg.utils import save_npz
+from CTLungSeg.utils import load_dicom
+from CTLungSeg.utils import load_image
+from CTLungSeg.utils import rescale
+from CTLungSeg.utils import preprocess
+from CTLungSeg.utils import subsamples
+from CTLungSeg.utils import imfill
+from CTLungSeg.utils import to_dataframe
+from CTLungSeg.utils import imcrop
 
 import cv2
 import numpy as np

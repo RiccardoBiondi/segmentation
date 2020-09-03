@@ -50,7 +50,7 @@ for file in $input_files; do
   printf "* Processing $file ...       "
 
   f="${file%%.*}"
-  python3 -m pipeline.slice_and_ROI --input="$input_dir$file" --output="$output_dir$f" $optional
+  python3 -m CTLungSeg.slice_and_ROI --input="$input_dir$file" --output="$output_dir$f" $optional
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

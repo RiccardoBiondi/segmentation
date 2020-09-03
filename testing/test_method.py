@@ -2,14 +2,14 @@ import pytest
 import hypothesis.strategies as st
 from hypothesis import given, settings
 
-from segmentation.method import erode
-from segmentation.method import dilate
-from segmentation.method import connectedComponentsWithStats
-from segmentation.method import bitwise_not
-from segmentation.method import imfill
-from segmentation.method import medianBlur
-from segmentation.method import gaussianBlur
-from segmentation.method import otsu
+from CTLungSeg.method import erode
+from CTLungSeg.method import dilate
+from CTLungSeg.method import connectedComponentsWithStats
+from CTLungSeg.method import bitwise_not
+from CTLungSeg.method import imfill
+from CTLungSeg.method import medianBlur
+from CTLungSeg.method import gaussianBlur
+from CTLungSeg.method import otsu
 
 import cv2
 import numpy as np

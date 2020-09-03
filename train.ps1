@@ -32,4 +32,4 @@ ElseIf ( -not (Test-Path -Path $output_dir -PathType Container) )
   exit 1
 }
 
-python -m pipeline.train --input $input_dir --output $output_dir $optional_1 $optional_2 $optional_3 $optional_4
+python -m CTLungSeg.train --input $input_dir --output $output_dir $optional_1 $optional_2 $optional_3 $optional_4

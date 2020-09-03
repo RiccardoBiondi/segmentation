@@ -1,7 +1,6 @@
 # slice_and_ROI
 This script allow to find the rectangular region with the smallest area which still contains the lung. It requires as input the path to the lung mask and save as output an np.ndarray which contains the top left and bottom right corner of the ROI. To find the ROI this script will use the stats provided by
-`cv2.connectedComponentsWithStats` function. Refers to `opencv-python` for more details.
-
+[cv2.connectedComponentsWithStats](https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html).
 
 
 
@@ -57,8 +56,8 @@ Thus script will return the reduced stack of cropped images
 
 To use this script call it from powershell or bash and provide the required arguments.
 
-```
-python -m pipeline.slice_and_ROI --input='path/to/input/folder/filename.pkl.npy' --output='path/to/output/folder/output_name'
+```bash
+python -m CTLungSeg.slice_and_ROI --input='path/to/input/folder/filename.pkl.npy' --output='path/to/output/folder/output_name'
 ```
 
 Required arguments:
@@ -72,11 +71,13 @@ Optional arguments:
 
 
 You can also run this script on multiple samples by calling it from the provided powershell script. In this case you have to create two folders: the first one(input) will contains the *.pkl.npy* files to process, the second one the results. Now you simply call the script from powershell by providing as the first parameter the path to the input older and as second the path to output folder:
-```
-C:\User\userName\your\working\directory\segmentation> & "./slice_and_ROI.ps1" path/to/input/folder/ path/to/output/folder/
+
+```powershell
+> ./slice_and_ROI.ps1 path/to/input/folder/ path/to/output/folder/
 ```
 
 If you want to provide the optional arguments you have to write them as third argument as follows:
-```
-C:\User\userName\your\working\directory\segmentation> & "./slice_and_ROI.ps1" path/to/input/folder/ path/to/output/folder/  --area=300
+
+```powershell
+> ./slice_and_ROI.ps1 path/to/input/folder/ path/to/output/folder/  --area=300
 ```

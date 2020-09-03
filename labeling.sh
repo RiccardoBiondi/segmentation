@@ -67,7 +67,7 @@ for file in $input_files; do
 
   f="${file%%.*}"
 
-  python3 -m pipeline.labeling --input="$input_dir$file" --output="$output_dir$f" --centroids="$centroids"
+  python3 -m CTLungSeg.labeling --input="$input_dir$file" --output="$output_dir$f" --centroids="$centroids"
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

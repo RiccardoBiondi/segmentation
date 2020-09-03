@@ -36,4 +36,4 @@ fi
 
 # apply the pipeline on the input files
 
-python3 -m pipeline.train --input="$input_dir" --output="$output_file" $optional1 $optional2 $optional3 $optional4
+python3 -m CTLungSeg.train --input="$input_dir" --output="$output_file" $optional1 $optional2 $optional3 $optional4
