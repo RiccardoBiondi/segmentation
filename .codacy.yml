@@ -2,7 +2,8 @@ exclude_paths:
   - '.github/**'
   - '**.md'
   - 'docs/**'
-  - segmentation/__init__.py
-  - segmentation/__version__.py
+  - CTLungSeg/__init__.py
+  - CTLungSeg/__version__.py
   - testing/**
   - appveyor.yml
+  - .travis.ylm

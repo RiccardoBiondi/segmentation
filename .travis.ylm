@@ -1,0 +1,55 @@
+language: python
+
+matrix:
+  include:
+
+    - os: linux
+      python: 3.5
+      name: ubuntu 14.04 - python@3.5
+      sudo: true
+      env:
+        - MATRIX_EVAL=""
+
+    - os: linux
+      python: 3.6
+      name: ubuntu 14.04 - python@3.6
+      sudo: true
+      env:
+        - MATRIX_EVAL=""
+
+    - os: linux
+      python: 3.7
+      name: ubuntu 14.04 - python@3.7
+      dist: xenial
+      sudo: true
+      env:
+        - MATRIX_EVAL=""
+
+    - os: linux
+      python: 3.8
+      name: ubuntu 14.04 - python@3.8
+      dist: xenial
+      sudo: true
+      env:
+        - MATRIX_EVAL=""
+
+
+before_install:
+  - travis_retry eval "${MATRIX_EVAL}"
+  #- pip install -r requirements.txt
+  - python -m pip install --upgrade pip
+  - python -m pip --version
+
+  # testing libraries
+  - python -m pip install hypothesis
+  - python -m pip install codecov
+  - python -m pip install pytest-cov
+
+install:
+  - python setup.py install
+
+script:
+  - travis_wait 45 python -m pytest --cov=segmentation --cov-config=.coveragerc
+
+after_succes:
+  - codecov
