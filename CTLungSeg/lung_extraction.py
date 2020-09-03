@@ -1,12 +1,10 @@
-#!/usr/bin/env python 
-
-import numpy as np
 import argparse
+import numpy as np
 from CTLungSeg.utils import load_image, save_pickle
 from CTLungSeg.utils import preprocess, rescale
 from CTLungSeg.method import erode, dilate
 from CTLungSeg.method import imfill, remove_spots
-from CTLungSeg.method import medianBlur, gaussianBlur,otsu
+from CTLungSeg.method import gaussianBlur,otsu
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
@@ -35,7 +33,6 @@ def main():
     DICOM = load_image(args.input)
     DICOM = preprocess(DICOM)
     imgs = DICOM.copy()
-    #DICOM = medianBlur(DICOM, 5)
     DICOM = gaussianBlur(DICOM, (5,5))
 
     imgs = otsu(imgs)

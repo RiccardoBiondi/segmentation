@@ -31,7 +31,7 @@ def main():
     img = lung.copy()
     lung = np.where(lung == 0, 0, 1)
     #find connected components
-    _, labels, stats, _ = connectedComponentsWithStats(lung.astype(np.uint8))
+    _, _, stats, _ = connectedComponentsWithStats(lung.astype(np.uint8))
     #manage stats into dataframe
     columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     stats = to_dataframe(stats, columns)
