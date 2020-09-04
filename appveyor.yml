@@ -40,5 +40,5 @@ install:
   - "%PYTHON%\\python.exe -m pip install pytest"
 
 test_script:
-  -  %PYTHON%\\Scripts\\pytest.exe
+  -  "%PYTHON%\\Scripts\\pytest.exe"
   - exit 0
