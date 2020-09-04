@@ -1,0 +1,5 @@
+[run]
+branch = True
+omit =
+    */CTLungSeg/__init__.py
+    */CTLungSeg/__version__.py
