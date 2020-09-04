@@ -57,7 +57,7 @@ def main():
         for x in el :
             sample = np.concatenate(x.reshape(-1, 1))
         sample = sample.astype(np.float32)
-        _, labels, centroids = cv2.kmeans(sample, args.k, None, criteria, 10,init[args.init])
+        _, _, centroids = cv2.kmeans(sample, args.k, None, criteria, 10,init[args.init])
         centr.append(np.array(centroids))
         if args.intermediate :#non molto performante
             save_pickle(args.out + '('+str(i)+')', centroids)
@@ -67,7 +67,7 @@ def main():
     print("\nStarting second clustering", flush=True)
 
     centr = np.array(centr).reshape(-1,)
-    ret, labels, centroids = cv2.kmeans(centr, args.k, None, criteria, 10, init[args.init])
+    _, _, centroids = cv2.kmeans(centr, args.k, None, criteria, 10, init[args.init])
     save_pickle(args.out, centroids)
 
     print('Complete', flush =True)

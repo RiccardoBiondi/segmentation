@@ -15,8 +15,7 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 def load_pickle(filename):
-    '''
-    Load the pickle image file
+    '''Load the pickle image file
 
     Parameters
     ----------
@@ -34,8 +33,7 @@ def load_pickle(filename):
 
 
 def load_npz(filename):
-    '''
-    Load the .npz image file
+    '''Load the .npz image file
 
     Parameters
     ----------
@@ -55,8 +53,7 @@ def load_npz(filename):
 
 
 def load_dicom(filedir):
-    """
-    Load image and store it into a 3D numpy array
+    """Load image and store it into a 3D numpy array
 
     Parameter
     ---------
@@ -80,8 +77,7 @@ def load_nifti(filename):
 
 
 def load_image(filename):
-    '''
-    Load a stack of images and return a 3D numpy array. The input file format can by .pkl.npy, .npz or a folder that contains .dcm files.
+    '''Load a stack of images and return a 3D numpy array. The input file format can by .pkl.npy, .npz or a folder that contains .dcm files.
 
     Parameter
     ---------
@@ -104,8 +100,7 @@ def load_image(filename):
 
 
 def save_pickle(filename, data):
-    '''
-    Save the image stack as pickle
+    '''Save the image stack as pickle
 
     Parameters
     ----------
@@ -124,8 +119,7 @@ def save_pickle(filename, data):
 
 
 def save_npz(filename, data):
-    '''
-    Save the image stack as uncompressed npz file
+    '''Save the image stack as uncompressed npz file
 
     Parameters
     ----------
@@ -143,8 +137,7 @@ def save_npz(filename, data):
 
 
 def rescale(img, Max, Min):
-    '''
-    Rescale the image accodring to max, min input
+    '''Rescale the image accodring to max, min input
 
     Parameters
     ----------
@@ -165,8 +158,7 @@ def rescale(img, Max, Min):
 
 
 def preprocess(img):
-    '''
-    Set to zero all the negative pixel values, rescale the image and convert it a 8bit GL image.
+    '''Set to zero all the negative pixel values, rescale the image and convert it a 8bit GL image.
 
     Parameter
     ---------
@@ -185,8 +177,7 @@ def preprocess(img):
 
 
 def subsamples(data, n_sub):
-    '''
-    Randomly divide the sample into n_sub subsamples
+    '''Randomly divide the sample into n_sub subsamples
 
     Parameters
     ----------
@@ -209,8 +200,7 @@ def subsamples(data, n_sub):
 
 
 def imfill(img):
-    '''
-    Internal function. Fill the holes of a single image.
+    '''Internal function. Fill the holes of a single image.
 
     Parameters
     ----------
@@ -240,8 +230,7 @@ def imfill(img):
 
 
 def to_dataframe (arr, columns) :
-    '''
-    Convert 3D numpy array into a list of pandas dataframes
+    '''Convert 3D numpy array into a list of pandas dataframes
 
     Parameter
     ---------
@@ -259,8 +248,7 @@ def to_dataframe (arr, columns) :
 
 
 def imcrop(img, ROI) :
-    '''
-    Crop the image according to ROI
+    '''Crop the image according to ROI
 
     Parameters
     ----------

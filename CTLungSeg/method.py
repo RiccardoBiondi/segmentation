@@ -9,8 +9,7 @@ __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 def erode(img, kernel, iterations = 1):
-    '''
-    Apply the erosion on the full image stack
+    '''Apply the erosion on the full image stack
 
     Parameters
     ----------
@@ -34,8 +33,7 @@ def erode(img, kernel, iterations = 1):
 
 
 def dilate(img, kernel, iterations = 1 ):
-    '''
-    Apply dilation to a whole stack of images
+    '''Apply dilation to a whole stack of images
 
     Parameters
     ----------
@@ -59,8 +57,7 @@ def dilate(img, kernel, iterations = 1 ):
 
 
 def connectedComponentsWithStats(img):
-    '''
-    computes the connected components labeled image of boolean image and also
+    '''computes the connected components labeled image of boolean image and also
     produces a statistics output for each label
 
     Parameters
@@ -87,8 +84,7 @@ def connectedComponentsWithStats(img):
 
 
 def bitwise_not(img):
-    '''
-    Calculates per-element bit-wise inversion of the input array
+    '''Calculates per-element bit-wise inversion of the input array
 
     Parameters
     ----------
@@ -108,8 +104,7 @@ def bitwise_not(img):
 
 
 def imfill(img):
-    '''
-    Fill the holes of the input image or stack of images
+    '''Fill the holes of the input image or stack of images
 
     Parameter
     ---------
@@ -128,8 +123,7 @@ def imfill(img):
 
 
 def medianBlur(img, ksize):
-    '''
-    Apply median blurring filter on an image or stack of images
+    '''Apply median blurring filter on an image or stack of images
     Parameters
     ----------
     img: array-like
@@ -148,8 +142,7 @@ def medianBlur(img, ksize):
 
 
 def gaussianBlur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
-    '''
-    Apply a gaussian blurring filter on an image or stack of images
+    '''Apply a gaussian blurring filter on an image or stack of images
     Parameters
     ----------
     img: array-like
@@ -176,8 +169,7 @@ def gaussianBlur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
 
 
 def otsu(img):
-    '''
-    Compute the best threshld value for each slice of the input image stack by using otsu algorithm
+    '''Compute the best threshld value for each slice of the input image stack by using otsu algorithm
 
     Parameters
     ----------
@@ -203,8 +195,7 @@ def otsu(img):
 
 
 def find_ROI(stats) :
-    '''
-    Found the upper and lower corner of the rectangular ROI according to the connected region stats
+    '''Found the upper and lower corner of the rectangular ROI according to the connected region stats
 
     Parameter
     ---------
@@ -223,8 +214,7 @@ def find_ROI(stats) :
 
 
 def remove_spots(img, area):
-    '''
-    Set to zero the GL of all the connected region with area lesser than area
+    '''Set to zero the GL of all the connected region with area lesser than area
 
     Parameters
     ----------
