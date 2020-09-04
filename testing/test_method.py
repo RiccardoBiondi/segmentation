@@ -1,6 +1,6 @@
 import pytest
 import hypothesis.strategies as st
-from hypothesis import given, settings
+from hypothesis import given, settings, example
 
 from CTLungSeg.method import erode
 from CTLungSeg.method import dilate
@@ -75,11 +75,28 @@ def test_bitwise_not_stack(input, expected_output, n_img, n_pix):
     assert (inverted == 255 * expected_output((n_img, n_pix, n_pix))).all()
 
 
+
+@given(image, st.integers(300, 512))
+@settings(max_examples = 20, deadline = None)
+def test_medianBlur (img, n_pix) :
+    input = 255 * img(n_pix, n_pix)
+    blurred = medianBlur(input.astype(np.float32), 5)
+    assert blurred.shape == input.shape
+
+
 @given(image, st.integers(2, 30), st.integers(300, 512))
 @settings(max_examples = 20, deadline = None)
 def test_medianBlur_stack (img, n_img, n_pix) :
     input = 255 * img(n_img, n_pix, n_pix)
     blurred = medianBlur(input.astype(np.float32), 5)
+    assert blurred.shape == input.shape
+
+
+@given(image, st.integers(300, 512))
+@settings(max_examples = 20, deadline = None)
+def test_gaussianBlur_stack (img, n_pix) :
+    input = 255 * img(n_pix, n_pix)
+    blurred = gaussianBlur(input.astype(np.float32), ksize=(5, 5))
     assert blurred.shape == input.shape
 
 
@@ -92,9 +109,20 @@ def test_gaussianBlur_stack (img, n_img, n_pix) :
     assert blurred.shape == input.shape
 
 
+
+
+@given(white_image)
+@settings(max_examples = 20, deadline = None)
+def test_imfill(to_compare) :
+    image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
+    compare = 255 * to_compare(image.shape)
+    filled = imfill(image)
+    assert (filled == compare).all()
+
+
 @given(white_image, st.integers(2, 300))
 @settings(max_examples = 20, deadline = None)
-def test_imfill(to_compare, n_img) :
+def test_imfill_stack(to_compare, n_img) :
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
     to_fill = np.array([image for i in range(n_img)])
     compare = 255 * to_compare(image.shape)
@@ -102,9 +130,21 @@ def test_imfill(to_compare, n_img) :
     assert  ((im == compare).all() for im in filled)
 
 
+
+def test_connectedComponentsWithStats() :
+    image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
+    image = bitwise_not(image)
+    n_regions = 4
+    retval, labels, stats, centroids = connectedComponentsWithStats(image)
+    print(np.unique(labels))
+    assert len(np.unique(labels)) == n_regions
+    assert len(np.unique(centroids)) == n_regions
+
+
+
 @given(st.integers(2,300))
 @settings(max_examples = 20, deadline = None )
-def test_connectedComponentsWithStats(n_img) :
+def test_connectedComponentsWithStats_stack(n_img) :
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
     image = bitwise_not(image)
     input =np.array([image for i in range(n_img)])
@@ -114,11 +154,20 @@ def test_connectedComponentsWithStats(n_img) :
     assert len(np.unique(labels)) == n_regions
     assert len(np.unique(centroids)) == n_regions
 
+#test otsu single image
+@given(image)
+@settings(max_examples = 20, deadline = None)
+def test_otsu(data):
+    input = (255 * data(512, 512)).astype(np.uint8)
+    out = otsu(input)
+    assert np.all(np.unique(out) == np.array([0, 1]))
+
+
 
 #testing otsu threshold
-@given(image, st.integers(300, 512))
+@given(image, st.integers(2, 300))
 @settings(max_examples = 20, deadline = None)
-def test_otsu(data, n_imgs):
+def test_otsu_stack(data, n_imgs):
     input = (255 * data(n_imgs, 512, 512)).astype(np.uint8)
     out = otsu(input)
     assert np.all(np.unique(out) == np.array([0, 1]))
