@@ -9,7 +9,7 @@ from CTLungSeg.segmentation import select_greater_connected_regions
 
 import cv2
 import numpy as np
-from CTLungSeg.method import connected_components_wStats, bitwise_not
+from CTLungSeg.method import connected_components_wStats
 from numpy import ones, zeros
 from numpy.random import rand
 
@@ -30,7 +30,7 @@ kernel = st.just(ones)
 @settings(max_examples = 20, deadline = None)
 def test_select_greater_connected_regions(n_imgs, n_reg):
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
-    image = bitwise_not(image)
+    image = np.logical_not(image)
     image =np.array([image for i in range(n_imgs)])
     res = select_greater_connected_regions(image, n_reg)
     _, labeled, _, _ = connected_components_wStats(res)
