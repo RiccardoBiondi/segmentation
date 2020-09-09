@@ -3,9 +3,11 @@
 
 import cv2
 import argparse
+import numpy as np
 from sklearn.cluster import KMeans
-from CTLungSeg.utils import load_image, save_pickle
+from CTLungSeg.utils import load_image, save_pickle, preprocess
 from CTLungSeg.method import median_blur
+from CTLungSeg.segmentation import opening
 
 __author__ = ['Riccado Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@tudio.unibo.it', 'nico.curti2@unibo.it']
@@ -36,14 +38,14 @@ def main():
     labels = median_blur(labels, 5)
     #create mask from labels
     labels[labels == 2] = 0
-    lebels[labels == 3] = 1
-    lebels = opening(labels, np.ones((5,5), np.uint8))
+    labels[labels == 3] = 1
+    labels = opening(labels, np.ones((5,5), np.uint8))
     #
     images = labels * images
     #variabili del secondo clustering
     images = preprocess(images)
     #applica un filtro mediano
-    images = medianBlur(images, 9)
+    images = median_blur(images, 9)
     images = images.astype(np.float32)
     #
     criteria = (cv2.TERM_CRITERIA_EPS +cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
