@@ -118,7 +118,6 @@ def imfill(img):
 
     if len(img.shape) == 2: #one image case
         return utils.imfill(img.astype(np.uint8))
-
     return np.asarray(list(map(utils.imfill,img.astype(np.uint8))))
 
 
@@ -183,11 +182,8 @@ def otsu_threshold(img):
         _, out = cv2.threshold(img, 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         return out
     else:
-        out = []
-        for im in img :
-            _, thr = cv2.threshold(im.astype(np.uint8), 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-            out.append(np.array(thr))
-        return np.array(out)
+        out = list(zip(*list(map(partial(cv2.threshold, thresh=0, maxval=1, type=cv2.THRESH_BINARY+cv2.THRESH_OTSU), img))))
+        return np.asarray(out[1])
 
 
 def gl2bit(img, width) :
@@ -223,7 +219,7 @@ def get_bit(img, bit_number) :
 
     Return
     ------
-    
+
     '''
     img_vector = img.reshape(-1, )
     significance = 2**(bit_number - 1)
