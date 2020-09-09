@@ -41,13 +41,10 @@ def main():
     #Remove all the regions that do not contains the lung
     ROI = ROI[AREAS > args.area]
     lung = lung[AREAS > args.area]
-    print('Selected ', img.shape[0], ' slices of ', AREAS.shape[0], flush = True)
+    print('Selected ', lung.shape[0], ' slices of ', AREAS.shape[0], flush = True)
     #crop the resulting images and save
-    res = np.array([imcrop(im.astype(np.float32), r) for (im, r) in zip(img, ROI)], dtype=np.ndarray)
-    
+    res = np.array([imcrop(im.astype(np.float32), r) for (im, r) in zip(lung, ROI)], dtype=np.ndarray)
     save_pickle(args.out, res)
-
-
 
 if __name__ == '__main__' :
     main()
