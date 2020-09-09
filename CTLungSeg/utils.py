@@ -18,7 +18,7 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 def load_pickle(filename):
-    '''Load the pickle image file
+    """Load the pickle image file
 
     Parameters
     ----------
@@ -29,14 +29,14 @@ def load_pickle(filename):
     -------
     data: array_like
         array loaded from a given file
-    '''
+    """
     with open(filename, 'rb') as fp:
         data = np.load(fp, allow_pickle = True)
     return data
 
 
 def load_npz(filename):
-    '''Load the .npz image file
+    """Load the .npz image file
 
     Parameters
     ----------
@@ -47,7 +47,7 @@ def load_npz(filename):
     -------
     data: array_like
         array loaded from a given file
-    '''
+    """
     with open(filename, 'rb') as fp:
         data_npz = np.load(fp, allow_pickle = True)
         data = [data_npz[key] for key in data_npz.keys()]
@@ -80,7 +80,7 @@ def load_nifti(filename):
 
 
 def load_image(filename):
-    '''Load a stack of images and return a 3D numpy array. The input file format can by .pkl.npy, .npz or a folder that contains .dcm files.
+    """Load a stack of images and return a 3D numpy array. The input file format can by .pkl.npy, .npz or a folder that contains .dcm files.
 
     Parameter
     ---------
@@ -90,7 +90,7 @@ def load_image(filename):
     ------
     imgs: array-like
         image tensor
-    '''
+    """
     if os.path.exists(filename) :
         if os.path.isfile(filename) :
             imgs = load_pickle(filename)
@@ -103,7 +103,7 @@ def load_image(filename):
 
 
 def save_pickle(filename, data):
-    '''Save the image stack as pickle
+    """Save the image stack as pickle
 
     Parameters
     ----------
@@ -115,14 +115,14 @@ def save_pickle(filename, data):
     Return
     ------
     None
-    '''
+    """
     with open('{}.pkl.npy'.format(filename), 'wb') as fp:
         pickle.dump(data, fp)
 
 
 
 def save_npz(filename, data):
-    '''Save the image stack as uncompressed npz file
+    """Save the image stack as uncompressed npz file
 
     Parameters
     ----------
@@ -134,13 +134,13 @@ def save_npz(filename, data):
     Return
     ------
     None
-    '''
+    """
     with open('{}.npz'.format(filename), 'wb') as fp :
         np.savez_compressed(file=fp, a=data)
 
 
 def rescale(img, Max, Min):
-    '''Rescale the image accodring to max, min input
+    """Rescale the image accodring to max, min input
 
     Parameters
     ----------
@@ -154,14 +154,14 @@ def rescale(img, Max, Min):
     ------
     rescaled: array-like
         Image rescaled according to min, max
-    '''
+    """
     if min == max :
         raise ZeroDivisionError
     return (img.astype(np.float32) - Min) * (1. / (Max - Min))
 
 
 def preprocess(img):
-    '''Set to zero all the negative pixel values, rescale the image and convert it a 8bit GL image.
+    """Set to zero all the negative pixel values, rescale the image and convert it a 8bit GL image.
 
     Parameter
     ---------
@@ -172,7 +172,7 @@ def preprocess(img):
     ------
     out: array like
         rescaled image
-    '''
+    """
     out = img.copy()
     out[out < 0] = 0
     out = 255 * rescale(out, np.amax(out), 0)#???
@@ -180,7 +180,7 @@ def preprocess(img):
 
 
 def subsamples(data, n_sub):
-    '''Randomly divide the sample into n_sub subsamples
+    """Randomly divide the sample into n_sub subsamples
 
     Parameters
     ----------
@@ -193,7 +193,7 @@ def subsamples(data, n_sub):
     -------
     out: list of array-like
         list of random subsamples
-    '''
+    """
     #shuffle the sample list
     img = data.copy()
     np.random.shuffle(img)
@@ -203,7 +203,7 @@ def subsamples(data, n_sub):
 
 
 def imfill(img):
-    '''Internal function. Fill the holes of a single image.
+    """Internal function. Fill the holes of a single image.
 
     Parameters
     ----------
@@ -214,7 +214,7 @@ def imfill(img):
     ------
     filled : array-like
         filled image
-    '''
+    """
     img = np.pad(img.astype('uint8'), pad_width=((1, 1), (1, 1)),
                       mode='constant', constant_values=(0., 0.))
     im_floodfill = img.copy()
@@ -228,7 +228,7 @@ def imfill(img):
 
 
 def to_dataframe (arr, columns) :
-    '''Convert 3D numpy array into a list of pandas dataframes
+    """Convert 3D numpy array into a list of pandas dataframes
 
     Parameter
     ---------
@@ -240,13 +240,13 @@ def to_dataframe (arr, columns) :
     ------
     df: list of dataframe
         list of dataframe made from arr
-    '''
+    """
     return list(map(partial(pd.DataFrame, columns=columns), arr))
 
 
 
 def imcrop(img, ROI) :
-    '''Crop the image according to ROI
+    """Crop the image according to ROI
 
     Parameters
     ----------
@@ -259,5 +259,5 @@ def imcrop(img, ROI) :
     ------
     cropped : array-like
         cropped image
-    '''
+    """
     return img[ROI[1] : ROI[3], ROI[0] : ROI[2]]

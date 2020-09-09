@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import cv2
 import numpy as np
 
 import CTLungSeg.utils as utils
@@ -12,7 +11,7 @@ __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 def opening(img, kernel):
-    '''Perform an erosion followed by a dilation
+    """Perform an erosion followed by a dilation
 
     Parameters
     ----------
@@ -20,7 +19,7 @@ def opening(img, kernel):
         image tensor
     kernel : array-like
         kernel used for the morphological operations
-    '''
+    """
     opened = img.copy()
     opened = erode(opened, kernel=kernel)
     opened = dilate(opened, kernel=kernel)
@@ -28,7 +27,7 @@ def opening(img, kernel):
 
 
 def closing(img, kernel):
-    '''Perform a dilation followed by an erosion
+    """Perform a dilation followed by an erosion
 
     Parameters
     ----------
@@ -36,7 +35,7 @@ def closing(img, kernel):
         image tensor
     kernel : array-like
         kernel used for the morphological operations
-    '''
+    """
     closed = img.copy()
     closed = dilate(closed, kernel=kernel)
     closed = erode(closed, kernel=kernel)
@@ -44,7 +43,7 @@ def closing(img, kernel):
 
 
 def remove_spots(img, area):
-    '''Set to zero the GL of all the connected region with area lesser than area
+    """Set to zero the GL of all the connected region with area lesser than area
 
     Parameters
     ----------
@@ -57,7 +56,7 @@ def remove_spots(img, area):
     -------
     filled: array-like
         binary image with spot removed
-    '''
+    """
     columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
     _, lab, stats, _ = connected_components_wStats(img.astype(np.uint8))
 
@@ -70,7 +69,7 @@ def remove_spots(img, area):
 
 
 def select_greater_connected_regions(img, n_reg):
-    '''Select the n_reg grater connecter regions in each slice of the stack and remove the others. If the image contains less than n_reg regions, no region will be selected.
+    """Select the n_reg grater connecter regions in each slice of the stack and remove the others. If the image contains less than n_reg regions, no region will be selected.
 
     Parameters
     ----------
@@ -82,7 +81,7 @@ def select_greater_connected_regions(img, n_reg):
     ------
     dst : array-like
         binary image with only the n_reg connected regions
-    '''
+    """
     m = []
     _, labs , stats, _ = connected_components_wStats(img)
     stats = utils.to_dataframe(stats, ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA'])
@@ -102,7 +101,7 @@ def select_greater_connected_regions(img, n_reg):
 
 
 def reconstruct_gg_areas(mask):
-    '''This function interpolate each slice of the input mask to reconstruct the missing gg areas.
+    """This function interpolate each slice of the input mask to reconstruct the missing gg areas.
 
     Parameter
     ---------
@@ -112,7 +111,7 @@ def reconstruct_gg_areas(mask):
     ------
     reconstructed : array-like
         reconstructed lung mask
-    '''
+    """
     first  = mask.copy()
     second = mask.copy()
     reconstructed = mask.copy()
@@ -131,7 +130,7 @@ def reconstruct_gg_areas(mask):
 
 
 def find_ROI(stats) :
-    '''Found the upper and lower corner of the rectangular ROI according to the connected region stats
+    """Found the upper and lower corner of the rectangular ROI according to the connected region stats
 
     Parameter
     ---------
@@ -142,7 +141,7 @@ def find_ROI(stats) :
     ------
     corners: array-like
         array which contains the coordinates of the upper and lower corner of the ROI organized as [x_top, y_top, x_bottom, y_bottom]
-    '''
+    """
     stats = stats.drop([0], axis = 0)
     corner = np.array([stats.min(axis = 0)['LEFT'], stats.min(axis = 0)['TOP'], np.max(stats['LEFT'] + stats['WIDTH']), np.max(stats['TOP'] + stats['HEIGHT'])])
     return np.where(corner == np.nan, np.int32(0), np.int32(corner))
