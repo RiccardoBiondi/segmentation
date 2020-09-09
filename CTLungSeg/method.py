@@ -54,6 +54,7 @@ def dilate(img, kernel, iterations = 1 ):
         return cv2.dilate(img.astype('uint8'), kernel, iterations)
     return np.asarray(list(map(partial(cv2.dilate, kernel=kernel, iterations=iterations),img)))
 
+
 def connected_components_wStats(img):
     '''computes the connected components labeled image of boolean image and also
     produces a statistics output for each label
@@ -102,8 +103,6 @@ def bitwise_not(img):
     return dst(img.astype('uint8'))
 
 
-
-
 def imfill(img):
     '''Fill the holes of the input image or stack of images
 
@@ -120,7 +119,7 @@ def imfill(img):
     if len(img.shape) == 2: #one image case
         return utils.imfill(img.astype(np.uint8))
 
-    return np.asarray(list(map(utild.imfill,img.astype(np.uint8))))
+    return np.asarray(list(map(utils.imfill,img.astype(np.uint8))))
 
 
 def median_blur(img, ksize):
@@ -140,8 +139,11 @@ def median_blur(img, ksize):
         return cv2.medianBlur(img, ksize)
     return np.asarray(list(map(partial(cv2.medianBlur, ksize=ksize),img)))
 
-def gaussian_blur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
+
+def gaussian_blur(img, ksize, sigmaX=0,
+                    sigmaY=0,borderType=cv2.BORDER_DEFAULT):
     '''Apply a gaussian blurring filter on an image or stack of images
+
     Parameters
     ----------
     img: array-like
@@ -164,7 +166,6 @@ def gaussian_blur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
     return np.asarray(list(map(partial(cv2.GaussianBlur, ksize = ksize,sigmaX=sigmaX, sigmaY=sigmaY, borderType = borderType),img)))
 
 
-
 def otsu_threshold(img):
     '''Compute the best threshld value for each slice of the input image stack by using otsu algorithm
 
@@ -181,10 +182,50 @@ def otsu_threshold(img):
     if len(img.shape) == 2  :
         _, out = cv2.threshold(img, 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         return out
-
     else:
         out = []
         for im in img :
             _, thr = cv2.threshold(im.astype(np.uint8), 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
             out.append(np.array(thr))
         return np.array(out)
+
+
+def gl2bit(img, width) :
+    '''Convert the gray level of each voxel of a stack of images into its binary representation.
+
+    Parameters
+    ----------
+    img : array-like
+        image tensor to convert
+    width : int
+        number of bit to display
+
+    Return
+    ------
+    binarized:  array-like
+        image trensor in which each voxel GL value is replaced by a str that contains its binary representation.
+
+    '''
+    img_vector = img.reshape(-1, )
+    return (np.asarray(list(map(partial(np.binary_repr, width=width), img_vector)))).reshape(img.shape)
+
+
+def get_bit(img, bit_number) :
+    '''
+    Return an image in which each voxel GL corresponds only to the required bit with its level of significance.
+
+    Parameters
+    ----------
+    img : array_like :
+        image converted in bit from which extract the required bit
+    bit_number : int
+        number of bit to extract: 8 for MSB, 1 for LSB
+
+    Return
+    ------
+    
+    '''
+    img_vector = img.reshape(-1, )
+    significance = 2**(bit_number - 1)
+    pos = 8 - bit_number
+    return  (np.array([int(i[pos]) for i in img_vector], dtype = np.uint8) * significance).reshape(img.shape)

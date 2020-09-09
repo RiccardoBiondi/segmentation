@@ -27,19 +27,17 @@ def parse_args() :
 
 def main():
     args = parse_args()
-    #load data
     lung = load_image(args.filename)
     img = lung.copy()
     lung = np.where(lung == 0, 0, 1)
-    #find connected components
     _, _, stats, _ = connected_components_wStats(lung.astype(np.uint8))
     #manage stats into dataframe
     columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     stats = to_dataframe(stats, columns)
     print('Starting ROI selection', flush=True)
-    ROI = np.array([find_ROI(s) for s in stats], dtype = np.int16)
+    ROI = np.array([find_ROI(s) for s in stats], dtype = np.int32)
     #starting the slice selection
-    AREAS = np.array([np.absolute((R[1] - R[3]) * (R[0] - R[2])) for R in ROI], dtype = np.int32)
+    AREAS = np.array([np.absolute((R[1] - R[3]) * (R[0] - R[2])) for R in ROI], dtype = np.int64)
     #Remove all the regions that do not contains the lung
     ROI = ROI[AREAS > args.area]
     img = img[AREAS > args.area]

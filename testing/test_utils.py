@@ -26,13 +26,12 @@ __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
-
 image = st.just(rand)
 black_image = st.just(zeros)
 white_image = st.just(ones)
 kernel = st.just(ones)
 
-#testing save and load pickle functions
+
 @given(image, st.integers(1,200), st.integers(300,512))
 @settings(max_examples = 20, deadline = None)
 def test_save_and_load_pkl(data, n_img, n_pixels):
@@ -42,7 +41,6 @@ def test_save_and_load_pkl(data, n_img, n_pixels):
     assert (load == input).all()
 
 
-#testing save and load npz functions
 @given(image, st.integers(1,200), st.integers(300,512))
 @settings(max_examples = 20, deadline = None)
 def test_save_and_load_npz(data, n_img, n_pixels):
@@ -50,6 +48,7 @@ def test_save_and_load_npz(data, n_img, n_pixels):
     save_npz('./testing/images/test_file', input)
     load = load_npz('./testing/images/test_file.npz')
     assert (load == input).all()
+
 
 '''
 #testing load_dicom
@@ -59,19 +58,17 @@ def test_load_dicom():
     assert (ref == img).all()
 '''
 
+
 def test_load_img() :
     ref = load_pickle('./testing/images/test_dicom/DICOM_gt.pkl.npy')
     img_pkl = load_image('./testing/images/test_dicom/DICOM_gt.pkl.npy')
 #    img_dcm = load_image('./testing/images/test_dicom/DICOM/')
-
     assert (ref == img_pkl).all()
 #    assert (ref == img_dcm).all()
     with pytest.raises(FileNotFoundError) :
         assert load_image('./testing/images/DICOM_gt.pkl.npy')
 
 
-
-#testing rescale function
 @given(image, st.integers(1,200), st.integers(300,512))
 @settings(max_examples = 20, deadline = None)
 def test_rescale(data, n_img, n_pixels):
@@ -84,7 +81,6 @@ def test_rescale(data, n_img, n_pixels):
         assert rescale(input, 3, 3)
 
 
-#testing preprocess function
 @given(image, st.integers(1,200), st.integers(300,512))
 @settings(max_examples = 20, deadline = None)
 def test_preprocess(data, n_img, n_pixels):
@@ -94,7 +90,6 @@ def test_preprocess(data, n_img, n_pixels):
     assert np.amin(out) == 0
 
 
-#test subsamples
 @given(st.integers(200, 1000), st.integers(2, 200))
 @settings(max_examples  = 20, deadline = None)
 def test_subsamples(n_sample, n_subsamples):
@@ -105,7 +100,6 @@ def test_subsamples(n_sample, n_subsamples):
     assert sub.shape[0] == n_subsamples
 
 
-#testing imfill
 @given(white_image)
 @settings(max_examples = 20, deadline = None)
 def test_imfill(white_image):
@@ -115,7 +109,6 @@ def test_imfill(white_image):
     assert (compare.astype(np.uint8) == filled.astype(np.uint8)).all()
 
 
-#test to dataframe
 @given(st.integers(2,30), st.integers(2, 30))
 @settings(max_examples = 20, deadline = None)
 def test_to_dataframe(n_slices, cc):
@@ -126,7 +119,6 @@ def test_to_dataframe(n_slices, cc):
     assert len(df) == n_slices
 
 
-#test imcrop
 @given(st.integers(0, 200), st.integers(0, 200), st.integers(1, 200), st.integers(1, 200))
 @settings(max_examples = 20, deadline = None)
 @example(x = 0, y = 0, h = 0, w = 0)

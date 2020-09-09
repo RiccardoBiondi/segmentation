@@ -11,7 +11,31 @@ This module contains useful functions to segment stack of images
 
 ## opening
 
+Perform an erosion followed by a dilation
+
+**Parameters**
+
+  *img* : array-like, image tensor
+
+  *kernel* : array-like, kernel used for the morphological operations
+
+**Returns**
+
+  *opened* : array-like, opened image
+
 ## closing
+
+Perform a dilation followed by an erosion
+
+**Parameters**
+
+  *img* : array-like, image tensor
+
+  *kernel* : array-like, kernel used for the morphological operations
+
+**Returns**
+
+  *closed* : array-like, closed image.
 
 ## remove_spots
 
@@ -33,7 +57,6 @@ from CTLungSeg.utils import preprocess
 from CTLungSeg.method import otsu_threshold
 from CTLungSeg.segmentation import remove_spots
 
-
 #load the image
 img = load_image('./images/image.pkl.npy')
 img = preprocess(img)
@@ -47,7 +70,31 @@ save_pickle('./images/filled.pkl.npy')
 
 ## select_greater_connected_regions
 
+Select the n_reg greater connected regions in each slice of the stack and remove the others. If the image contains less than n_reg regions, no region will be selected.
+
+**Parameters**
+
+  *img* : array-like, Image tensor; better if the images are binary
+
+  *n_reg* : int, number of connected regions to select. The background it is not considered as connected regions
+
+**Return**
+
+  *dst* : array-like, binary image with only the n_reg connected regions
+
+**TODO** add usage example and images
+
 ## reconstruct_gg_areas
+
+This function interpolate each slice of the input mask to reconstruct the missing gg areas.
+
+**Parameter**
+
+  *mask* : array-like, lung mask to reconstruct
+
+**Return**
+
+  *reconstructed* : array-like, reconstructed lung mask
 
 ## find_ROI
 

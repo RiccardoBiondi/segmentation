@@ -215,18 +215,13 @@ def imfill(img):
     filled : array-like
         filled image
     '''
-    # Copy the thresholded image.
     img = np.pad(img.astype('uint8'), pad_width=((1, 1), (1, 1)),
                       mode='constant', constant_values=(0., 0.))
     im_floodfill = img.copy()
-    # Mask used to flood filling.
     h, w = im_floodfill.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
-    # Floodfill from point (0, 0)
     cv2.floodFill(im_floodfill, mask, (0,0), 255);
-    # Invert floodfilled image
     im_floodfill_inv = cv2.bitwise_not(im_floodfill)
-    # Combine the two images to get the foreground.
     filled = img | im_floodfill_inv
     return filled[1:-1, 1:-1]
 
@@ -246,8 +241,8 @@ def to_dataframe (arr, columns) :
     df: list of dataframe
         list of dataframe made from arr
     '''
-    df = list(map(partial(pd.DataFrame, columns=columns), arr))
-    return df
+    return list(map(partial(pd.DataFrame, columns=columns), arr))
+
 
 
 def imcrop(img, ROI) :

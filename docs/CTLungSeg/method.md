@@ -7,10 +7,11 @@ This module contains functions useful for the script execution. This functions e
 3. [connected_components_wStats](#connected_components_wStats)
 4. [bitwise_not](#bitwise_not)
 5. [imfill](#imfill)
-6. [median_blur](#medianBlur)
-7. [gaussian_blur](#gaussianBlur)
-8. [otsu_threshold](#otsu)
-9. [find_ROI](#corner_finder)
+6. [median_blur](#media_blur)
+7. [gaussian_blur](#gaussian_blur)
+8. [otsu_threshold](#otsu_threshold)
+9. [gl2bit](#gl2bit)
+10. [get_bit](#get_bit)
 
 ## erode
 
@@ -293,3 +294,31 @@ Compute the best threshold value for each slice of the input image stack by usin
   <img src="./images/thresholded.png" alt="thr"
   title="thr" width="250" height="250" />
   <caption>thresholded image</caption>
+
+## gl2bit
+
+Convert the grey level of each voxel of a stack of images into its binary representation.
+
+**Parameters**
+
+  *img* : array-like , image tensor to convert
+
+  *width* : int, number of bit to display
+
+**Return**
+
+  *binarized* : array-like, image tensor in which each voxel GL value is replaced by a str that contains its binary representation.
+
+## get_bit
+
+Return an image in which each voxel GL corresponds only to the required bit with its level of significance.
+
+**Parameters**
+
+  *img* : array_like, image converted in bit from which extract the required bit
+
+  *bit_number* : int, number of bit to extract: 8 for MSB, 1 for LSB
+
+**Return**
+
+  *out* array_like, bit_number image
