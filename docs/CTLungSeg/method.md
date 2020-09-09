@@ -5,13 +5,12 @@ This module contains functions useful for the script execution. This functions e
 1. [erode](#erode)
 2. [dilate](#dilate)
 3. [connected_components_wStats](#connected_components_wStats)
-4. [bitwise_not](#bitwise_not)
-5. [imfill](#imfill)
-6. [median_blur](#media_blur)
-7. [gaussian_blur](#gaussian_blur)
-8. [otsu_threshold](#otsu_threshold)
-9. [gl2bit](#gl2bit)
-10. [get_bit](#get_bit)
+4. [imfill](#imfill)
+5. [median_blur](#media_blur)
+6. [gaussian_blur](#gaussian_blur)
+7. [otsu_threshold](#otsu_threshold)
+8. [gl2bit](#gl2bit)
+9. [get_bit](#get_bit)
 
 ## erode
 
@@ -121,38 +120,6 @@ produces a statistics output for each label. Is the extension for a stack of ima
   stack= np.where(stack < 3, 0, 1) #apply a threshold to obtain boolean images
   ret, label, stats, centroids = connected_components_wStats(stack)
 ```
-
-
-## bitwise_not
-
-Calculates per-element bit-wise inversion of the input stack of images. This function is an implementation for a stack of images of [cv2.bitwise_not](https://docs.opencv.org/3.4/d2/de8/group__core__array.html#ga0002cf8b418479f4cb49a75442baee2f) in opencv-python.
-
-**Parameters**
-
-  *img* : array_like, image or stack of images to invert
-
-**Returns**
-
-  *dst* : array-like, inverted image or stack of images
-
-```python
-  import cv2
-  import numpy as np
-  from CTLungSeg.utils import load_pickle, save_pickle
-  from CTLungSeg.method import bitwise_not
-
-  stack = load_pikle('./images/image.pkl.npy')
-  stack = np.where(stack < 3, 0, 1) #apply a threshold to obtain boolean images
-  inverted = bitwise_not(stack)
-  save_pickle('./output_filename', inverted)
-```
-
-<p style="text-align:center;"><img src="./images/thresholded.png" alt="original"
-	title="input image" width="220" height="220" />
-  <caption>Thresholded image</caption>
-  <img src="./images/inverted.png" alt="ROI"
-	title="ROI" width="220" height="220" />
-  <caption>Inverted image</caption>
 
 ## imfill
 

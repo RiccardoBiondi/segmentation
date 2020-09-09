@@ -8,7 +8,6 @@ from hypothesis import given, settings, example
 from CTLungSeg.method import erode
 from CTLungSeg.method import dilate
 from CTLungSeg.method import connected_components_wStats
-from CTLungSeg.method import bitwise_not
 from CTLungSeg.method import imfill
 from CTLungSeg.method import median_blur
 from CTLungSeg.method import gaussian_blur
@@ -57,20 +56,6 @@ def test_dilate_stack(data, kernel, n_img, k_dim, iter):
 def test_dilate(data, kernel,k_dim, iter):
     dilated = dilate(data(300, 300), kernel((k_dim, k_dim)), iter)
     assert dilated.shape == (300, 300)
-
-
-@given(black_image, white_image, st.integers(300,512))
-@settings(max_examples = 20, deadline = None)
-def test_bitwise_not(input, expected_output, n_pix):
-    inverted = bitwise_not(input((n_pix, n_pix)))
-    assert (inverted == 255 * expected_output((n_pix, n_pix))).all()
-
-
-@given(black_image, white_image, st.integers(2,30), st.integers(300,512))
-@settings(max_examples = 20, deadline = None)
-def test_bitwise_not_stack(input, expected_output, n_img, n_pix):
-    inverted = bitwise_not(input((n_img, n_pix, n_pix)))
-    assert (inverted == 255 * expected_output((n_img, n_pix, n_pix))).all()
 
 
 @given(image, st.integers(300, 512))
@@ -126,7 +111,7 @@ def test_imfill_stack(white_image, n_img) :
 
 def test_connected_components_wStats() :
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
-    image = bitwise_not(image)
+    image = np.logical_not(image)
     n_regions = 4
     retval, labels, stats, centroids = connected_components_wStats(image)
     print(np.unique(labels))
@@ -138,7 +123,7 @@ def test_connected_components_wStats() :
 @settings(max_examples = 20, deadline = None )
 def test_connected_components_wStats_stack(n_img) :
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
-    image = bitwise_not(image)
+    image = np.logical_not(image)
     input =np.array([image for i in range(n_img)])
     n_regions = 4
     retval, labels, stats, centroids = connected_components_wStats(input)
