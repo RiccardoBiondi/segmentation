@@ -36,11 +36,20 @@ matrix:
 
 before_install:
   - travis_retry eval "${MATRIX_EVAL}"
+    #- pip install -r requirements.txt
   - python -m pip install --upgrade pip
   - python -m pip --version
 
+  - python -m pip install --user numpy==1.17
+  - python -m pip install --user scipy==1.2.1
+  - python -m pip install --user scikit-learn==0.20.3
+  - python -m pip install --user pydicom==1.3.0
+  - python -m pip install --user pandas==0.25.3
+  - python -m pip install --user tqdm
+
   # testing libraries
-  - python -m pip install hypothesis
+  - python -m pip install pytest==3.0.7
+  - python -m pip install hypothesis>=4.13.0
   - python -m pip install codecov
   - python -m pip install pytest-cov
 
@@ -48,7 +57,7 @@ install:
   - python setup.py install
 
 script:
-  - travis_wait 45 python -m pytest --cov=CTLungSeg
-
+  - travis_wait 45 python -m pytest --cov=segmentation --cov-config=.coveragerc
+  
 after_succes:
   - codecov
