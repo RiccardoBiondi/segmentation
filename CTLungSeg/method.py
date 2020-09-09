@@ -30,9 +30,7 @@ def erode(img, kernel, iterations = 1):
     '''
     if len(img.shape) == 2 :
         return cv2.erode(img.astype('uint8'), kernel, iterations)
-
-    vectorized = np.vectorize(partial(cv2.erode, kernel=kernel, iterations=iterations), signature= '(m,n)->(m,n)')
-    return vectorized(img.astype('uint8'))
+    return np.asarray(list(map(partial(cv2.erode, kernel=kernel, iterations=iterations),img)))
 
 
 def dilate(img, kernel, iterations = 1 ):
@@ -54,10 +52,7 @@ def dilate(img, kernel, iterations = 1 ):
     '''
     if len(img.shape) == 2 :
         return cv2.dilate(img.astype('uint8'), kernel, iterations)
-
-    vectorized = np.vectorize(partial(cv2.dilate, kernel=kernel, iterations=iterations), signature = '(m,n)->(m,n)')
-    return vectorized(img.astype('uint8'))
-
+    return np.asarray(list(map(partial(cv2.dilate, kernel=kernel, iterations=iterations),img)))
 
 def connected_components_wStats(img):
     '''computes the connected components labeled image of boolean image and also
@@ -124,8 +119,8 @@ def imfill(img):
 
     if len(img.shape) == 2: #one image case
         return utils.imfill(img.astype(np.uint8))
-    filled = np.vectorize(utils.imfill, signature='(m,n)->(m,n)')
-    return filled(img.astype(np.uint8))
+
+    return np.asarray(list(map(utild.imfill,img.astype(np.uint8))))
 
 
 def median_blur(img, ksize):
@@ -143,9 +138,7 @@ def median_blur(img, ksize):
     '''
     if len(img.shape) == 2: #single image case
         return cv2.medianBlur(img, ksize)
-    blurred = np.vectorize(partial(cv2.medianBlur, ksize = ksize), signature = '(m,n)->(m,n)')
-    return blurred(img)
-
+    return np.asarray(list(map(partial(cv2.medianBlur, ksize=ksize),img)))
 
 def gaussian_blur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
     '''Apply a gaussian blurring filter on an image or stack of images
@@ -168,9 +161,7 @@ def gaussian_blur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
         '''
     if len(img.shape) == 2: #single image case
         return cv2.GaussianBlur(img, ksize,sigmaX=tuple(sigmaX), sigmaY=tuple(sigmaY), borderType = borderType)
-
-    blurred = np.vectorize(partial(cv2.GaussianBlur, ksize = ksize,sigmaX=sigmaX, sigmaY=sigmaY, borderType = borderType), signature = '(m,n)->(m,n)')
-    return blurred(img)
+    return np.asarray(list(map(partial(cv2.GaussianBlur, ksize = ksize,sigmaX=sigmaX, sigmaY=sigmaY, borderType = borderType),img)))
 
 
 
