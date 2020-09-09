@@ -7,3 +7,4 @@ CTLungSeg/method.py
 CTLungSeg/slice_and_ROI.py
 CTLungSeg/train.py
 CTLungSeg/utils.py
+CTLungSeg/segmentation.py

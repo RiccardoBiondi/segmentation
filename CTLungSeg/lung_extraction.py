@@ -6,8 +6,9 @@ import numpy as np
 from CTLungSeg.utils import load_image, save_pickle
 from CTLungSeg.utils import preprocess, rescale
 from CTLungSeg.method import erode, dilate
-from CTLungSeg.method import imfill, remove_spots
+from CTLungSeg.method import imfill
 from CTLungSeg.method import gaussian_blur,otsu_threshold
+from CTLungSeg.segmentation import remove_spots
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']

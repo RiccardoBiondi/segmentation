@@ -7,7 +7,7 @@ from CTLungSeg.utils import load_image, save_pickle
 from CTLungSeg.utils import to_dataframe
 from CTLungSeg.utils import imcrop
 from CTLungSeg.method import connected_components_wStats
-from CTLungSeg.method import find_ROI
+from CTLungSeg.segmentation import find_ROI
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']

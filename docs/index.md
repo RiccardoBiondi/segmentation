@@ -53,7 +53,8 @@ To refer to modules documentation:
 | **Module**| **Description**|
 |---              |---              |
 | [utils](./CTLungSeg/utils.md) | method to load, save and preprocess stack																									|
-| [method](./CTLungSeg/method.md) | method to apply morphological, thresholding and statistical operation on stack of images |
+| [method](./CTLungSeg/method.md) | method to apply morphological, thresholding and statistical operation on stack of images 																								|
+| [segmentation](./CTLungSeg/segmentation.md) | contains useful function to segment stack of images and select ROI																										|
 
 ## Installation
 

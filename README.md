@@ -67,6 +67,7 @@ To refer to modules documentation:
 |:---------:|:--------------:|
 | [utils](./docs/CTLungSeg/utils.md) | method to load, save and preprocess stack																																										|
 | [method](./docs/CTLungSeg/method.md) | method to apply morphological, thresholding and statistical operation on stack of images |
+| [segmentation](./docs/CTLungSeg/segmentation.md) | contains useful function to segment stack of images and select			 ROI																										|
 
 For each script described below there are a powershell and a shell script which allow to execute the script on multiple patient.
 

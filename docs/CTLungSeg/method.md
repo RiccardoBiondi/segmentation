@@ -11,7 +11,6 @@ This module contains functions useful for the script execution. This functions e
 7. [gaussian_blur](#gaussianBlur)
 8. [otsu_threshold](#otsu)
 9. [find_ROI](#corner_finder)
-10. [remove_spots](#remove_spots)
 
 ## erode
 
@@ -294,46 +293,3 @@ Compute the best threshold value for each slice of the input image stack by usin
   <img src="./images/thresholded.png" alt="thr"
   title="thr" width="250" height="250" />
   <caption>thresholded image</caption>
-
-## find_ROI
-
-Found the upper and lower corner of the smallest rectangle that still contains the lung regions for each image of the input stack
-
-**Parameter**
-
-  *stats*: pandas dataframe, dataframe that contains the stats of the connected regions. columns must be ...
-
-**Return**
-
-  *corners*: array-like, array which contains the coordinates of the upper and lower corner of the ROI organized as [x_top, y_top, x_bottom, y_bottom]
-
-## remove_spots
-
-Set to zero the GL of all the connected region with area lesser than area
-
-**Parameters**
-
-  *img*: array-like, binary image from which remove spots
-  *area*: int, maximun area in pixels of the removed spots
-
-**Return**
-
-  *filled*: array-like, binary image with spot removed
-
-```python
-
-from CTLungSeg.utils import load_pickle, save_pickle
-from CTLungSeg.utils import preprocess
-from CTLungSeg.method import remove_spots
-from CTLungSeg.method import otsu
-
-#load the image
-img = load_pikle('./images/image.pkl.npy')
-img = preprocess(img)
-
-#apply a threshold
-img = otsu_threshold(img)
-#fill the smallest holes
-filled = remove_spots(img, 500)
-save_pickle('./images/filled.pkl.npy')
-```
