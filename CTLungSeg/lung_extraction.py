@@ -4,14 +4,13 @@
 import argparse
 import numpy as np
 from CTLungSeg.utils import load_image, save_pickle
-from CTLungSeg.utils import preprocess, rescale
+from CTLungSeg.utils import preprocess
 from CTLungSeg.method import imfill
 from CTLungSeg.method import gaussian_blur, otsu_threshold
 from CTLungSeg.method import gl2bit, get_bit
 from CTLungSeg.segmentation import opening, closing
 from CTLungSeg.segmentation import remove_spots, reconstruct_gg_areas, select_greater_connected_regions
 
-from time import time
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
@@ -75,7 +74,7 @@ def main():
 
 
     if args.mask not in ['', None] :
-        save_pickle(args.mask, imgs.astype(np.uint8))
+        save_pickle(args.mask, lung_mask.astype(np.uint8))
     save_pickle(args.lung, DICOM.astype(np.float32))
 
 
