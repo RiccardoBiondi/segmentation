@@ -6,7 +6,6 @@ reset='\033[0m]'
 
 input_dir=$1
 output_dir=$2
-optional=$3
 
 
 # check if the input directory exists and it is provided
@@ -50,7 +49,7 @@ for file in $input_files; do
   printf "* Processing $file ...       "
 
   f="${file%%.*}"
-  python3 -m CTLungSeg.slice_and_ROI --input="$input_dir$file" --output="$output_dir$f" $optional
+  python3 -m CTLungSeg.slice_and_ROI --input="$input_dir$file" --output="$output_dir$f" "${@:3}"
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

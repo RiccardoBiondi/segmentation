@@ -2,10 +2,6 @@
 
 $input_dir = $args[0]
 $output_dir = $args[1]
-$optional_1 = $args[2]
-$optional_2 = $args[3]
-$optional_3 = $args[4]
-$optional_4 = $args[5]
 
 If ( $null -eq $input_dir)
 {
@@ -32,4 +28,4 @@ ElseIf ( -not (Test-Path -Path $output_dir -PathType Container) )
   exit 1
 }
 
-python -m CTLungSeg.train --input $input_dir --output $output_dir $optional_1 $optional_2 $optional_3 $optional_4
+python -m CTLungSeg.train --input $input_dir --output $output_dir $args[2..$args.Length]

@@ -62,9 +62,6 @@ echo "Found ${#input_files[@]} files to process"
 for file in $input_files; do
 
   printf "* Processing $file ...       "
-
-  #f= basename "$file" .pkl.npy
-
   f="${file%%.*}"
 
   python3 -m CTLungSeg.labeling --input="$input_dir$file" --output="$output_dir$f" --centroids="$centroids"

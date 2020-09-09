@@ -5,12 +5,6 @@ reset='\033[0m]' #No Color
 
 input_dir=$1
 output_file=$2
-optional1=$3
-optional2=$4
-optional3=$5
-optional4=$6
-
-
 
 # check if the input directory exists and it is provided
 if [ -z "$input_dir" ]; then
@@ -36,4 +30,4 @@ fi
 
 # apply the pipeline on the input files
 
-python3 -m CTLungSeg.train --input="$input_dir" --output="$output_file" $optional1 $optional2 $optional3 $optional4
+python3 -m CTLungSeg.train --input="$input_dir" --output="$output_file" "${@:3}"

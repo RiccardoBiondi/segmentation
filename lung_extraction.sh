@@ -7,8 +7,6 @@ reset='\033[0m]' #No Color
 
 input_dir=$1
 output_dir=$2
-optional1=$3
-optional2=$4
 
 # check if the input directory exists and it is provided
 if [ -z "$input_dir" ]; then
@@ -53,7 +51,7 @@ for file in $input_files; do
   printf "* Processing $file ...       "
 
   f="${file%%.*}"
-  python3 -m CTLungSeg.lung_extraction --input="$input_dir$file" --lung="$output_dir$f" $optional1 $optional2
+  python3 -m CTLungSeg.lung_extraction --input="$input_dir$file" --lung="$output_dir$f" "${@:3}"
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

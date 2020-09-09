@@ -1,3 +1,4 @@
+#!/usr/bin/env pwsh
 
 $input_dir = $args[0]
 $output_dir = $args[1]
