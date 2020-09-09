@@ -1,11 +1,12 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 import numpy as np
 import argparse
 from CTLungSeg.utils import load_image, save_pickle
 from CTLungSeg.utils import to_dataframe
 from CTLungSeg.utils import imcrop
-from CTLungSeg.method import connectedComponentsWithStats
+from CTLungSeg.method import connected_components_wStats
 from CTLungSeg.method import find_ROI
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
@@ -31,7 +32,7 @@ def main():
     img = lung.copy()
     lung = np.where(lung == 0, 0, 1)
     #find connected components
-    _, _, stats, _ = connectedComponentsWithStats(lung.astype(np.uint8))
+    _, _, stats, _ = connected_components_wStats(lung.astype(np.uint8))
     #manage stats into dataframe
     columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     stats = to_dataframe(stats, columns)

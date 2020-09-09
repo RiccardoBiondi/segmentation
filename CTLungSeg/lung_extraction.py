@@ -1,10 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import argparse
 import numpy as np
 from CTLungSeg.utils import load_image, save_pickle
 from CTLungSeg.utils import preprocess, rescale
 from CTLungSeg.method import erode, dilate
 from CTLungSeg.method import imfill, remove_spots
-from CTLungSeg.method import gaussianBlur,otsu
+from CTLungSeg.method import gaussian_blur,otsu_threshold
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
@@ -33,9 +36,9 @@ def main():
     DICOM = load_image(args.input)
     DICOM = preprocess(DICOM)
     imgs = DICOM.copy()
-    DICOM = gaussianBlur(DICOM, (5,5))
+    DICOM = gaussian_bur(DICOM, (5,5))
 
-    imgs = otsu(imgs)
+    imgs = otsu_threshold(imgs)
     kernel = np.ones((5,5), dtype = np.uint8)
     imgs = erode(imgs, kernel)
     imgs = dilate(imgs, kernel)
@@ -56,9 +59,8 @@ def main():
     #filter out small external spots
     imgs = remove_spots(imgs, args.esa)
     #apply mask
-    DICOM = DICOM * imgs
-    DICOM = rescale(DICOM, DICOM.max(),0)
-    DICOM = DICOM * imgs
+
+    DICOM = imgs * DICOM
 
     if args.mask not in ['', None] :
         save_pickle(args.mask, imgs.astype(np.uint8))

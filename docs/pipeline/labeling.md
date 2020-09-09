@@ -3,8 +3,6 @@
 This script allow to segment an image once you know the centroids.
 By using *sklearn.clustering.KMeans* this script will assign at each pixel the label such that the distance between the label centroid and the pixel GL is minimum. Notice that this script doesn't compute the centroids but only segment an image by using pre-existing ones.
 
-
-
 <html>
   <head>
 	<style>
@@ -27,7 +25,6 @@ By using *sklearn.clustering.KMeans* this script will assign at each pixel the l
 </head>
 <body>
 
-
 <figure>
 <img src="./images/lung.png" alt="input"
 	title="Input image" />
@@ -44,10 +41,8 @@ title="body_mask slice"  />
 	</figcaption>
 </figure>
 
-
 </body>
 </html>
-
 
 # Usage
 
@@ -66,5 +61,5 @@ Required parameters:
 
 You can also run this script on multiple samples by calling it from the provided powershell script. In this case you have to create two folders: the first one(input) will contains the *.pkl.npy* files to label(the ones with the extracted lung), the second one the results. Now you simply call the script from powershell by providing as the first parameter the path to the input older, as second parameter the path to output folder and as third parameter the path to the centroids file:
 ```powershell
-> ./labeling.ps1 path/to/input/folder/ path/to/output/folder/ path/to/centroids/file/centroids.pkl.npy
+PS /> ./labeling.ps1 path/to/input/folder/ path/to/output/folder/ path/to/centroids/file/centroids.pkl.npy
 ```

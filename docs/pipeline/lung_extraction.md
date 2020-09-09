@@ -5,8 +5,6 @@ This script allows to isolate the lung regions from the rest of the body in an i
 It takes as input the stack of images as *.pkl.npy* format.
 At the end of the execution the script save the stack with the extracted lung as *.pkl.npy* format. It is also possible to chose to save or not the binary lung mask.
 
-
-
 <html>
   <head>
 	<style>
@@ -28,7 +26,6 @@ At the end of the execution the script save the stack with the extracted lung as
 </style>
 </head>
 <body>
-
 
 <figure>
 	<img src="./images/dicom.png" alt="dicom"
@@ -57,7 +54,6 @@ title="lung_mask slice" />
 </body>
 </html>
 
-
 ## Usage
 
 To use this script call it from powershell or bash and provide the required arguments.
@@ -80,10 +76,9 @@ Optional arguments:
 
 * --ext_spot_area :int, default=200 **TODO**
 
-
 You can also run this script on multiple samples by calling it from the provided powershell script. In this case you have to create two folders: the first one(input) will contains the *.pkl.npy* files to process, the second one the results. Now you simply call the script from powershell by providing as the first parameter the path to the input older and as second the path to output folder:
 ```powershell
-> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
+PS /> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
 ```
 
 If you want to provide the optional arguments you have to write them as third argument as follows:

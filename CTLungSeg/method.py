@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import cv2
 import numpy as np
 import CTLungSeg.utils as utils
@@ -56,7 +59,7 @@ def dilate(img, kernel, iterations = 1 ):
     return vectorized(img.astype('uint8'))
 
 
-def connectedComponentsWithStats(img):
+def connected_components_wStats(img):
     '''computes the connected components labeled image of boolean image and also
     produces a statistics output for each label
 
@@ -71,20 +74,23 @@ def connectedComponentsWithStats(img):
 
     labels: array-like
         labelled image or stack
+
     stats: list of array-like
         statistic for each lablel for each image of the stack
+
     centroids: array-like
         centroid for each label fr each image of the stack
     '''
     if len(img.shape) == 2 :
         retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype('uint8'))
         return [retval, labels, stats, centroids]
+
     out = list(zip(*list(map(cv2.connectedComponentsWithStats, img.astype('uint8')))))
     return [np.array(out[0]), np.array(out[1]), list(out[2]), list(out[3])]
 
 
 def bitwise_not(img):
-    '''Calculates per-element bit-wise inversion of the input array
+    '''Compute per-element bit-wise inversion of the input array
 
     Parameters
     ----------
@@ -122,7 +128,7 @@ def imfill(img):
     return filled(img.astype(np.uint8))
 
 
-def medianBlur(img, ksize):
+def median_blur(img, ksize):
     '''Apply median blurring filter on an image or stack of images
     Parameters
     ----------
@@ -141,7 +147,7 @@ def medianBlur(img, ksize):
     return blurred(img)
 
 
-def gaussianBlur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
+def gaussian_blur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
     '''Apply a gaussian blurring filter on an image or stack of images
     Parameters
     ----------
@@ -168,7 +174,7 @@ def gaussianBlur(img, ksize, sigmaX=0, sigmaY=0,borderType=cv2.BORDER_DEFAULT):
 
 
 
-def otsu(img):
+def otsu_threshold(img):
     '''Compute the best threshld value for each slice of the input image stack by using otsu algorithm
 
     Parameters

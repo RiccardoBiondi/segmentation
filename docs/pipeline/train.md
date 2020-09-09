@@ -14,13 +14,13 @@ python -m CTLungSeg.train. --input='path/to/inputfolder' --output='path/to/outpu
 And this will use all the image stored in the input folder to compute the  centroid and save them into output folder with output_name as *.pkl.npy*. The number of clusters is 4 as default and the number of subsamples is 100 as default.
 To control these parameters you can provide the optional arguments:
 
-* --k : int, the number of clusters, default 4
-* --n : int, number of subsamples to use, default 100
-* --init: int, initialization technique: if 0 will use the random center initialization ,if 1 will use the kmenas++ algorithm.
-* --intermediate: bool, if true allows to save the centroid of the subsamples
+* *--k* : int, the number of clusters, default 4
+* *--n* : int, number of subsamples to use, default 100
+* *--init*: int, initialization technique: if 0 will use the random center initialization ,if 1 will use the kmenas++ algorithm.
+* *--intermediate*: bool, if true allows to save the centroid of the subsamples
 
 You can also call this script by using the implemented powershell sctipt by providing as first argument the path t the inpt folder and as second argument the path to output file. the other arguments will be the optional ones:
 
 ```powershell
-> ./train.ps1 path/to/input/folder/ path/to/output/folder/output_name  --k=5
+PS /> ./train.ps1 path/to/input/folder/ path/to/output/folder/output_name  --k=5
 ```
