@@ -29,7 +29,10 @@ def parse_args():
 
 
 def main():
-    init =  [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
+    init = [ "KMEANS_RANDOM_CENTERS", "KMEANS_PP_CENTERS"]
+    centroid_init =  [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
+    iter_stop_criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+
     args = parse_args()
     #read files and create the sample vector
     print('Loading...', flush=True )
@@ -45,31 +48,27 @@ def main():
     print('Number of custers-->', args.k , flush=True)
     print('Number of subsamples-->', args.n , flush=True)
     print('Total images --> ', imgs.shape[0])
-    print('Centroid initzialization technique-->', str(init[args.init]), flush=True)
+    print('Centroid initzialization technique-->',init[args.init], flush=True)
     print('Save intermediate centroids-->', args.intermediate , flush=True)
-    #first clustering
-    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-    centr = []
 
     widgets = ['Computing:', progressbar.Bar('*')]
     bar = progressbar.ProgressBar(widgets=widgets).start()
 
+    centroids = []
     for i,el in enumerate(samples) :
-        for x in el :
-            sample = np.concatenate(x.reshape(-1, 1))
-        sample = sample.astype(np.float32)
-        _, _, centroids = cv2.kmeans(sample, args.k, None, criteria, 10,init[args.init])
-        centr.append(np.array(centroids))
+        to_cluster = np.array([x.reshape(-1,) for x in el], dtype=np.float32)
+        _, _, centr = cv2.kmeans(to_cluster, args.k, None, iter_stop_criteria, 10, centroid_init[args.init])
+
+        centroids.append(np.array(centr))
         if args.intermediate :#non molto performante
-            save_pickle(args.out + '('+str(i)+')', centroids)
+            save_pickle(args.out + '('+str(i)+')', centr)
         bar.update(i)
 
-    #starting the second clustering
     print("\nStarting second clustering", flush=True)
 
-    centr = np.array(centr).reshape(-1,)
-    _, _, centroids = cv2.kmeans(centr, args.k, None, criteria, 10, init[args.init])
-    save_pickle(args.out, centroids)
+    centroids = np.array(centroids).reshape(-1,)
+    _, _, centr = cv2.kmeans(centroids, args.k, None, iter_stop_criteria, 10, centroid_init[args.init])
+    save_pickle(args.out, centr)
 
     print('Complete', flush =True)
 
