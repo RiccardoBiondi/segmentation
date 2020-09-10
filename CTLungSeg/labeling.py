@@ -42,20 +42,13 @@ def main():
     labels = opening(labels, np.ones((5,5), np.uint8))
     #
     images = labels * images
-    #variabili del secondo clustering
-    images = preprocess(images)
-    #applica un filtro mediano
-    images = median_blur(images, 9)
-    images = images.astype(np.float32)
-    #
+    images = (median_blur(preprocess(images), 9)).astype(np.float32)
+
     criteria = (cv2.TERM_CRITERIA_EPS +cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
     init = [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
-
     _, labels,_ = cv2.kmeans(images.reshape(-1,), 3, None,criteria, 10, init[1])
 
-    labels = labels.reshape(images.shape)
-    #
-    labels = labels.astype(np.uint8)
+    labels = (labels.reshape(images.shape)).astype(np.uint8)
     labels = median_blur(labels, 7)
     labels[labels == 2] = 1
 

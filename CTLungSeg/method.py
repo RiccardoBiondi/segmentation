@@ -105,12 +105,14 @@ def imfill(img):
 
 def median_blur(img, ksize):
     """Apply median blurring filter on an image or stack of images
+
     Parameters
     ----------
     img: array-like
         image or stack of images to filter
     ksize : int
         aperture linear size; it must be odd and greater than 1
+
     Return
     ------
     blurred : array-like
@@ -118,7 +120,7 @@ def median_blur(img, ksize):
     """
     if len(img.shape) == 2: #single image case
         return cv2.medianBlur(img, ksize)
-    return np.asarray(list(map(partial(cv2.medianBlur, ksize=ksize),img)))
+    return np.asarray(list(map(partial(cv2.medianBlur, ksize=ksize),img)), dtype=np.uint8)
 
 
 def gaussian_blur(img, ksize, sigmaX=0,
@@ -144,7 +146,7 @@ def gaussian_blur(img, ksize, sigmaX=0,
     """
     if len(img.shape) == 2: #single image case
         return cv2.GaussianBlur(img, ksize,sigmaX=tuple(sigmaX), sigmaY=tuple(sigmaY), borderType = borderType)
-    return np.asarray(list(map(partial(cv2.GaussianBlur, ksize = ksize,sigmaX=sigmaX, sigmaY=sigmaY, borderType = borderType),img)))
+    return np.asarray(list(map(partial(cv2.GaussianBlur, ksize = ksize,sigmaX=sigmaX, sigmaY=sigmaY, borderType = borderType),img)), dtype=np.uint8)
 
 
 def otsu_threshold(img):

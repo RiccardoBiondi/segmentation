@@ -20,10 +20,8 @@ def opening(img, kernel):
     kernel : array-like
         kernel used for the morphological operations
     """
-    opened = img.copy()
-    opened = erode(opened, kernel=kernel)
-    opened = dilate(opened, kernel=kernel)
-    return opened
+    opened = erode(img, kernel=kernel)
+    return dilate(opened, kernel=kernel)
 
 
 def closing(img, kernel):
@@ -36,10 +34,8 @@ def closing(img, kernel):
     kernel : array-like
         kernel used for the morphological operations
     """
-    closed = img.copy()
-    closed = dilate(closed, kernel=kernel)
-    closed = erode(closed, kernel=kernel)
-    return closed
+    closed = dilate(img, kernel=kernel)
+    return erode(closed, kernel=kernel)
 
 
 def remove_spots(img, area):
@@ -58,14 +54,13 @@ def remove_spots(img, area):
         binary image with spot removed
     """
     columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
-    _, lab, stats, _ = connected_components_wStats(img.astype(np.uint8))
+    _, lab, stats, _ = connected_components_wStats(img)
 
     stats = utils.to_dataframe(stats, columns)
     for i,stat in enumerate(stats):
         for j in stat.query('AREA <' + str(area)).index:
             lab[i][lab[i] == j] = 0
-    lab = np.where(lab == 0, 0, 1)
-    return lab.astype(np.uint8)
+    return (lab != 0)
 
 
 def select_greater_connected_regions(img, n_reg):

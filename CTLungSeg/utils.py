@@ -171,12 +171,11 @@ def preprocess(img):
     Return
     ------
     out: array like
-        rescaled image
+        8-bit rescaled image
     """
     out = img.copy()
     out[out < 0] = 0
-    out = 255 * rescale(out, np.amax(out), 0)#???
-    return out.astype(np.uint8)
+    return (255 * rescale(out, np.amax(out), 0)).astype(np.uint8)
 
 
 def subsamples(data, n_sub):
