@@ -33,7 +33,7 @@ kernel = st.just(ones)
 @given(image, kernel, st.integers(2, 300),st.integers(5,30), st.integers(1, 5))
 @settings(max_examples = 20, deadline = None)
 def test_erode_stack(data, kernel, n_imgs, k_dim,iter):
-    eroded = erode(data(n_imgs, 300, 300), kernel((k_dim, k_dim)), )
+    eroded = erode(data(n_imgs, 300, 300), kernel((k_dim, k_dim)),iter )
     assert eroded.shape == (n_imgs,300, 300)
 
 
