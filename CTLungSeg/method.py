@@ -3,6 +3,7 @@
 
 import cv2
 import numpy as np
+import pandas as pd
 import CTLungSeg.utils as utils
 from functools import partial
 
@@ -71,18 +72,20 @@ def connected_components_wStats(img):
     labels: array-like
         labelled image or stack
 
-    stats: list of array-like
+    stats: list of pandas DataFrame
         statistic for each lablel for each image of the stack
 
     centroids: array-like
         centroid for each label fr each image of the stack
     """
+    columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
     if len(img.shape) == 2 :
         retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype('uint8'))
-        return [retval, labels, stats, centroids]
+        return [retval, labels, pd.DataFrame(np.array(stats), columns=columns), centroids]
+
 
     out = list(zip(*list(map(cv2.connectedComponentsWithStats, img.astype('uint8')))))
-    return [np.array(out[0]), np.array(out[1]), list(out[2]), list(out[3])]
+    return [np.array(out[0]), np.array(out[1]), utils.stats2dataframe(list(out[2])), list(out[3])]
 
 
 def imfill(img):

@@ -105,7 +105,7 @@ produces a statistics output for each label. Is the extension for a stack of ima
 
   *labels* : array-like, labelled image or stack
 
-  *stats* : list of array-like, statistic for each label for each image of the stack
+  *stats* : list pandas DataFrame, statistic for each label for each image of the stack
 
   *centroids* : array-like, centroid for each label for each image of the stack
 

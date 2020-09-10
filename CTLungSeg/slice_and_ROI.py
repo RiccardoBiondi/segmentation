@@ -4,7 +4,6 @@
 import numpy as np
 import argparse
 from CTLungSeg.utils import load_image, save_pickle
-from CTLungSeg.utils import to_dataframe
 from CTLungSeg.utils import imcrop
 from CTLungSeg.method import connected_components_wStats
 from CTLungSeg.segmentation import find_ROI
@@ -31,9 +30,6 @@ def main():
     lung_mask = lung.copy()
     lung_mask[lung_mask != 0] = 1
     _, _, stats, _ = connected_components_wStats(lung_mask)
-    #manage stats into dataframe
-    columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
-    stats = to_dataframe(stats, columns)
     print('Starting ROI selection', flush=True)
     ROI = np.array(list(map(find_ROI, stats)), dtype = np.int32)
     #starting the slice selection

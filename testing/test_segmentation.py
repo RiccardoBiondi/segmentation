@@ -6,9 +6,11 @@ import hypothesis.strategies as st
 from hypothesis import given, settings, example
 
 from CTLungSeg.segmentation import select_greater_connected_regions
+from CTLungSeg.segmentation import find_ROI
 
 import cv2
 import numpy as np
+import pandas as pd
 from CTLungSeg.method import connected_components_wStats
 from numpy import ones, zeros
 from numpy.random import rand
@@ -22,9 +24,17 @@ white_image = st.just(ones)
 kernel = st.just(ones)
 
 
-#def test_opening
+#@given(image, st.integers(1,20), st.integers(1,11))
+#@settings(max_examples = 20, deadline = None)
+#def test_opening(img, stack_size, kernel_size) :
+#    opened = closing(img(stack_size, 300, 300), np.ones((kernel_size, kernel_size), dtype=np.uint8))
 
-#def test_closing
+
+#@given(image, st.integers(1,20), st.integers(1,11))
+#@settings(max_examples = 20, deadline = None)
+#def test_closing(img, stack_size, kernel_size) :
+#    closed = closing(img(stack_size, 300, 300), np.ones((kernel_size, kernel_size), dtype=np.uint8))
+
 
 @given(st.integers(2, 300), st.integers(0,3))
 @settings(max_examples = 20, deadline = None)
@@ -40,4 +50,13 @@ def test_select_greater_connected_regions(n_imgs, n_reg):
 #def test_reconstruct_gg_areas(imgs):
 
 
-#def test_find_ROI
+@given(st.integers(1,200), st.integers(1,200), st.integers(1,200), st.integers(1,200))
+@settings(max_examples = 200, deadline = None)
+def test_find_ROI(x, y, w, h) :
+    image = np.zeros((512, 512), dtype=np.uint8)
+    corners = [x, y, x + w, y + h]
+    columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
+
+    image[y : y + h, x : x + w] = np.ones((h, w), dtype=np.uint8)
+    _, _, stats, _ = connected_components_wStats(image)
+    assert (find_ROI(pd.DataFrame(stats, columns=columns)) == corners).all

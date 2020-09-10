@@ -3,7 +3,6 @@
 
 import numpy as np
 
-import CTLungSeg.utils as utils
 from CTLungSeg.method import connected_components_wStats, erode, dilate
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
@@ -53,10 +52,8 @@ def remove_spots(img, area):
     filled: array-like
         binary image with spot removed
     """
-    columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
     _, lab, stats, _ = connected_components_wStats(img)
 
-    stats = utils.to_dataframe(stats, columns)
     for i,stat in enumerate(stats):
         for j in stat.query('AREA <' + str(area)).index:
             lab[i][lab[i] == j] = 0
@@ -79,7 +76,6 @@ def select_greater_connected_regions(img, n_reg):
     """
     m = []
     _, labs , stats, _ = connected_components_wStats(img)
-    stats = utils.to_dataframe(stats, ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA'])
     for stat, lab in zip(stats, labs):
         stat = stat.drop(index = 0)
         stat = stat.sort_values(by = ['AREA'], ascending = False)

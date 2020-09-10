@@ -12,7 +12,7 @@ from CTLungSeg.utils import rescale
 from CTLungSeg.utils import preprocess
 from CTLungSeg.utils import subsamples
 from CTLungSeg.utils import imfill
-from CTLungSeg.utils import to_dataframe
+from CTLungSeg.utils import stats2dataframe
 from CTLungSeg.utils import imcrop
 
 import cv2
@@ -111,11 +111,10 @@ def test_imfill(white_image):
 
 @given(st.integers(2,30), st.integers(2, 30))
 @settings(max_examples = 20, deadline = None)
-def test_to_dataframe(n_slices, cc):
+def test_stats2dataframe(n_slices, cc):
     shape = (cc, 5)
-    columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     input = [np.empty(shape) for i in range(n_slices)]
-    df = to_dataframe(input , columns)
+    df = stats2dataframe(input)
     assert len(df) == n_slices
 
 

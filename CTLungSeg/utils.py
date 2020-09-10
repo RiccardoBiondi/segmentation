@@ -226,20 +226,19 @@ def imfill(img):
 
 
 
-def to_dataframe (arr, columns) :
+def stats2dataframe (arr) :
     """Convert 3D numpy array into a list of pandas dataframes
 
     Parameter
     ---------
     arr: array-like
         input array to convert in a dataframe
-    columns: list of string
-        columns of the dataframe
     Return
     ------
     df: list of dataframe
         list of dataframe made from arr
     """
+    columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
     return list(map(partial(pd.DataFrame, columns=columns), arr))
 
 
