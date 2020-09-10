@@ -50,11 +50,11 @@ def main():
 
     lung_mask = reconstruct_gg_areas(lung_mask)
     #BIT PLANE slices
-    bit_lung_mask = gl2bit(lung_mask * DICOM, 8)
+    bit_lung_mask = gl2bit(lung_mask * preprocess(DICOM), 8)
     t_mask = get_bit(bit_lung_mask, 5) + get_bit(bit_lung_mask, 7) + get_bit(bit_lung_mask, 8)
     t_mask = otsu_threshold(preprocess(gaussian_blur(t_mask, (7,7))))
 
-    lung_mask = t_mask * lung_mask
+    lung_mask = np.logical_not(t_mask) * lung_mask
     lung_mask = closing(lung_mask, np.ones((7,7), dtype=np.uint8))
 
     lung_mask = select_greater_connected_regions(lung_mask, 2)
@@ -64,7 +64,7 @@ def main():
 
 
     if args.mask not in ['', None] :
-        save_pickle(args.mask, lung_mask.astype(np.uint8))
+        save_pickle(args.mask, t_mask.astype(np.uint8))
     save_pickle(args.lung, DICOM.astype(np.float32))
 
 
