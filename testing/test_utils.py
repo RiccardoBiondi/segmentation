@@ -1,6 +1,8 @@
 import pytest
 import hypothesis.strategies as st
 from hypothesis import given, settings, example
+from  hypothesis import HealthCheck as HC
+
 
 from CTLungSeg.utils import load_pickle
 from CTLungSeg.utils import save_pickle
@@ -17,37 +19,43 @@ from CTLungSeg.utils import imcrop
 
 import cv2
 import numpy as np
-from numpy.random import rand
-from numpy.random import random_integers as ran_int
-from numpy import ones, zeros
+from numpy.random import randint
+from numpy import ones
 
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
-image = st.just(rand)
-black_image = st.just(zeros)
-white_image = st.just(ones)
-kernel = st.just(ones)
+#Define Test strategies
 
+#create filename
+unicode_categories = ('Nd','Lu','Ll', 'Pc', 'Pd')
+legitimate_chars = st.characters(whitelist_categories=(unicode_categories))
+filename_strategy = st.text(alphabet=legitimate_chars, min_size=1, max_size=15)
 
-@given(image, st.integers(1,200), st.integers(300,512))
+#strategy to generate a random stack of 8-bit images
+@st.composite
+def rand_stack_strategy(draw, n_imgs = st.integers(2, 50)) :
+    N = draw(n_imgs)
+    return (255 * np.random.rand(N, 512, 512)).astype(np.uint8)
+
+#START TESTING
+
+@given(rand_stack_strategy(), filename_strategy)
 @settings(max_examples = 20, deadline = None)
-def test_save_and_load_pkl(data, n_img, n_pixels):
-    input = data(n_img, n_pixels, n_pixels)
-    save_pickle('./testing/images/test_file', input)
-    load = load_pickle('./testing/images/test_file.pkl.npy')
-    assert (load == input).all()
+def test_save_and_load_pkl(imgs,  filename):
+    save_pickle('./testing/images/' + filename, imgs)
+    load = load_pickle('./testing/images/' + filename + '.pkl.npy')
+    assert (load == imgs).all()
 
 
-@given(image, st.integers(1,200), st.integers(300,512))
+@given(rand_stack_strategy(), filename_strategy)
 @settings(max_examples = 20, deadline = None)
-def test_save_and_load_npz(data, n_img, n_pixels):
-    input = data(n_img, n_pixels, n_pixels)
-    save_npz('./testing/images/test_file', input)
-    load = load_npz('./testing/images/test_file.npz')
-    assert (load == input).all()
+def test_save_and_load_npz(imgs, filename):
+    save_npz('./testing/images/' + filename, imgs)
+    load = load_npz('./testing/images/' + filename + '.npz')
+    assert (load == imgs).all()
 
 
 '''
@@ -69,44 +77,44 @@ def test_load_img() :
         assert load_image('./testing/images/DICOM_gt.pkl.npy')
 
 
-@given(image, st.integers(1,200), st.integers(300,512))
-@settings(max_examples = 20, deadline = None)
-def test_rescale(data, n_img, n_pixels):
-    input =  255. * data(n_img, n_pixels, n_pixels)
-    rescaled = rescale(input, np.amax(input), 0 )
+@given(rand_stack_strategy())
+@settings(max_examples=20,
+deadline=None,suppress_health_check=(HC.too_slow,))
+def test_rescale(img):
+
+    rescaled = rescale(img, np.amax(img), 0 )
     assert np.isclose(rescaled.max(), 1.)
     assert np.amin(rescaled) >= 0.
 
     with pytest.raises(ZeroDivisionError) :
-        assert rescale(input, 3, 3)
+        assert rescale(img, 3, 3)
 
 
-@given(image, st.integers(1,200), st.integers(300,512))
-@settings(max_examples = 20, deadline = None)
-def test_preprocess(data, n_img, n_pixels):
-    input =  255. * data(n_img, n_pixels, n_pixels)
-    out = preprocess(input)
-    assert np.amax(out) == 255
-    assert np.amin(out) == 0
+@given(rand_stack_strategy())
+@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+def test_preprocess(img):
+
+    out = preprocess(img)
+    assert out.max() == 255
+    assert out.min() == 0
+
 
 
 @given(st.integers(200, 1000), st.integers(2, 200))
 @settings(max_examples  = 20, deadline = None)
 def test_subsamples(n_sample, n_subsamples):
-    #create the sample array
-    sample = np.array([np.ones((ran_int(1,300), ran_int(1, 300))) for i in range(n_sample)])
-    #split it into subsamples
-    sub = subsamples(sample, n_subsamples)
-    assert sub.shape[0] == n_subsamples
+    sample = np.array([np.ones((randint(1,301), randint(1, 301))) for i in range(n_sample)], dtype=np.ndarray)
+    subsample = subsamples(sample, n_subsamples)
+    
+    assert subsample.shape[0] == n_subsamples
 
 
-@given(white_image)
-@settings(max_examples = 20, deadline = None)
-def test_imfill(white_image):
+
+def test_imfill():
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
-    compare = 255 * white_image(image.shape)
+    compare = 255 * ones(image.shape, dtype = np.uint8)
     filled = imfill(image)
-    assert (compare.astype(np.uint8) == filled.astype(np.uint8)).all()
+    assert (compare == filled.astype(np.uint8)).all()
 
 
 @given(st.integers(2,30), st.integers(2, 30))
@@ -122,7 +130,6 @@ def test_stats2dataframe(n_slices, cc):
 @settings(max_examples = 20, deadline = None)
 @example(x = 0, y = 0, h = 0, w = 0)
 def test_imcrop(x, y, w, h) :
-    img = ones((512, 512))
     roi = np.array([x, y, x + w, y + h], dtype = np.int16)
-    crop = imcrop(img.astype(np.int8), roi)
+    crop = imcrop(ones((512, 512), dtype = np.uint8), roi)
     assert crop.shape == (h, w)
