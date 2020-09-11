@@ -1,6 +1,7 @@
 import pytest
 import hypothesis.strategies as st
 from hypothesis import given, settings, example
+from hypothesis.extra.numpy import arrays
 
 from CTLungSeg.utils import load_pickle
 from CTLungSeg.utils import save_pickle
@@ -26,27 +27,38 @@ __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
+#Define Test strategies
+unicode_categories = ('Nd','Lu','Ll', 'Pc', 'Pd')
+legitimate_chars = st.characters(whitelist_categories=(unicode_categories))
+filename_strategy = st.text(alphabet=legitimate_chars, min_size=1, max_size=15)
+
+shape_strategy = (st.integers(2,3), 12, 12)
+
+@st.composite
+def rand_img_strategy(draw, n_imgs) :
+
+    pass
 image = st.just(rand)
 black_image = st.just(zeros)
 white_image = st.just(ones)
 kernel = st.just(ones)
 
 
-@given(image, st.integers(1,200), st.integers(300,512))
+@given(image, n_images, filename_strategy)
 @settings(max_examples = 20, deadline = None)
-def test_save_and_load_pkl(data, n_img, n_pixels):
-    input = data(n_img, n_pixels, n_pixels)
-    save_pickle('./testing/images/test_file', input)
-    load = load_pickle('./testing/images/test_file.pkl.npy')
+def test_save_and_load_pkl(data, n_imgs, filename):
+    input = data(n_imgs, 512, 512)
+    save_pickle('./testing/images/' + filename, input)
+    load = load_pickle('./testing/images/' + filename + '.pkl.npy')
     assert (load == input).all()
 
 
-@given(image, st.integers(1,200), st.integers(300,512))
+@given(image, st.integers(1,200), st.text())
 @settings(max_examples = 20, deadline = None)
-def test_save_and_load_npz(data, n_img, n_pixels):
-    input = data(n_img, n_pixels, n_pixels)
-    save_npz('./testing/images/test_file', input)
-    load = load_npz('./testing/images/test_file.npz')
+def test_save_and_load_npz(data, n_img, filename):
+    input = data(n_img, 512, 512)
+    save_npz('./testing/images/' + filename, input)
+    load = load_npz('./testing/images/' + filename + '.npz')
     assert (load == input).all()
 
 
@@ -69,10 +81,10 @@ def test_load_img() :
         assert load_image('./testing/images/DICOM_gt.pkl.npy')
 
 
-@given(image, st.integers(1,200), st.integers(300,512))
+@given(image, st.integers(1,200))
 @settings(max_examples = 20, deadline = None)
-def test_rescale(data, n_img, n_pixels):
-    input =  255. * data(n_img, n_pixels, n_pixels)
+def test_rescale(data, n_img):
+    input =  255. * data(n_img, 512, 512)
     rescaled = rescale(input, np.amax(input), 0 )
     assert np.isclose(rescaled.max(), 1.)
     assert np.amin(rescaled) >= 0.
@@ -81,10 +93,10 @@ def test_rescale(data, n_img, n_pixels):
         assert rescale(input, 3, 3)
 
 
-@given(image, st.integers(1,200), st.integers(300,512))
+@given(image, st.integers(1,200))
 @settings(max_examples = 20, deadline = None)
-def test_preprocess(data, n_img, n_pixels):
-    input =  255. * data(n_img, n_pixels, n_pixels)
+def test_preprocess(data, n_img):
+    input =  255. * data(n_img, 512, 512)
     out = preprocess(input)
     assert np.amax(out) == 255
     assert np.amin(out) == 0
@@ -104,9 +116,9 @@ def test_subsamples(n_sample, n_subsamples):
 @settings(max_examples = 20, deadline = None)
 def test_imfill(white_image):
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
-    compare = 255 * white_image(image.shape)
+    compare = 255 * white_image(image.shape, dtype = np.uint8)
     filled = imfill(image)
-    assert (compare.astype(np.uint8) == filled.astype(np.uint8)).all()
+    assert (compare == filled.astype(np.uint8)).all()
 
 
 @given(st.integers(2,30), st.integers(2, 30))
