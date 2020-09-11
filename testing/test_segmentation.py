@@ -3,10 +3,15 @@
 
 import pytest
 import hypothesis.strategies as st
-from hypothesis import given, settings, example
+from hypothesis import given, settings
+from  hypothesis import HealthCheck as HC
 
+from CTLungSeg.segmentation import opening
+from CTLungSeg.segmentation import closing
 from CTLungSeg.segmentation import select_greater_connected_regions
 from CTLungSeg.segmentation import find_ROI
+from CTLungSeg.segmentation import bit_plane_slices
+
 
 import cv2
 import numpy as np
@@ -18,10 +23,18 @@ from numpy.random import rand
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
-image = st.just(rand)
-black_image = st.just(zeros)
-white_image = st.just(ones)
-kernel = st.just(ones)
+
+ # Strategies definitions
+@st.composite
+def rand_stack_strategy(draw, n_imgs = st.integers(1, 20)) :
+    N = draw(n_imgs)
+    return (255 * np.random.rand(N, 300, 300)).astype(np.uint8)
+
+
+@st.composite
+def kernel_strategy(draw, k_size = st.integers(3,9)) :
+    k = draw(k_size)
+    return ones((k,k), dtype=np.uint8)
 
 
 #@given(image, st.integers(1,20), st.integers(1,11))
@@ -60,3 +73,12 @@ def test_find_ROI(x, y, w, h) :
     image[y : y + h, x : x + w] = np.ones((h, w), dtype=np.uint8)
     _, _, stats, _ = connected_components_wStats(image)
     assert (find_ROI(pd.DataFrame(stats, columns=columns)) == corners).all
+
+
+@given(rand_stack_strategy())
+@settings(max_examples = 2, deadline = None, suppress_health_check=(HC.too_slow,))
+def test_bit_plane_slices(stack) :
+    ground_truth = [0, 16, 64, 80, 128, 144, 192, 208]
+    result = bit_plane_slices(stack, (5,7,8))
+    assert result.shape == stack.shape
+    assert ( np.unique(result) == ground_truth).all()

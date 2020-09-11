@@ -7,9 +7,9 @@ from CTLungSeg.utils import load_image, save_pickle
 from CTLungSeg.utils import preprocess
 from CTLungSeg.method import imfill
 from CTLungSeg.method import gaussian_blur, otsu_threshold
-from CTLungSeg.method import gl2bit, get_bit
 from CTLungSeg.segmentation import opening, closing
 from CTLungSeg.segmentation import remove_spots, reconstruct_gg_areas, select_greater_connected_regions
+from CTLungSeg.segmentation import bit_plane_slices
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
@@ -49,9 +49,7 @@ def main():
 
     lung_mask = reconstruct_gg_areas(lung_mask)
     #BIT PLANE slices
-    bit_lung_mask = gl2bit(lung_mask * preprocess(DICOM), 8)
-    t_mask = get_bit(bit_lung_mask, 5) + get_bit(bit_lung_mask, 7) + get_bit(bit_lung_mask, 8)
-
+    t_mask = bit_plane_slices(lung_mask * preprocess(DICOM), (5,7,8))
     t_mask = otsu_threshold(preprocess(gaussian_blur(t_mask, (7,7))))
 
     lung_mask = np.logical_not(t_mask) * lung_mask

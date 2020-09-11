@@ -3,8 +3,9 @@
 
 import numpy as np
 
-from CTLungSeg.method import connected_components_wStats, erode, dilate
-
+from CTLungSeg.method import connected_components_wStats
+from CTLungSeg.method import erode, dilate
+from CTLungSeg.method import gl2bit, get_bit
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
@@ -136,3 +137,28 @@ def find_ROI(stats) :
     stats = stats.drop([0], axis = 0)
     corner = np.array([stats.min(axis = 0)['LEFT'], stats.min(axis = 0)['TOP'], np.max(stats['LEFT'] + stats['WIDTH']), np.max(stats['TOP'] + stats['HEIGHT'])])
     return np.where(corner == np.nan, np.int32(0), np.int32(corner))
+
+
+def bit_plane_slices(stack, bits):
+    """Convert each voxel GL into its 8-bit binary
+    rapresentation and return as output the stack
+    resulting from the sum of all the bith
+    specified in bits, with them significance.
+
+    Parameters
+    ----------
+    stack : array-like
+        image stack. each GL must be an 8-bit unsigned int
+    bits: tuple
+        tuple that specify which bit sum
+
+    Returns
+    -------
+    output : array-like
+        images stack in which each GL depends only to the significance of each specfied bit
+    """
+    binary = gl2bit(stack, 8)
+    output = 0
+    for bit in bits:
+        output = np.add(output,get_bit(binary, bit))
+    return output
