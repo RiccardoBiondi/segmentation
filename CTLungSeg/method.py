@@ -78,7 +78,7 @@ def connected_components_wStats(img):
     centroids: array-like
         centroid for each label fr each image of the stack
     """
-    columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
+    columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     if len(img.shape) == 2 :
         retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype('uint8'))
         return [retval, labels, pd.DataFrame(np.array(stats), columns=columns), centroids]
@@ -163,7 +163,7 @@ def otsu_threshold(img):
     Return
     ------
     out: array-like
-        threshlded image stack
+        thresholded image stack
     """
     if len(img.shape) == 2  :
         _, out = cv2.threshold(img, 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
@@ -193,8 +193,7 @@ def gl2bit(img, width) :
 
 
 def get_bit(img, bit_number) :
-    """
-    Return an image in which each voxel GL corresponds only to the required bit with its level of significance.
+    """Return an image in which each voxel GL corresponds only to the required bit with its level of significance.
 
     Parameters
     ----------

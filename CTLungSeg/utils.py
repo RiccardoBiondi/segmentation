@@ -238,7 +238,7 @@ def stats2dataframe (arr) :
     df: list of dataframe
         list of dataframe made from arr
     """
-    columns = ['TOP', 'LEFT', 'WIDTH', 'HEIGHT', 'AREA']
+    columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     return list(map(partial(pd.DataFrame, columns=columns), arr))
 
 
