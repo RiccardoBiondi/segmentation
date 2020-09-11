@@ -105,7 +105,7 @@ def test_preprocess(img):
 def test_subsamples(n_sample, n_subsamples):
     sample = np.array([np.ones((randint(1,301), randint(1, 301))) for i in range(n_sample)], dtype=np.ndarray)
     subsample = subsamples(sample, n_subsamples)
-    
+
     assert subsample.shape[0] == n_subsamples
 
 
