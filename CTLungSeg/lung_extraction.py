@@ -42,7 +42,6 @@ def main():
 
     body_mask = imfill(lung_mask)
     body_mask[body_mask == 255] = 1
-
     lung_mask = body_mask * np.logical_not(lung_mask)
     #filter out internal and external spots
     lung_mask = remove_spots(np.logical_not(lung_mask), args.isa)
@@ -52,6 +51,7 @@ def main():
     #BIT PLANE slices
     bit_lung_mask = gl2bit(lung_mask * preprocess(DICOM), 8)
     t_mask = get_bit(bit_lung_mask, 5) + get_bit(bit_lung_mask, 7) + get_bit(bit_lung_mask, 8)
+
     t_mask = otsu_threshold(preprocess(gaussian_blur(t_mask, (7,7))))
 
     lung_mask = np.logical_not(t_mask) * lung_mask
@@ -61,7 +61,6 @@ def main():
     lung_mask[lung_mask == 255] = 1
 
     DICOM = lung_mask * DICOM
-
 
     if args.mask not in ['', None] :
         save_pickle(args.mask, t_mask.astype(np.uint8))

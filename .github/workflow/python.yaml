@@ -1,4 +1,4 @@
-ame: CTLungSeg CI
+name: CTLungSeg CI
 
 on:
   push:

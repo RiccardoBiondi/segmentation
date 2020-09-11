@@ -8,7 +8,8 @@ except ImportError:
   from distutils.core import setup
   from distutils.core import find_packages
 
-
+__author__  = ['Riccardo Biondi', 'Nico Curti']
+__email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 def get_requires (requirements_filename):
   '''

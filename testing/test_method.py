@@ -19,6 +19,7 @@ import cv2
 import numpy as np
 from numpy import ones, zeros
 from numpy.random import rand
+from CTLungSeg.utils import load_image
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
@@ -99,14 +100,13 @@ def test_imfill(to_compare) :
     assert (filled == compare).all()
 
 
-@given(white_image, st.integers(2, 300))
+@given(white_image, st.iterables(st.integers(), min_size=2, max_size=200))
 @settings(max_examples = 20, deadline = None)
-def test_imfill_stack(white_image, n_img) :
+def test_imfill_stack(white_image, n_imgs) :
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
-    to_fill = np.array([image for i in range(n_img)])
-    compare = 255 * white_image(to_fill.shape)
+    to_fill = np.array([image for i in n_imgs])
     filled = imfill(to_fill)
-    assert (filled == compare).all()
+    assert (filled == (255 * white_image(to_fill.shape))).all()
 
 
 def test_connected_components_wStats() :
