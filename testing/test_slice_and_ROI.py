@@ -10,26 +10,48 @@ from numpy import ones, zeros
 from numpy.random import rand
 from CTLungSeg.method import connected_components_wStats
 
+
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
-@given(st.integers(2, 100), st.integers(2, 100), st.integers(50, 200), st.integers(100, 200))
+##
+# STRATEGIES DEFINITIONS
+##
+
+@st.composite
+def images_wlung_strategy(draw, heigt = st.integers(50, 70), width=st.integers(50, 70), n_imgs=st.integers(1, 100)) :
+    h = draw(heigt)
+    w = draw(width)
+    n = draw(n_imgs)
+    stack = zeros((n, 512, 512), dtype=np.uint8)
+    stack[:, 100 : h+100, 100 : w+100] = ones((h, w))
+    return stack
+
+
+@st.composite
+def images_wolung_strategy(draw, heigt = st.integers(5, 20), width=st.integers(5, 20), n_imgs=st.integers(1, 100)) :
+    h = draw(heigt)
+    w = draw(width)
+    n = draw(n_imgs)
+    stack = zeros((n, 512, 512), dtype=np.uint8)
+    stack[:, 100 : h+100, 100 : w+100] = ones((h, w))
+    return stack
+
+
+###
+#  START TESTING
+###
+
+
+@given(images_wlung_strategy(), images_wolung_strategy(), st.integers(600, 700))
 @settings(max_examples=20, deadline=None)
-def test_select_slice_wlung(slice_wlung, slice_wolung, w, h):
+def test_select_slice_wlung(stack_wlung, stack_wolung, min_area):
 
-    image_wlung = zeros((512, 512), dtype=np.uint8)
-    image_wolung = zeros((512, 512), dtype=np.uint8)
-    image_wlung[100 : h+120, 100 : w+120] = np.ones((h+20, w+20), dtype=np.uint8)
-    image_wolung[100 : h + 80, 100 : w + 80] = np.ones((h-20, w-20), dtype=np.uint8)
-
-    stack_wlung = np.array([image_wlung for i in range(slice_wlung)])
-    stack_wolung = np.array([image_wolung for i in range(slice_wolung)])
     stack = np.concatenate((stack_wlung, stack_wolung))
-
     _, _, stats, _ = connected_components_wStats(stack)
 
-    assert (select_slice_wlung(stack, w * h, stats) == stack_wlung).all()
+    assert (select_slice_wlung(stack, min_area, stats) == stack_wlung).all()
 
 
 @given(st.integers(20, 200), st.integers(20, 200), st.integers(2, 200))
