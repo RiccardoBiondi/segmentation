@@ -3,6 +3,7 @@
 
 import argparse
 import numpy as np
+from time import time
 from CTLungSeg.utils import load_image, save_pickle
 from CTLungSeg.utils import preprocess
 from CTLungSeg.method import imfill
@@ -46,23 +47,21 @@ def main():
     #filter out internal and external spots
     lung_mask = remove_spots(np.logical_not(lung_mask), args.isa)
     lung_mask = remove_spots(np.logical_not(lung_mask), args.esa)
-
     lung_mask = reconstruct_gg_areas(lung_mask)
     #BIT PLANE slices
     t_mask = bit_plane_slices(lung_mask * preprocess(DICOM), (5,7,8))
     t_mask = otsu_threshold(preprocess(gaussian_blur(t_mask, (7,7))))
 
-    lung_mask = np.logical_not(t_mask) * lung_mask
+    lung_mask = (np.logical_not(t_mask) * lung_mask).astype(np.uint8)
     lung_mask = closing(lung_mask, np.ones((7,7), dtype=np.uint8))
-
     lung_mask = select_greater_connected_regions(lung_mask, 2)
     lung_mask[lung_mask == 255] = 1
 
-    DICOM = lung_mask * DICOM
+    DICOM = lung_mask * preprocess(DICOM)
 
     if args.mask not in ['', None] :
         save_pickle(args.mask, t_mask.astype(np.uint8))
-    save_pickle(args.lung, DICOM.astype(np.float32))
+    save_pickle(args.lung, DICOM.astype(np.uint8))
 
 
 
