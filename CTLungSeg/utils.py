@@ -197,7 +197,7 @@ def subsamples(data, n_sub):
     img = data.copy()
     np.random.shuffle(img)
     img = np.array_split(img, n_sub)
-    return np.array(img)
+    return np.array(img, dtype=np.ndarray)
 
 
 
