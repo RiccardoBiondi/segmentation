@@ -80,11 +80,11 @@ def connected_components_wStats(img):
     """
     columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     if len(img.shape) == 2 :
-        retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype('uint8'))
+        retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype(np.uint8))
         return [retval, labels, pd.DataFrame(np.array(stats), columns=columns), centroids]
 
 
-    out = list(zip(*list(map(cv2.connectedComponentsWithStats, img.astype('uint8')))))
+    out = list(zip(*list(map(cv2.connectedComponentsWithStats, img.astype(np.uint8)))))
     return [np.array(out[0]), np.array(out[1]), utils.stats2dataframe(list(out[2])), list(out[3])]
 
 
