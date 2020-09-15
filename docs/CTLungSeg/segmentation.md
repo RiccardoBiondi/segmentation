@@ -11,7 +11,7 @@ This module contains useful functions to segment stack of images
 
 ## opening
 
-Perform an erosion followed by a dilation
+Perform an opening operations( erosion followed by a dilation) on the whole stack of images, according to the provided structuring element (kernel)
 
 **Parameters**
 
@@ -25,7 +25,7 @@ Perform an erosion followed by a dilation
 
 ## closing
 
-Perform a dilation followed by an erosion
+Perform a closing operations( erosion followed by a dilation) on the whole stack of images, according to the provided structuring element (kernel)
 
 **Parameters**
 
@@ -39,7 +39,7 @@ Perform a dilation followed by an erosion
 
 ## remove_spots
 
-Set to zero the GL of all the connected region with area lesser than area
+Set to zero the GL of all the connected region with area lesser than a minimum value.
 
 **Parameters**
 
@@ -90,7 +90,7 @@ This function interpolate each slice of the input mask to reconstruct the missin
 
 **Parameter**
 
-  *mask* : array-like, lung mask to reconstruct
+  *mask* : array-like, lung mask to reconstruct, must be a binary image.
 
 **Return**
 
@@ -102,8 +102,37 @@ Found the upper and lower corner of the smallest rectangle that still contains t
 
 **Parameter**
 
-  *stats*: pandas dataframe, dataframe that contains the stats of the connected regions. columns must be ...
+  *stats*: pandas dataframe, dataframe that contains the stats of the connected regions.
 
 **Return**
 
   *corners*: array-like, array which contains the coordinates of the upper and lower corner of the ROI organized as [x_top, y_top, x_bottom, y_bottom]
+
+#bit_plane_slices
+
+Convert each voxel GL into its 8-bit binary rapresentation and return as output the stack resulting from the sum of all the bit specified in bits, with them significance.
+
+**Parameters**
+
+  *stack* : array-like, image stack. each GL must be an 8-bit unsigned int
+
+  *bits*: tuple, tuple that specify which bit sum
+
+**Returns**
+
+  *output* : array-like, images stack in which each GL depends only to the significance of each specfied bit
+
+## imlabeling
+
+eturn the labeled image given the original image
+  tensor and the centroids
+
+**Parameters**
+
+  *image* : array-like, image to label
+
+  *centroids* : array-like, Centroids vector for KMeans clustering
+
+**Return**
+
+  *labeled* : array-like, Image in which each GL ia assigned on its label.

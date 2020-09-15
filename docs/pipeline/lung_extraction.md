@@ -2,57 +2,29 @@
 
 This script allows to isolate the lung regions from the rest of the body in an image stack. To achieve this purpose it will use some threshold and morphological operation.
 
-It takes as input the stack of images as *.pkl.npy* format.
+It takes as input the image tensor as numpy array stored into *.pkl.npy* or *.npz* format. An other accepted input is a path to a folder that contains the *.dcm* files.
 At the end of the execution the script save the stack with the extracted lung as *.pkl.npy* format. It is also possible to chose to save or not the binary lung mask.
 
-<html>
-  <head>
-	<style>
-	figure {
-		border: thin #c0c0c0 solid;
-    display: flex;
-    flex-flow: column;
-    padding: 5px;
-		max-width: 500px;
-	}
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/pipeline/images/dicom.png" width="500" height="500">
+  </div>
+  <div class="text_caption"> Rescaled image from which extract lungs </div>
+</a>
 
-	figcaption {
-		background-color: black;
-    color: gray;
-    font: italic smaller sans-serif;
-    padding: 7px;
-    text-align: center;
-	}
-</style>
-</head>
-<body>
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/lung_mask.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/pipeline/images/lung_mask.png" width="500" height="500">
+  </div>
+  <div class="text_caption"> Obtained lung mask</div>
+</a>
 
-<figure>
-	<img src="./images/dicom.png" alt="dicom"
-	title="dicom slice"  />
-	<figcaption>
-	Rescaled image from which extract lungs
-	</figcaption>
-</figure>
-
-<figure>
-	<img src="./images/lung_mask.png" alt=lung_mask"
-title="lung_mask slice" />
-	<figcaption>
-	Computed lung mask
-	</figcaption>
-</figure>
-
-<figure>
-	<img src="./images/lung.png" alt="lung"
-	title="lung"/>
-	<figcaption>
-	Extracted lung regions
-	</figcaption>
-</figure>
-
-</body>
-</html>
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/lung.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/pipeline/images/lung.png" width="500" height="500">
+  </div>
+  <div class="text_caption"> Extracted lung regions</div>
+</a>
 
 ## Usage
 
@@ -76,14 +48,17 @@ Optional arguments:
 
 * --ext_spot_area :int, default=200 **TODO**
 
-You can also run this script on multiple samples by calling it from the provided powershell script. In this case you have to create two folders: the first one(input) will contains the *.pkl.npy* files to process, the second one the results. Now you simply call the script from powershell by providing as the first parameter the path to the input older and as second the path to output folder:
+You can also run this script on multiple samples by calling it from the provided powershell or bash scripts. In this case you have to create two folders: the first one(input) will contains the files to process, the second one the results. ll the data must be in *.pkl.npy* or in *.dcm* format. In the DICOM case in each folder you have to create a subfolder for each patient that contains the *.dcm* files.
+
+ Now you simply call the script from powershell( or bash) by providing as the first parameter the path to the input older and as second the path to output folder:
+
 ```powershell
 PS /> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
 ```
 
 If you want to provide the optional arguments you have to write them as third argument as follows:
 ```powershell
-> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/  --int_spot_area=300
+PS /> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/  --int_spot_area=300
 ```
 
 **NOTE** : in this case you can't provide the *--mask* argument as optional.

@@ -2,87 +2,17 @@
 
 This modules contains useful functions to mange input and output image stacks and simple operations on single images
 
-1. [load_pickle](#load_pikle)
-2. [load_npz](#load_npz)
-3. [load_dicom](#load_dicom)
-4. [load_image](#load_image)
-5. [save_pickle](#save_pikle)
-6. [save_npz](#save_npz)
-7. [rescale](#rescale)
-8. [preprocess](#preprocess)
 
-## load_pikle
+1. [load_image](#load_image)
+2. [save_pickle](#save_pikle)
+3. [save_npz](#save_npz)
+4. [rescale](#rescale)
+5. [preprocess](#preprocess)
 
-This function load the '.pkl.npy' file that contains the image or the stack of images to process
-
-**Parameter**
-
-  *filename*: str, file name or path to load file as pickle
-
-**Return**
-
-  *data*: array like, numpy nd.array that contains the stack of images-
-
-  ```python
-    import cv2
-    import numpy as np
-    from CTLungSeg.utils import load_pickle
-
-    stack = load_pikle('./images/image.pkl.npy')
-    #
-    #Processing
-    #
-  ```
-
-## load_npz
-
-This function load the '.npz' file that contains the image or the stack of images to process
-
-**Parameter**
-
-  *filename*: str, file name or path to load file as pickle
-
-**Return**
-
-  *data*: array like, numpy nd.array that contains the stack of images-
-
-```python
-  import cv2
-  import numpy as np
-  from CTLungSeg.utils import load_npz
-
-  stack = load_npz('./images/image.npz')
-  #
-  #Processing
-  #
-```
-
-## load_dicom
-
-Load image in DICOM format and store it into a 3D numpy array
-
-**Parameter**
-
-  *filedir*: str, path to the directory that contains the dicom files
-
-**Returns**
-
-  *imgs*: array-like, image tensor
-
-```python
-import cv2
-import numpy as np
-from CTLungSeg.utils import load_dicom
-
-stack = load_dicom('./images/')
-#
-#Stack processing
-#
-```
 
 ## load_image
 
-Load a stack of images and return a 3D numpy array. The input file format can by .pkl.npy, .npz or a folder that contains .dcm files.
+Load a stack of images and return a 3D numpy array. The input file format can by .pkl.npy, .npz or a folder that contains .dcm files. Notice that this function doesn't provide any metadata informations, but only the image tensor.
 
 **Parameter**
 
@@ -107,7 +37,7 @@ Save in the processed stack of images '.pkl.npy' format. Data must be in a np.nd
 ```python
 import cv2
 import numpy as np
-from CTLungSeg.utils import load_pickle, save_pickle
+from CTLungSeg.utils import load_image, save_pickle
 
 stack = load_pikle('./images/image.pkl.npy')
 #
@@ -131,9 +61,9 @@ Save in the processed stack of images '.pkl.npy' format. Data must be in a np.nd
 ```python
 import cv2
 import numpy as np
-from CTLungSeg.utils import load_npz, save_npz
+from CTLungSeg.utils import load_image, save_npz
 
-stack = load_pikle('./images/image.pkl.npy')
+stack = load_image('./images/image.pkl.npy')
 #
 #Stack processing
 #
@@ -159,17 +89,17 @@ Rescale the image according to max, min input
 ```python
   import cv2
   import numpy as np
-  from CTLungSeg.utils import load_pickle, save_pickle
+  from CTLungSeg.utils import load_image, save_pickle
   from CTLungSeg.utils import rescale
 
-  stack = load_pikle('./images/image.pkl.npy')
+  stack = load_image('./images/image.pkl.npy')
   rescaled = rescale(stack, stack.max(), 0)
   save_pickle('./output_dir/output_filename',  rescaled)
 ```
 
 ## preprocess
 
-Set to zero all the negative pixel values, rescale the image and convert it a 8bit GL image.
+Set to zero all the negative pixel values, rescale the image and convert it a 8bit GL image. The returned image tensor is a 3D numpy array that contains np.uint8 values.
 
 **Parameter**
 
@@ -182,7 +112,7 @@ Set to zero all the negative pixel values, rescale the image and convert it a 8b
 ```python
   import cv2
   import numpy as np
-  from CTLungSeg.utils import load_pickle, save_pickle
+  from CTLungSeg.utils import load_image, save_pickle
   from CTLungSeg.utils import preprocess
 
   stack = load_pikle('./images/image.pkl.npy')
@@ -190,9 +120,16 @@ Set to zero all the negative pixel values, rescale the image and convert it a 8b
   save_pickle('./output_dir/output_filename',  stack)
 ```
 
-  <p style="text-align:center;"><img src="./images/not_rescaled.png" alt="original"
-  	title="original image" width="250" height="250" />
-    <caption>Original image</caption>
-    <img src="./images/rescaled.png" alt="ROI"
-  	title="ROI" width="250" height="250" />
-    <caption>preprocessed image</caption>
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/not_rescaled.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/not_rescaled.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Original image in HU units </div>
+</a>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> pre-processed image </div>
+</a>

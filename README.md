@@ -2,7 +2,7 @@
 |:------------:|:-----------:|:-----------------:|:-----------:|:----------------:|:------------:|
 | [**R. Biondi**](https://github.com/RiccardoBiondi) <br/> [**N. Curti**](https://github.com/Nico-Curti) | **COVID-19 Lung Segmentation** | **Linux/MacOS** : [![Build Status](https://travis-ci.com/RiccardoBiondi/segmentation.svg?branch=master)](https://travis-ci.com/RiccardoBiondi/segmentation) <br/>  **Windows** : [![Build status](https://ci.appveyor.com/api/projects/status/om6elsnkoi22xii3?svg=true)](https://ci.appveyor.com/project/RiccardoBiondi/segmentation) | [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/RiccardoBiondi/segmentation/blob/master/LICENSE.md) | **Codacy** : [![Codacy Badge](https://app.codacy.com/project/badge/Grade/cc0fd47ae8e44ab1943b1f74c2a3d7e2)](https://www.codacy.com/manual/RiccardoBiondi/segmentation?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RiccardoBiondi/segmentation&amp;utm_campaign=Badge_Grade) <br/> **Codebeat** : [![CODEBEAT](https://codebeat.co/badges/927db14b-36fc-42ed-88f1-09b2a9e1b9c0)](https://codebeat.co/projects/github-com-riccardobiondi-segmentation-master) | [![codecov](https://codecov.io/gh/RiccardoBiondi/segmentation/branch/master/graph/badge.svg)](https://codecov.io/gh/RiccardoBiondi/segmentation) |
 
-![Project CI](https://github.com/RiccardoBiondi/segmentation/workflows/Project%20CI/badge.svg)
+![Project CI](https://github.com/RiccardoBiondi/segmentation/workflows/CTLungSeg%20CI/badge.svg)
 
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/RiccardoBiondi/segmentation.svg?style=plastic)](https://github.com/RiccardoBiondi/segmentation/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/RiccardoBiondi/segmentation.svg?style=plastic)](https://github.com/RiccardoBiondi/segmentation/issues)
@@ -123,11 +123,11 @@ PS \> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
  - Once you have successfully isolated the lung, you have to remove all the regions and slices without lung, to achieve  this purpose simply run slice_and_ROI.ps1 by providing as arguments the input folder and the output one:
 
  ```powershell
-> ./slice_and_ROI.ps1 path/to/input/folder/ path/to/output/folder/
+PS \> ./slice_and_ROI.ps1 path/to/input/folder/ path/to/output/folder/
  ```
  The input folder must contains the extracted lung, the output ones will store the stack resulting from the selection. Notice that if input and output are the same folder, the script will overwrite the input files.
 
-- in the end you can start the training. Simply run train.ps1 by provinding as input folder the one that contains the results from the previous passages, and the output filename in which save the resulting centroids.
+- in the end you can start the training. Simply run train.ps1 by providing as input folder the one that contains the results from the previous passages, and the output filename in which save the resulting centroids.
 
 ```powershell
 PS /> ./slice_and_ROI.ps1 path/to/input/folder/ path/to/output/folder/centroids
@@ -155,7 +155,7 @@ The `COVID-19 Lung Segmentation` package is licensed under the MIT "Expat" Licen
 
 ## Contribution
 
-Any contribution is more than welcome `:heart:`. Just fill an [issue](./.github/ISSUE_TEMPLATE/ISSUE_TEMPLATE.md) or a [pull request](./.github/PULL_REQUEST_TEMPLATE/PULL_REQUEST_TEMPLATE.md) and we will check ASAP!
+Any contribution is more than welcome. Just fill an [issue](./.github/ISSUE_TEMPLATE/ISSUE_TEMPLATE.md) or a [pull request](./.github/PULL_REQUEST_TEMPLATE/PULL_REQUEST_TEMPLATE.md) and we will check ASAP!
 
 See [here](https://github.com/RiccardoBiondi/segmentation/blob/master/CONTRIBUTING.md) for further informations about how to contribute with this project.
 

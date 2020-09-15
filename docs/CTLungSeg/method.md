@@ -14,11 +14,11 @@ This module contains functions useful for the script execution. This functions e
 
 ## erode
 
-Compute the erosion for the whole stack of images. It is the extension for a stack of images of   [cv2.erode](https://docs.opencv.org/3.4/d4/d86/group__imgproc__filter.html#gaeb1e0c1033e3f6b891a25d0511362aeb) in opencv-python.
+Compute the erosion for the whole stack of images according to the provided structuring element(kernel). It is the extension for a stack of images of   [cv2.erode](https://docs.opencv.org/3.4/d4/d86/group__imgproc__filter.html#gaeb1e0c1033e3f6b891a25d0511362aeb) in opencv-python.
 
 **Parameters**
 
-  *img* : array-like, image or stack of images to erode
+  *img* : array-like, image or stack of images to erode, better if the images binary images
 
   *kernel* : (2D)array-like, kernel to apply to the input stack
 
@@ -31,11 +31,11 @@ Compute the erosion for the whole stack of images. It is the extension for a sta
 ```python
   import cv2
   import numpy as np
-  from CTLungSeg.utils import load_pickle, save_pickle
+  from CTLungSeg.utils import load_image, save_pickle
   from CTLungSeg.utils import rescale
   from CTLungSeg.method import erode
 
-  stack = load_pikle('./images/image.pkl.npy')
+  stack = load_image('./images/image.pkl.npy')
   stack[stack < 0] = 0
   stack = rescale(stack, stack.max(), 0)# apply a rescaling
   stack = 255 * np.where(stack > 0.1, 0, 1)#apply a threshold
@@ -44,20 +44,27 @@ Compute the erosion for the whole stack of images. It is the extension for a sta
   save_pickle('./output_dir/output_filename',  eroded)
 ```
 
-<p style="text-align:center;"><img src="./images/thresholded.png" alt="original"
-	title="input image" width="220" height="220" />
-  <caption>Thresholded image</caption>
-  <img src="./images/eroded.png" alt="ROI"
-	title="ROI" width="220" height="220" />
-  <caption>Eroded image</caption>
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Input Binary Image</div>
+</a>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/eroded.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/eroded.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Eroded Image</div>
+</a>
 
 ## dilate
 
-Compute the dilation for the whole stack of images. It is the extension for a stack of images of   [cv2.dilate](https://docs.opencv.org/3.4/d4/d86/group__imgproc__filter.html#ga4ff0f3318642c4f469d0e11f242f3b6c) in opencv-python.
+Compute the dilation for the whole stack of images accordig to the provided structuring element(kernel). It is the extension for a stack of images of   [cv2.dilate](https://docs.opencv.org/3.4/d4/d86/group__imgproc__filter.html#ga4ff0f3318642c4f469d0e11f242f3b6c) in opencv-python.
 
 **Parameters**
 
-  *img* : array-like, image or stack of images to dilate
+  *img* : array-like, image or stack of images to dilate, better if the images are binary.
 
   *kernel* : (2D)array-like, kernel to apply to the input stack
 
@@ -70,7 +77,7 @@ Compute the dilation for the whole stack of images. It is the extension for a st
 ```python
   import cv2
   import numpy as np
-  from CTLungSeg.utils import load_pickle, save_pickle
+  from CTLungSeg.utils import load_image, save_pickle
   from CTLungSeg.utils import rescale
   from CTLungSeg.method import dilate
 
@@ -83,17 +90,27 @@ Compute the dilation for the whole stack of images. It is the extension for a st
   save_pickle('./output_dir/output_filename',  dilated)
 ```
 
-<p style="text-align:center;"><img src="./images/thresholded.png" alt="original"
-	title="thresholded image" width="220" height="220" />
-  <caption>Original image</caption>
-  <img src="./images/dilated.png" alt="ROI
-	title="ROI" width="220" height="220" />
-  <caption>Dilated image</caption>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Input Binary Image </div>
+</a>
+
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/dilated.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/dilated.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Dilated Image</div>
+</a>
 
 ## connected_components_wStats
 
 Computes the connected components labeled image of boolean image and also
-produces a statistics output for each label. Is the extension for a stack of images of [cv2.connectedComponentsWithStats](https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html) function in opencv-python.
+produces a statistics output for each label. This function will also provide a pandas dataframe which contains 5 columns rapresenting the connected regions statistics. The provided imformations are: 'LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA', for  each region.
+This function is the extension for a stack of images of [cv2.connectedComponentsWithStats](https://docs.opencv.org/3.4/d3/dc0/group__imgproc__shape.html) function in opencv-python.
 
 **Parameters**
 
@@ -113,10 +130,10 @@ produces a statistics output for each label. Is the extension for a stack of ima
 ```python
   import cv2
   import numpy as np
-  from CTLungSeg.utils import load_pickle
+  from CTLungSeg.utils import load_image
   from CTLungSeg.method import connected_components_wStats
 
-  stack = load_pikle('./images/image.pkl.npy')
+  stack = load_image('./images/image.pkl.npy')
   stack= np.where(stack < 3, 0, 1) #apply a threshold to obtain boolean images
   ret, label, stats, centroids = connected_components_wStats(stack)
 ```
@@ -136,11 +153,11 @@ This function, based on `cv2.floodFill()` function, is useful to fill holes in t
 ```python
   import cv2
   import numpy as np
-  from CTLungSeg.utils import load_pickle, save_pickle
+  from CTLungSeg.utils import load_image, save_pickle
   from CTLungSeg.utils import rescale
   from CTLungSeg.method import imfill
 
-  stack = load_pikle('./images/image.pkl.npy')
+  stack = load_image('./images/image.pkl.npy')
   stack[stack < 0] = 0
   stack = rescale(stack, stack.max(), 0)# apply a rescaling
   stack = 255 * np.where(stack > 0.1, 0, 1)#apply a threshold
@@ -149,12 +166,21 @@ This function, based on `cv2.floodFill()` function, is useful to fill holes in t
   save_pickle('./output_filename', filled)
 ```
 
-<p style="text-align:center;"><img src="./images/thresholded.png" alt="original"
-	title="image after threshold" width="220" height="220" />
-  <caption>image after threshold</caption>
-  <img src="./images/filled.png" alt="ROI"
-	title="ROI" width="220" height="220" />
-  <caption>Filled image</caption>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Input Binary Image </div>
+</a>
+
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/filled.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/filled.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Filled Image Image </div>
+</a>
 
 ## median_blur
 
@@ -174,23 +200,31 @@ This function is an implementation for a stack of images of [cv2.medianBlur](htt
 ```python
   import cv2
   import numpy as np
-  from CTLungSeg.utils import load_pickle, save_pickle
+  from CTLungSeg.utils import load_image, save_pickle
   from CTLungSeg.utils import rescale
   from CTLungSeg.method import median_blur
 
-  stack = load_pikle('./images/image.pkl.npy')
+  stack = load_image('./images/image.pkl.npy')
   stack[stack < 0] = 0
   stack = rescale(stack, stack.max(), 0)
   blurred = median_blur(stack, 5)
   save_pickle('./output_filename', blurred)
 ```
 
-<p style="text-align:center;"><img src="./images/rescaled.png" alt="original"
-  title="rescaled" width="220" height="220" />
-  <caption>rescaled image</caption>
-  <img src="./images/blurred.png" alt="ROI"
-  title="ROI" width="220" height="220" />
-  <caption>blurred image</caption>
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Input rescaled Image </div>
+</a>
+
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/blurred.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/blurred.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Median Blurred Image </div>
+</a>
 
 ## gaussian_blur
 
@@ -215,18 +249,30 @@ Apply a gaussian blurring filter on an image or stack of images. This function i
 ```python
   import cv2
   import numpy as np
-  from CTLungSeg.utils import load_pickle, save_pickle
+  from CTLungSeg.utils import load_image, save_pickle
   from CTLungSeg.utils import rescale
   from CTLungSeg.method import gaussian_blur
 
-  stack = load_pikle('./images/image.pkl.npy')
+  stack = load_image('./images/image.pkl.npy')
   stack[stack < 0] = 0
   stack = rescale(stack, stack.max(), 0)
-  blurred = gaussian_blur(stack, (5,5))
+  blurred = gaussian_blur(stack, (11, 11))
   save_pickle('./output_filename', blurred)
 ```
 
-**TODO**: add images
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Input Image </div>
+</a>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/gaussian_blurred.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/gaussian_blurred.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Blurred Image </div>
+</a>
 
 ## otsu_threshold
 
@@ -243,11 +289,11 @@ Compute the best threshold value for each slice of the input image stack by usin
 ```python
   import cv2
   import numpy as np
-  from CTLungSeg.utils import load_pickle, save_pickle
+  from CTLungSeg.utils import load_image, save_pickle
   from CTLungSeg.utils import rescale
   from CTLungSeg.method import otsu
 
-  stack = load_pikle('./images/image.pkl.npy')
+  stack = load_image('./images/image.pkl.npy')
   stack[stack < 0] = 0
   stack = rescale(stack, stack.max(), 0)
   stack = (255 * stack).astype(np.uint8)
@@ -255,12 +301,19 @@ Compute the best threshold value for each slice of the input image stack by usin
   save_pickle('./output_filename', thr)
 ```
 
-<p style="text-align:center;"><img src="./images/rescaled.png" alt="original"
-  title="rescaled" width="250" height="250" />
-  <caption>input image</caption>
-  <img src="./images/thresholded.png" alt="thr"
-  title="thr" width="250" height="250" />
-  <caption>thresholded image</caption>
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Input Image </div>
+</a>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Thresholded Image </div>
+</a>
 
 ## gl2bit
 
@@ -289,3 +342,38 @@ Return an image in which each voxel GL corresponds only to the required bit with
 **Return**
 
   *out* array_like, bit_number image
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> Original Image </div>
+</a>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/5bit.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/5bit.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> 5-bit Image </div>
+</a>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/6bit.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/6bit.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> 6-bit Image </div>
+</a>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/7bit.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/7bit.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> 7-bit Image </div>
+</a>
+
+<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/8bit.png">
+  <div class="image">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/8bit.png" width="220" height="220">
+  </div>
+  <div class="text_caption"> 8-bit Image </div>
+</a>
