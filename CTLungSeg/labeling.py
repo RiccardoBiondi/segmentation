@@ -7,7 +7,7 @@ import numpy as np
 from sklearn.cluster import KMeans
 from CTLungSeg.utils import load_image, save_pickle, preprocess
 from CTLungSeg.method import median_blur
-from CTLungSeg.segmentation import opening
+from CTLungSeg.segmentation import opening, imlabeling
 
 __author__ = ['Riccado Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@tudio.unibo.it', 'nico.curti2@unibo.it']
@@ -31,10 +31,8 @@ def main():
     centroid = load_image(args.centroids)
     n_clusters = centroid.shape[0]
 
-    shape = images.shape
-    images = images.reshape((-1,1))
-    res = KMeans(n_clusters=n_clusters, init=centroid, n_init=1).fit(images)
-    labels = res.labels_.reshepe(shape)
+    labels = imlabeling(images, centroid)
+
     labels = median_blur(labels, 5)
     #create mask from labels
     labels[labels == 2] = 0

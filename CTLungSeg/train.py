@@ -56,7 +56,7 @@ def main():
 
     centroids = []
     for i,el in enumerate(samples) :
-        to_cluster = np.array([x.reshape(-1,) for x in el], dtype=np.float32)
+        to_cluster = np.array([x.reshape(-1,1) for x in el], dtype=np.float32)
         _, _, centr = cv2.kmeans(to_cluster, args.k, None, iter_stop_criteria, 10, centroid_init[args.init])
 
         centroids.append(np.array(centr))
