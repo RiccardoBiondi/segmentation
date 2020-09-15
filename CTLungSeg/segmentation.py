@@ -3,9 +3,12 @@
 
 import numpy as np
 
+from sklearn.cluster import KMeans
+
 from CTLungSeg.method import connected_components_wStats
 from CTLungSeg.method import erode, dilate
 from CTLungSeg.method import gl2bit, get_bit
+
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
@@ -162,3 +165,25 @@ def bit_plane_slices(stack, bits):
     for bit in bits:
         output = np.add(output,get_bit(binary, bit))
     return output
+
+
+def imlabeling(image, centroids) :
+    """Return the labeled image given the original image
+    tensor and the centroids
+
+    Parameters
+    ----------
+    image : array-like
+    image to label
+
+    centroids : array-like
+        Centroids vector for KMeans clustering
+
+    Return
+    ------
+    labeled : array-like
+        Image in which each GL ia assigned on its label.
+    """
+    to_label = image.reshape((-1,1))
+    res = KMeans(n_clusters=centroids.shape[0], init=centroids, n_init=1).fit(to_label)
+    return (res.labels_.reshape(image.shape)).astype(np.uint8)
