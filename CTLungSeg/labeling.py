@@ -4,7 +4,7 @@
 import cv2
 import argparse
 import numpy as np
-from sklearn.cluster import KMeans
+
 from CTLungSeg.utils import load_image, save_pickle, preprocess
 from CTLungSeg.method import median_blur
 from CTLungSeg.segmentation import opening, imlabeling

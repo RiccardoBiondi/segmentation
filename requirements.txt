@@ -2,5 +2,5 @@ numpy
 scikit-learn
 opencv-python
 pandas
-progressbar
+tdqm
 pydicom
