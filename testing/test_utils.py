@@ -51,20 +51,11 @@ def test_save_and_load_pkl(imgs,  filename):
 
 
 @given(rand_stack_strategy(), filename_strategy)
-@settings(max_examples = 20, deadline = None)
+@settings(max_examples = 20, deadline = None,suppress_health_check=(HC.too_slow,))
 def test_save_and_load_npz(imgs, filename):
     save_npz('./testing/images/' + filename, imgs)
     load = load_npz('./testing/images/' + filename + '.npz')
     assert (load == imgs).all()
-
-
-'''
-#testing load_dicom
-def test_load_dicom():
-    ref = load_pickle('./testing/images/test_dicom/DICOM_gt.pkl.npy')
-    img = load_dicom('./testing/images/test_dicom/DICOM/')
-    assert (ref == img).all()
-'''
 
 
 def test_load_img() :

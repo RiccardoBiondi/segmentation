@@ -7,7 +7,7 @@ from sklearn.cluster import KMeans
 
 from CTLungSeg.method import connected_components_wStats
 from CTLungSeg.method import erode, dilate
-from CTLungSeg.method import gl2bit, get_bit
+from CTLungSeg.method import gl2bit
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
@@ -59,9 +59,10 @@ def remove_spots(img, area):
     _, lab, stats, _ = connected_components_wStats(img)
 
     for i,stat in enumerate(stats):
-        for j in stat.query('AREA <' + str(area)).index:
+        for j in stat.query('AREA < {}'.format(str(area))).index:
             lab[i][lab[i] == j] = 0
-    return (lab != 0)
+    lab = lab != 0
+    return lab.astype(np.uint8)
 
 
 def select_greater_connected_regions(img, n_reg):
@@ -86,7 +87,7 @@ def select_greater_connected_regions(img, n_reg):
 
         if len(stat.index ) > n_reg-1:
             for i in range(n_reg):
-                index  = stat.query('AREA ==' + str(stat.iat[i, 4])).index
+                index  = stat.query('AREA == {}'.format(str(stat.iat[i, 4]))).index
                 lab[lab == np.uint8(index)] = 255
             lab[lab != 255] = 0
         else :
@@ -139,7 +140,7 @@ def find_ROI(stats) :
     """
     stats = stats.drop([0], axis = 0)
     corner = np.array([stats.min(axis = 0)['LEFT'], stats.min(axis = 0)['TOP'], np.max(stats['LEFT'] + stats['WIDTH']), np.max(stats['TOP'] + stats['HEIGHT'])])
-    return np.where(corner == np.nan, np.int32(0), np.int32(corner))
+    return np.nan_to_num(corner, copy=False).astype('int16')
 
 
 def bit_plane_slices(stack, bits):
@@ -160,11 +161,11 @@ def bit_plane_slices(stack, bits):
     output : array-like
         images stack in which each GL depends only to the significance of each specfied bit
     """
-    binary = gl2bit(stack, 8)
-    output = 0
-    for bit in bits:
-        output = np.add(output,get_bit(binary, bit))
-    return output
+    binary = gl2bit(stack)
+    bit = np.asarray(bits)
+    selection = binary[8 - bit, ...]
+    significance = np.asarray([2**(i - 1) for i in bit]).reshape(3, 1, 1, 1)
+    return (np.sum(selection * significance, axis=0)).astype(np.uint8)
 
 
 def imlabeling(image, centroids) :

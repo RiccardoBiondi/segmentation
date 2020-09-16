@@ -7,7 +7,7 @@ from time import time
 from CTLungSeg.utils import load_image, save_pickle
 from CTLungSeg.utils import preprocess
 from CTLungSeg.method import imfill
-from CTLungSeg.method import gaussian_blur, otsu_threshold
+from CTLungSeg.method import median_blur,gaussian_blur, otsu_threshold
 from CTLungSeg.segmentation import opening, closing
 from CTLungSeg.segmentation import remove_spots, reconstruct_gg_areas, select_greater_connected_regions
 from CTLungSeg.segmentation import bit_plane_slices
@@ -36,28 +36,36 @@ def main():
 
     args = parse_args()
     DICOM = load_image(args.input)
+    DICOM = preprocess(DICOM)
 
-    lung_mask = otsu_threshold(gaussian_blur(preprocess(DICOM), (5,5)))
-    lung_mask = opening(lung_mask, kernel=np.ones((5,5), dtype=np.uint8))
-    lung_mask = opening(lung_mask, kernel=np.ones((11,11), dtype=np.uint8))
+    lung_mask = otsu_threshold(gaussian_blur(DICOM, (5,5)))
+    kernel = np.ones((5,5), dtype=np.uint8)
+    lung_mask = opening(lung_mask, kernel=kernel)
+    kernel = np.ones((11,11), dtype=np.uint8)
+    lung_mask = opening(lung_mask, kernel=kernel)
 
     body_mask = imfill(lung_mask)
-    body_mask[body_mask == 255] = 1
-    lung_mask = body_mask * np.logical_not(lung_mask)
+    body_mask = body_mask == 255
+    lung_mask = body_mask & np.logical_not(lung_mask)
     #filter out internal and external spots
-    lung_mask = remove_spots(np.logical_not(lung_mask), args.isa)
-    lung_mask = remove_spots(np.logical_not(lung_mask), args.esa)
+    lung_mask = lung_mask == 0
+    lung_mask = remove_spots(lung_mask, args.isa)
+    lung_mask = lung_mask == 0
+    lung_mask = remove_spots(lung_mask, args.esa)
+
     lung_mask = reconstruct_gg_areas(lung_mask)
     #BIT PLANE slices
-    t_mask = bit_plane_slices(lung_mask * preprocess(DICOM), (5,7,8))
+    t_mask = bit_plane_slices(lung_mask * DICOM, (5,7,8))
     t_mask = otsu_threshold(preprocess(gaussian_blur(t_mask, (7,7))))
 
-    lung_mask = (np.logical_not(t_mask) * lung_mask).astype(np.uint8)
-    lung_mask = closing(lung_mask, np.ones((7,7), dtype=np.uint8))
+    t_mask = ~t_mask
+    lung_mask= lung_mask & t_mask
+    kernel = np.ones((7,7), dtype = np.uint8)
+    lung_mask = closing(lung_mask,kernel=kernel)
     lung_mask = select_greater_connected_regions(lung_mask, 2)
-    lung_mask[lung_mask == 255] = 1
+    lung_mask = lung_mask != 0
 
-    DICOM = lung_mask * preprocess(DICOM)
+    DICOM = lung_mask * DICOM
 
     if args.mask not in ['', None] :
         save_pickle(args.mask, t_mask.astype(np.uint8))

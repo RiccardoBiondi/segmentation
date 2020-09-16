@@ -14,7 +14,7 @@ from CTLungSeg.method import median_blur
 from CTLungSeg.method import gaussian_blur
 from CTLungSeg.method import otsu_threshold
 from CTLungSeg.method import gl2bit
-from CTLungSeg.method import get_bit
+
 
 import cv2
 import numpy as np
@@ -154,14 +154,5 @@ def test_otsu_threshold(stack):
 @settings(max_examples = 2, deadline = None)
 def test_gl2bit(n_imgs) :
     input = np.ones((n_imgs, 100, 100), dtype = np.uint8)
-    result = gl2bit(input, 8)
-    assert np.unique(result) == ["00000001"]
-
-
-@given(rand_stack_strategy(), st.integers(1,8))
-@settings(max_examples = 2, deadline = None)
-def test_get_bit(stack, bit_number) :
-
-    input = gl2bit(stack, 8)
-    result = get_bit(input, bit_number)
-    assert (np.unique(result) == [0, 2**(bit_number -1)]).all()
+    result = gl2bit(input)
+    assert (np.unique(result) == [0,1]).all()

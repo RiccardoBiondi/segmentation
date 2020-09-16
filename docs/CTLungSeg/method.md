@@ -10,7 +10,6 @@ This module contains functions useful for the script execution. This functions e
 6. [gaussian_blur](#gaussian_blur)
 7. [otsu_threshold](#otsu_threshold)
 8. [gl2bit](#gl2bit)
-9. [get_bit](#get_bit)
 
 ## erode
 
@@ -328,52 +327,3 @@ Convert the grey level of each voxel of a stack of images into its binary repres
 **Return**
 
   *binarized* : array-like, image tensor in which each voxel GL value is replaced by a str that contains its binary representation.
-
-## get_bit
-
-Return an image in which each voxel GL corresponds only to the required bit with its level of significance.
-
-**Parameters**
-
-  *img* : array_like, image converted in bit from which extract the required bit
-
-  *bit_number* : int, number of bit to extract: 8 for MSB, 1 for LSB
-
-**Return**
-
-  *out* array_like, bit_number image
-
-<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png">
-  <div class="image">
-    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/rescaled.png" width="220" height="220">
-  </div>
-  <div class="text_caption"> Original Image </div>
-</a>
-
-<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/5bit.png">
-  <div class="image">
-    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/5bit.png" width="220" height="220">
-  </div>
-  <div class="text_caption"> 5-bit Image </div>
-</a>
-
-<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/6bit.png">
-  <div class="image">
-    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/6bit.png" width="220" height="220">
-  </div>
-  <div class="text_caption"> 6-bit Image </div>
-</a>
-
-<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/7bit.png">
-  <div class="image">
-    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/7bit.png" width="220" height="220">
-  </div>
-  <div class="text_caption"> 7-bit Image </div>
-</a>
-
-<a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/8bit.png">
-  <div class="image">
-    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/8bit.png" width="220" height="220">
-  </div>
-  <div class="text_caption"> 8-bit Image </div>
-</a>
