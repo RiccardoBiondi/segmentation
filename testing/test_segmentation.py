@@ -51,17 +51,34 @@ def centroids_strategy(draw, centroid = st.integers(0, 255)) :
     assume(c < d)
     return np.array([a, b, c, d], dtype=np.uint8)
 
+#square image strategy
+@st.composite
+def square_image_strategy(draw, side = st.integers(50,200)) :
+    L = draw(side)
+    square = ones((512,512), dtype=np.uint8)
+    square[100 : 100 + L, 100 : 100 + L ] = zeros((L,L), dtype=np.uint8)
+    return (square, L)
 
-#@given(image, st.integers(1,20), st.integers(1,11))
-#@settings(max_examples = 20, deadline = None)
-#def test_opening(img, stack_size, kernel_size) :
-#    opened = closing(img(stack_size, 300, 300), np.ones((kernel_size, kernel_size), dtype=np.uint8))
+
+#####################################################
+###                START TESTS                    ###
+#####################################################
 
 
-#@given(image, st.integers(1,20), st.integers(1,11))
-#@settings(max_examples = 20, deadline = None)
-#def test_closing(img, stack_size, kernel_size) :
-#    closed = closing(img(stack_size, 300, 300), np.ones((kernel_size, kernel_size), dtype=np.uint8))
+@given(square_image_strategy(), kernel_strategy())
+@settings(max_examples = 20, deadline = None)
+def test_opening(img, kernel) :
+    opened = opening(img[0], kernel )
+    square_area = opened.size - np.sum(opened)
+    assert (square_area >= img[1] ** 2)
+
+
+@given(square_image_strategy(), kernel_strategy())
+@settings(max_examples = 20, deadline = None)
+def test_closing(img, kernel) :
+    closed = closing(img[0], kernel)
+    square_area = closed.size - np.sum(closed)
+    assert square_area <= img[1]**2
 
 
 @given(st.integers(2, 300), st.integers(0,3))
@@ -95,7 +112,7 @@ def test_find_ROI(x, y, w, h) :
 def test_bit_plane_slices(stack) :
     ground_truth = [0, 16, 64, 80, 128, 144, 192, 208]
     result = bit_plane_slices(stack, (5,7,8))
-    
+
     assert result.shape == stack.shape
     assert ( np.unique(result) == ground_truth).all()
 
