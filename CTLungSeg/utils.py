@@ -67,7 +67,7 @@ def load_dicom(filedir):
     imgs: array-like
         image tensor
     """
-    dicoms = glob('{}/*'.format(filedir))
+    dicoms = glob('{}/*.dcm'.format(filedir))
     z = [float(pydicom.dcmread(f, force = True)[('0020', '0032')][-1]) for f in dicoms]
     order = np.argsort(z)
     dicoms = np.asarray(dicoms)[order]
