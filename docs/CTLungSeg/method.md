@@ -10,6 +10,7 @@ This module contains functions useful for the script execution. This functions e
 6. [gaussian_blur](#gaussian_blur)
 7. [otsu_threshold](#otsu_threshold)
 8. [gl2bit](#gl2bit)
+9. [connected_components_wAreas_3d](#connected_components_wAreas_3d)
 
 ## erode
 
@@ -327,3 +328,17 @@ Convert the grey level of each voxel of a stack of images into its binary repres
 **Return**
 
   *binarized* : array-like, image tensor in which each voxel GL value is replaced by a str that contains its binary representation.
+
+
+## connected_components_wAreas_3d
+
+Found all the connected components in three dimensions of  the image tensor and te corresponding areas. THhe used connectivity is 26.
+
+**Parameter**
+
+  *image* : array-like, Binary stack of images
+
+**Return**
+
+  *labeled* : array-like, image in which each voxel is assigned to a connected region
+  *areas* :array-like, array of areas(in pixel) of each connected region.

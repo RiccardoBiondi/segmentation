@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import cv2
 import argparse
 import numpy as np
 
@@ -18,8 +17,10 @@ def parse_args():
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument('--input', dest='filename', required=True, type=str, action='store', help='Input filename')
-    parser.add_argument('--centroids', dest='centroids', required=True, type=str, action='store', help='Centroids')
-    parser.add_argument('--output', dest='out', required=True, type=str, action='store', help='output filename')
+    parser.add_argument('--centroids', dest='centroids', required=True, type=str, action='store', help='centroids')
+    parser.add_argument('--label1', dest='lab1', required=True, type=str, action='store', help='output name of first label')
+    parser.add_argument('--label2', dest='lab2', required=True, type=str, action='store', help='output name of second label')
+
 
     args = parser.parse_args()
     return args
@@ -28,33 +29,23 @@ def parse_args():
 def main():
     args = parse_args()
     images = load_image(args.filename)
-    centroid = load_image(args.centroids)
-    n_clusters = centroid.shape[0]
+    centroids = load_image(args.centroids)
 
-    labels = imlabeling(images, centroid)
+    images = preprocess(images)
+    images = median_blur(images, 5)
 
-    labels = median_blur(labels, 5)
-    #create mask from labels
-    labels[labels == 2] = 0
-    labels[labels == 3] = 1
-    labels = opening(labels, np.ones((5,5), np.uint8))
+    labels = imlabeling(images, centroids)
+
+    #separate the different labels
+    lab_1 = (labels == 1).astype(np.uint8)
+    lab_2 = (labels == 2).astype(np.uint8)
+    #clean up the labels
+    kernel = np.ones((5,5), dtype = np.uint8)
+    lab_1 = opening(lab_1, kernel)
+    lab_2 = opening(lab_2, kernel)
     #
-    images = labels * images
-    images = (median_blur(preprocess(images), 9)).astype(np.float32)
-
-    criteria = (cv2.TERM_CRITERIA_EPS +cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-    init = [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
-    _, labels,_ = cv2.kmeans(images.reshape(-1,), 3, None,criteria, 10, init[1])
-
-    labels = (labels.reshape(images.shape)).astype(np.uint8)
-    labels = median_blur(labels, 7)
-    labels[labels == 2] = 1
-
-
-
-
-    save_pickle(args.out, labels)
-
+    save_pickle(args.lab1, lab_1)
+    save_pickle(args.lab2, lab_2)
 
 if __name__ == '__main__' :
     main()

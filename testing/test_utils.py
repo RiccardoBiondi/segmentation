@@ -43,7 +43,7 @@ def rand_stack_strategy(draw, n_imgs = st.integers(2, 50)) :
 #START TESTING
 
 @given(rand_stack_strategy(), filename_strategy)
-@settings(max_examples = 20, deadline = None)
+@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_save_and_load_pkl(imgs,  filename):
     save_pickle('./testing/images/' + filename, imgs)
     load = load_pickle('./testing/images/' + filename + '.pkl.npy')

@@ -1,11 +1,14 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import cv2
 import numpy as np
 
 from sklearn.cluster import KMeans
+from tqdm import tqdm
 
 from CTLungSeg.method import connected_components_wStats
+from CTLungSeg.method import connected_components_wAreas_3d
 from CTLungSeg.method import erode, dilate
 from CTLungSeg.method import gl2bit
 
@@ -65,35 +68,23 @@ def remove_spots(img, area):
     return lab.astype(np.uint8)
 
 
-def select_greater_connected_regions(img, n_reg):
-    """Select the n_reg grater connecter regions in each slice of the stack and remove the others. If the image contains less than n_reg regions, no region will be selected.
+def select_largest_connected_region_3d(img):
+    """Select the larger connected regions of the iamge tesor.
+        NOTE: do not consider backgroung as connected region
 
     Parameters
     ----------
     img : array-like
-        Image tensor; better if the images are binary
-    n_reg : int
-        number of connected regions to select. The background it is not considered as connected regions
+        binary image tensor
     Return
     ------
     dst : array-like
-        binary image with only the n_reg connected regions
+        binary image with only the largest connected region
     """
-    m = []
-    _, labs , stats, _ = connected_components_wStats(img)
-    for stat, lab in zip(stats, labs):
-        stat = stat.drop(index = 0)
-        stat = stat.sort_values(by = ['AREA'], ascending = False)
-
-        if len(stat.index ) > n_reg-1:
-            for i in range(n_reg):
-                index  = stat.query('AREA == {}'.format(str(stat.iat[i, 4]))).index
-                lab[lab == np.uint8(index)] = 255
-            lab[lab != 255] = 0
-        else :
-            lab[lab != 0] = 0
-        m.append(lab)
-    return np.asarray(m, dtype = np.uint8)
+    connected, areas = connected_components_wAreas_3d(img)
+    areas = np.delete(areas, np.argmax(areas))
+    dst = (connected == np.argmax(areas) + 1)
+    return dst
 
 
 def reconstruct_gg_areas(mask):
@@ -185,6 +176,42 @@ def imlabeling(image, centroids) :
     labeled : array-like
         Image in which each GL ia assigned on its label.
     """
+    weigth = (image != 0).astype(np.uint8)
     to_label = image.reshape((-1,1))
-    res = KMeans(n_clusters=centroids.shape[0], init=centroids, n_init=1).fit(to_label)
-    return (res.labels_.reshape(image.shape)).astype(np.uint8)
+    res = KMeans(n_clusters=centroids.shape[0], init=centroids, n_init=1).fit_predict(to_label, sample_weight = weigth.reshape(-1,))
+
+    return res.reshape(image.shape)
+
+
+def subsamples_kmeans_wo_bkg(imgs, n_centroids, stopping_criteria, centr_init) :
+    """
+    Apply the kmenas clustering on each stack of images in subsample.
+    During clustering do not consider the background pixels that must be set to 0.
+
+    Parameters :
+    ----------
+    imgs : array-like
+        array of images tensor
+    n_centroids : int
+        number of centroids to find
+    stopping_criteria :
+        It is the iteration termination criteria. When this criteria
+        is satisfied, algorithm iteration stops.
+    center_init :
+        centroid initialization technique; can be
+        cv2.KMEANS_RANDOM_CENTERS or cv2.KMEANS_PP_CENTERS.
+
+    Return
+    ------
+    centroids : array-like
+        array that contains the n_centroids estimated for each
+        subsample
+    """
+    centroids = []
+
+    for el in tqdm(imgs) :
+        to_cluster = el[el != 0] # remove bkg pixel
+        to_cluster =  to_cluster.astype(np.float32) # cast to correct type
+        _,_,centr = cv2.kmeans(to_cluster.reshape((-1,1)), n_centroids, None, stopping_criteria, 10, centr_init)
+        centroids.append(centr)
+    return np.asarray(centroids, dtype= np.float32)

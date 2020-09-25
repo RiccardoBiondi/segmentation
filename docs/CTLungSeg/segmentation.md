@@ -5,9 +5,12 @@ This module contains useful functions to segment stack of images
 1. [opening](#opening)
 2. [closing](#closing)
 3. [remove_spots](#remove_spots)
-4. [select_greater_connected_regions](#select_greater_connected_regions)
+4. [select_larger_connected_region_3](#select_lergest_connected_region_3d)
 5. [reconstruct_gg_areas](#reconstruct_gg_areas)
 6. [find_ROI](#find_ROI)
+7. [bit_plane_slices](#bit_plane_slices)
+8. [imlabeling](#imlabeling)
+9. [subsamples_kmeans_wo_bkg](#subsamples_kmeans_wo_bkg)
 
 ## opening
 
@@ -68,19 +71,18 @@ filled = remove_spots(img, 500)
 save_pickle('./images/filled.pkl.npy')
 ```
 
-## select_greater_connected_regions
+## select_larger_connected_region_3d
 
-Select the n_reg greater connected regions in each slice of the stack and remove the others. If the image contains less than n_reg regions, no region will be selected.
+Select the larger connected regions of the image tesor.
+*NOTE*: do not consider background as connected region
 
 **Parameters**
 
-  *img* : array-like, Image tensor; better if the images are binary
-
-  *n_reg* : int, number of connected regions to select. The background it is not considered as connected regions
+  *img* : array-like, binary image tesnor
 
 **Return**
 
-  *dst* : array-like, binary image with only the n_reg connected regions
+  *dst* : array-like, binary image with only the largest connected region
 
 **TODO** add usage example and images
 
@@ -122,10 +124,22 @@ Convert each voxel GL into its 8-bit binary rapresentation and return as output 
 
   *output* : array-like, images stack in which each GL depends only to the significance of each specfied bit
 
+## bit_plane_slices
+
+Convert each voxel GL into its 8-bit binary rapresentation and return as output the stack resulting from the sum of all the bit specified in bits, with them significance.
+
+**Parameters**
+
+  *stack* : array-like, image stack. each GL must be an 8-bit unsigned int
+  *bits*: tuple, tuple that specify which bit sum
+
+**Returns**
+
+  *output* : array-like, images stack in which each GL depends only to the significance of each specified bit
+
 ## imlabeling
 
-eturn the labeled image given the original image
-  tensor and the centroids
+Label a an image tensor according to the provided centroids.
 
 **Parameters**
 
@@ -135,4 +149,20 @@ eturn the labeled image given the original image
 
 **Return**
 
-  *labeled* : array-like, Image in which each GL ia assigned on its label.
+  *labeled* : array-like, Image in which each GL is assigned on its label.
+
+## subsamples_kmeans_wo_bkg
+
+Apply the kmeans clustering on each stack of images in subsample. During clustering do not consider the background pixels that must be set to 0.
+
+**Parameters** :
+
+  *imgs* : array-like, array of images tensor
+  *n_centroids* : int, number of centroids to find
+  *stopping_criteria* :It is the iteration termination criteria. When this criteria
+      is satisfied, algorithm iteration stops.
+  *center_init* :centroid initialization technique; can be cv2.KMEANS_RANDOM_CENTERS or cv2.KMEANS_PP_CENTERS.
+
+**Return**
+
+  *centroids* : array-like, array that contains the n_centroids estimated for each subsample

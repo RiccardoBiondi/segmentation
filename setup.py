@@ -109,7 +109,6 @@ setup(
     entry_points={
         'console_scripts': [
         'lung_extraction = CTLungSeg.lung_extraction:main',
-        'slice_and_ROI = CTLungSeg.slice_and_ROI:main',
         'labeling = CTLungSeg.labeling:main',
         'train = CTLungSeg.tain:main'
     ]},

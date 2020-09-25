@@ -4,3 +4,4 @@ opencv-python
 pandas
 tdqm
 pydicom
+connected-components-3d

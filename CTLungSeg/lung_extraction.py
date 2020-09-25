@@ -3,14 +3,15 @@
 
 import argparse
 import numpy as np
-from time import time
+
 from CTLungSeg.utils import load_image, save_pickle
 from CTLungSeg.utils import preprocess
 from CTLungSeg.method import imfill
 from CTLungSeg.method import median_blur,gaussian_blur, otsu_threshold
 from CTLungSeg.segmentation import opening, closing
-from CTLungSeg.segmentation import remove_spots, reconstruct_gg_areas, select_greater_connected_regions
+from CTLungSeg.segmentation import remove_spots, reconstruct_gg_areas
 from CTLungSeg.segmentation import bit_plane_slices
+from CTLungSeg.segmentation import select_largest_connected_region_3d
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
@@ -18,7 +19,7 @@ __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 def parse_args():
-    description = 'Lung Segmentation'
+    description = 'Lung Extraction'
     parser = argparse.ArgumentParser(description=description)
 
     parser.add_argument('--input', dest='input', required=True, type=str, action='store', help='Input filename, must be .pkl.npy format')
@@ -30,7 +31,14 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+#bimarize ??
 
+
+#def remove_int_ext_spots(isa, esa) :
+#   pass
+
+#def lung_extraction(DICOM, isa, esa) :
+#   pass
 
 def main():
 
@@ -43,7 +51,7 @@ def main():
     lung_mask = opening(lung_mask, kernel=kernel)
     kernel = np.ones((11,11), dtype=np.uint8)
     lung_mask = opening(lung_mask, kernel=kernel)
-
+    #extract lung
     body_mask = imfill(lung_mask)
     body_mask = body_mask == 255
     lung_mask = body_mask & np.logical_not(lung_mask)
@@ -52,24 +60,26 @@ def main():
     lung_mask = remove_spots(lung_mask, args.isa)
     lung_mask = lung_mask == 0
     lung_mask = remove_spots(lung_mask, args.esa)
-
+    #
     lung_mask = reconstruct_gg_areas(lung_mask)
     #BIT PLANE slices
     t_mask = bit_plane_slices(lung_mask * DICOM, (5,7,8))
     t_mask = otsu_threshold(preprocess(gaussian_blur(t_mask, (7,7))))
-
     t_mask = ~t_mask
     lung_mask= lung_mask & t_mask
     kernel = np.ones((7,7), dtype = np.uint8)
     lung_mask = closing(lung_mask,kernel=kernel)
-    lung_mask = select_greater_connected_regions(lung_mask, 2)
-    lung_mask = lung_mask != 0
+    #
+    kernel = np.ones((5,5), dtype = np.uint8)
+    lung_mask = opening(lung_mask, kernel)
 
-    DICOM = lung_mask * DICOM
+    lung_mask = select_largest_connected_region_3d(lung_mask)
+
+    lung = lung_mask * DICOM
 
     if args.mask not in ['', None] :
         save_pickle(args.mask, t_mask.astype(np.uint8))
-    save_pickle(args.lung, DICOM.astype(np.uint8))
+    save_pickle(args.lung, lung.astype(np.uint8))
 
 
 

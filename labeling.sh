@@ -6,9 +6,9 @@ reset='\033[0m]' #No Color
 
 
 input_dir=$1
-output_dir=$2
-centroids=$3
-
+centroids=$2
+label1_dir=$3
+label2_dir=$4
 
 
 # check if the input directory exists and it is provided
@@ -24,20 +24,6 @@ elif [ ! -d "$input_dir" ]; then
 
 fi
 
-# check if the output directory exists and it is provided
-if [ -z "$output_dir" ]; then
-
-  echo -e "${red}Error! Output directory not set${reset}"
-  exit 1
-
-# comment the following lines if
-# the output directory could not exist
-elif [ ! -d "$output_dir" ]; then
-
-  echo -e "${red}Error! Output directory not found${reset}"
-  exit 1
-
-fi
 
 #chck if the centroids file is provided
 if [ -z "$centroids" ]; then
@@ -53,6 +39,38 @@ elif [ ! -f "$centroids" ]; then
 
 fi
 
+
+# check if the  first label dirrectory exists and it is provided
+if [ -z "$label1_dir" ]; then
+
+  echo -e "${red}Error! Output directory for label 1 not set${reset}"
+  exit 1
+
+# comment the following lines if
+# the output directory could not exist
+elif [ ! -d "$label1_dir" ]; then
+
+  echo -e "${red}Error! Output directory for label 1 not found${reset}"
+  exit 1
+
+fi
+
+
+# check if the  first label dirrectory exists and it is provided
+if [ -z "$label1_dir" ]; then
+
+  echo -e "${red}Error! Output directory for label 1 not set${reset}"
+  exit 1
+
+# comment the following lines if
+# the output directory could not exist
+elif [ ! -d "$label1_dir" ]; then
+
+  echo -e "${red}Error! Output directory for label 1 not found${reset}"
+  exit 1
+
+fi
+
 # list all the pickle files into the input directory
 input_files=$(ls "$input_dir")
 echo "Found ${#input_files[@]} files to process"
@@ -64,7 +82,7 @@ for file in $input_files; do
   printf "* Processing $file ...       "
   f="${file%%.*}"
 
-  python3 -m CTLungSeg.labeling --input="$input_dir$file" --output="$output_dir$f" --centroids="$centroids"
+  python3 -m CTLungSeg.labeling --input="$input_dir$file"  --centroids="$centroids" --label1="$label1_dir$f" --label2="$label2_dir$f"
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

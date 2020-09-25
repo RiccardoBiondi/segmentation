@@ -6,12 +6,16 @@ import hypothesis.strategies as st
 from hypothesis import given, settings, assume
 from  hypothesis import HealthCheck as HC
 
+from CTLungSeg.utils import subsamples
+
 from CTLungSeg.segmentation import opening
 from CTLungSeg.segmentation import closing
-from CTLungSeg.segmentation import select_greater_connected_regions
+from CTLungSeg.segmentation import remove_spots
+from CTLungSeg.segmentation import select_largest_connected_region_3d
 from CTLungSeg.segmentation import find_ROI
 from CTLungSeg.segmentation import bit_plane_slices
 from CTLungSeg.segmentation import imlabeling
+from CTLungSeg.segmentation import subsamples_kmeans_wo_bkg
 
 
 import cv2
@@ -28,7 +32,7 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
  # Strategies definitions
 
 @st.composite
-def rand_stack_strategy(draw, n_imgs = st.integers(1, 20)) :
+def rand_stack_strategy(draw, n_imgs = st.integers(10, 30)) :
     """Create a stack of white noise 8-bit images"""
     N = draw(n_imgs)
     return (255 * np.random.rand(N, 300, 300)).astype(np.uint8)
@@ -53,11 +57,12 @@ def centroids_strategy(draw, centroid = st.integers(0, 255)) :
 
 #square image strategy
 @st.composite
-def square_image_strategy(draw, side = st.integers(50,200)) :
+def square_stack_strategy(draw, side =st.integers(50, 200), n_imgs = st.integers(2, 100)) :
+    N = draw(n_imgs)
     L = draw(side)
-    square = ones((512,512), dtype=np.uint8)
-    square[100 : 100 + L, 100 : 100 + L ] = zeros((L,L), dtype=np.uint8)
-    return (square, L)
+    image = ones((L, 512, 512), dtype=np.uint8)
+    image[ : , 100 : 100 + L, 100 : 100 + L ] = zeros((L,L), dtype=np.uint8)
+    return (image,L)
 
 
 #####################################################
@@ -65,31 +70,27 @@ def square_image_strategy(draw, side = st.integers(50,200)) :
 #####################################################
 
 
-@given(square_image_strategy(), kernel_strategy())
+@given(square_stack_strategy(), kernel_strategy())
 @settings(max_examples = 20, deadline = None)
 def test_opening(img, kernel) :
     opened = opening(img[0], kernel )
     square_area = opened.size - np.sum(opened)
-    assert (square_area >= img[1] ** 2)
+    assert (square_area >= (img[1] ** 2)*opened.shape[0])
 
 
-@given(square_image_strategy(), kernel_strategy())
+@given(square_stack_strategy(), kernel_strategy())
 @settings(max_examples = 20, deadline = None)
 def test_closing(img, kernel) :
     closed = closing(img[0], kernel)
     square_area = closed.size - np.sum(closed)
-    assert square_area <= img[1]**2
+    assert (square_area <= (img[1]**2)*closed.shape[0])
 
 
-@given(st.integers(2, 300), st.integers(0,3))
+@given(square_stack_strategy())
 @settings(max_examples = 20, deadline = None)
-def test_select_greater_connected_regions(n_imgs, n_reg):
-    image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
-    image = np.logical_not(image)
-    image =np.array([image for i in range(n_imgs)])
-    res = select_greater_connected_regions(image, n_reg)
-    _, labeled, _, _ = connected_components_wStats(res)
-    assert np.unique(labeled).shape == (n_reg + 1,)
+def test_select_largest_connected_regions_3d(img):
+    res = select_largest_connected_region_3d(np.logical_not(img[0]))
+    assert (np.sum(res) == (img[1] ** 2)*img[0].shape[0])
 
 
 #def test_reconstruct_gg_areas(imgs):
@@ -118,9 +119,18 @@ def test_bit_plane_slices(stack) :
 
 
 @given(rand_stack_strategy(), centroids_strategy() )
-@settings(max_examples  =20, deadline=None)
+@settings(max_examples  = 4, deadline=None)
 def test_imlabeling(stack, centroids) :
     labeled = imlabeling(stack, centroids.reshape(4,1))
-
     assert (np.unique(labeled) == [0, 1, 2, 3]).all()
     assert labeled.shape == stack.shape
+
+
+@given(rand_stack_strategy(), st.integers(2, 3), st.integers(2,3))
+@settings(max_examples = 4, deadline = None)
+def test_subsamples_kmeans_wo_bkg(stack, n_centroids, n_subsamples) :
+    stopping_criteria =  (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    samples = subsamples(stack, n_subsamples)
+    centr = subsamples_kmeans_wo_bkg(samples,n_centroids, stopping_criteria, cv2.KMEANS_RANDOM_CENTERS)
+
+    assert centr.size == (n_subsamples * n_centroids)

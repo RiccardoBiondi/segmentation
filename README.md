@@ -57,7 +57,6 @@ To refer to script documentation:
 | **Script** | **Description** |
 |:----------:|:---------------:|
 | [lung_extraction](./docs/pipeline/lung_extraction.md) | Extract lung from TAC images 										 																																				|
-| [slice_and_ROI](./docs/pipeline/slice_and_ROI.md) | Select only slices and areas containing the lungs 																																														|
 | [train](./docs/pipeline/train.md) | Apply colour quantization on a series of stacks in order to estimate the centroid to use to segment other images  																																													|
 | [labeling](./docs/pipeline/labeling.md) |Segment the input image by using pre-estimated centroids |
 
@@ -110,7 +109,7 @@ python -m pytest
 
 ## Usage
 
-Lets consider the case where you have an high nuber of patients. First of all you have to divide the data in train and test dataset: the first one to estimate the centroids used to segment the second one. To achieve these purpose create two folders named *train* and *test* and organize your sample inside them.
+Lets consider the case where you have an high number of patient. First of all you have to divide the data in train and test dataset: the first one to estimate the centroids used to segment the second one. To achieve these purpose create two folders named *train* and *test* and organize your sample inside them.
 All the data must be in *.pkl.npy* format or in *.dcm*. In the DICOM case in each folder you have to create a subfolder for each patient that contains the *.dcm* files.
 
 ### Training
@@ -120,17 +119,10 @@ All the data must be in *.pkl.npy* format or in *.dcm*. In the DICOM case in eac
 PS \> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
  ```
 
- - Once you have successfully isolated the lung, you have to remove all the regions and slices without lung, to achieve  this purpose simply run slice_and_ROI.ps1 by providing as arguments the input folder and the output one:
-
- ```powershell
-PS \> ./slice_and_ROI.ps1 path/to/input/folder/ path/to/output/folder/
- ```
- The input folder must contains the extracted lung, the output ones will store the stack resulting from the selection. Notice that if input and output are the same folder, the script will overwrite the input files.
-
-- in the end you can start the training. Simply run train.ps1 by providing as input folder the one that contains the results from the previous passages, and the output filename in which save the resulting centroids.
+ - Once you have successfully isolated the lung, you are ready to train and estimate the centroids. To start the training  simply run train.ps1 by providing as input folder the one that contains the files with the extracted lung, and the output filename in which save the resulting centroids.
 
 ```powershell
-PS /> ./slice_and_ROI.ps1 path/to/input/folder/ path/to/output/folder/centroids
+PS /> ./train.ps1 path/to/input/folder/ path/to/output/folder/centroids
 ```
 This script will compute the centroids and save them into output folder as *centroids.pkl.npy*
 
@@ -138,16 +130,16 @@ This script will compute the centroids and save them into output folder as *cent
 
 Once you have compute the centroids by using the training dataset, you can use them to label the test dataset. To achieve this purpose you have to use two folders: an input one, that in this case is the test one, and an output one, in which the results will saved.
 
-- First of all you have to prepare the images by extraction the lung regions, so run the powershell script as before:
+- First of all you have to prepare the images by extracting the lung regions, so run the powershell script as before:
 ```powershell
 PS /> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
 ```
 
 - once you have extracted the lung you can start to label the dataset. To achieve this purpose simply run the *labeling.ps1* script by providing the required parameters:
 ```powershell
-PS /> ./labeling.ps1 path/to/input/folder/ path/to/output/folder/ path/to/centroids/file/centroids.pkl.npy
+PS /> ./labeling.ps1 path/to/input/folder/ path/to/centroids/file/centroids.pkl.npy /path/to/label1/output/folder/ /path/to/label2/output/folder/
 ```
-The input directory is the one that contains the images with the extracted lung. the output folder is the one in which the labeled images will be saved, notice that if is the same as input all the input data will be overwrite.
+The input directory is the one that contains the images with the extracted lung. The two different output folder will contains the two different set of estimated labels: one for ground glass and one for blood vessels. The reason why provide this two labels is because sometimes may happen that ground glass are assigned to the centroid as vessel; so after the segmentation you have to check which of the two labels corresponds to the region of interest.
 
 ## License
 

@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 import CTLungSeg.utils as utils
 from functools import partial
+from cc3d import connected_components
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
@@ -192,3 +193,24 @@ def gl2bit(img) :
     x = np.unpackbits(img.reshape(1, -1), axis=0)
     x = x.reshape(8, *img.shape)
     return np.asarray(x, dtype=np.uint8)
+
+
+def connected_components_wAreas_3d(image) :
+    """
+    Found the connected components in three dimensions of  the image tensor and te corresponding areas. THhe used connectivity is 26.
+
+    Parameter
+    ---------
+    image : array-like
+        Binary stack of images
+
+    Return
+    ------
+    labeled : array-like
+        image in which each voxel is assigned to a connected region
+    areas :array-like
+        array of areas(in pixel) of each connected region.
+    """
+    connected = connected_components(image)
+    areas =  np.asarray([np.sum((connected == i)) for i in np.unique(connected)])
+    return [connected, areas]

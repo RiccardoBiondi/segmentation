@@ -14,7 +14,7 @@ from CTLungSeg.method import median_blur
 from CTLungSeg.method import gaussian_blur
 from CTLungSeg.method import otsu_threshold
 from CTLungSeg.method import gl2bit
-
+from CTLungSeg.method import connected_components_wAreas_3d
 
 import cv2
 import numpy as np
@@ -58,9 +58,9 @@ def kernel_strategy(draw, k_size = st.integers(3,9)) :
     return ones((k,k), dtype=np.uint8)
 
 
-###
-#    START TESTS
-###
+#####################################################
+###                START TESTS                    ###
+#####################################################
 
 
 @given(square_image_strategy(), kernel_strategy(), st.integers(1,5))
@@ -144,9 +144,14 @@ def test_connected_components_wStats_stack(n_img) :
     assert len(np.unique(centroids)) == n_regions
 
 
+def test_otsu_threshold():
+    image = (255 * np.random.rand(512, 512)).astype(np.uint8)
+    assert (np.unique(otsu_threshold(image))==np.array([0, 1])).all()
+
+
 @given(rand_stack_strategy())
 @settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
-def test_otsu_threshold(stack):
+def test_otsu_threshold_stack(stack):
     assert np.all(np.unique(otsu_threshold(stack))==np.array([0, 1]))
 
 
@@ -156,3 +161,11 @@ def test_gl2bit(n_imgs) :
     input = np.ones((n_imgs, 100, 100), dtype = np.uint8)
     result = gl2bit(input)
     assert (np.unique(result) == [0,1]).all()
+
+
+@given(square_image_strategy())
+@settings(max_examples = 2, deadline = None, suppress_health_check=(HC.too_slow,))
+def test_connected_components_wAreas_3d(image) :
+    res = connected_components_wAreas_3d(image[0])
+    assert (np.unique(res[0]) == [0,1]).all()
+    assert (res[1][1] == image[1] ** 2)
