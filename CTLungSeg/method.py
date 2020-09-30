@@ -213,7 +213,7 @@ def connected_components_wAreas_3d(image) :
         array of areas(in pixel) of each connected region.
     """
     image = itk.image_from_array(image)
-    connected = itk.connected_component_image_filter(image)
+    connected = itk.ConnectedComponentImageFilter(image)
     connected = itk.array_from_image(connected)
     areas =  np.asarray([np.sum((connected == i)) for i in np.unique(connected)])
     return [connected, areas]
