@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import itk
 import numpy as np
 import pandas as pd
 import CTLungSeg.utils as utils
 from functools import partial
-from cc3d import connected_components
+
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
@@ -211,6 +212,8 @@ def connected_components_wAreas_3d(image) :
     areas :array-like
         array of areas(in pixel) of each connected region.
     """
-    connected = connected_components(image)
+    image = itk.image_from_array(image)
+    connected = itk.connected_component_image_filter(image)
+    connected = itk.array_from_image(connected)
     areas =  np.asarray([np.sum((connected == i)) for i in np.unique(connected)])
     return [connected, areas]

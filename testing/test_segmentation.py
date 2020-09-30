@@ -89,7 +89,8 @@ def test_closing(img, kernel) :
 @given(square_stack_strategy())
 @settings(max_examples = 20, deadline = None)
 def test_select_largest_connected_regions_3d(img):
-    res = select_largest_connected_region_3d(np.logical_not(img[0]))
+    input = np.logical_not(img[0])
+    res = select_largest_connected_region_3d(input.astype(np.uint8))
     assert (np.sum(res) == (img[1] ** 2)*img[0].shape[0])
 
 
