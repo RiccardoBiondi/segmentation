@@ -42,6 +42,8 @@ def main():
 
     files = glob(args.folder + '/*.pkl.npy')
     imgs = np.concatenate(np.array([preprocess(load_image(f)) for f in files]))
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
+    imgs = np.asarray(list(map(clahe.apply, imgs)))
     imgs = median_blur(imgs, 5)
 
     print('Loaded {:d} files from {}\n'.format(len(files), args.folder), flush=True)

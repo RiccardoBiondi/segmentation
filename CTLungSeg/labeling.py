@@ -30,8 +30,10 @@ def main():
     args = parse_args()
     images = load_image(args.filename)
     centroids = load_image(args.centroids)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
 
     images = preprocess(images)
+    images = np.asarray(list(map(clahe.apply, images)))
     images = median_blur(images, 5)
 
     labels = imlabeling(images, centroids)
