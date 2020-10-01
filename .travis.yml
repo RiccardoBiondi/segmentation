@@ -50,7 +50,7 @@ before_install:
   - python -m pip install pandas==0.25.3
   - python -m pip install opencv-python
   - python -m pip install tqdm
-  - python -m pip install connected-components-3d
+  - python -m pip install itk
 
   # testing libraries
   - python -m pip install pytest==3.0.7
