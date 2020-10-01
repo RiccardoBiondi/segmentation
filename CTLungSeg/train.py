@@ -21,10 +21,32 @@ def parse_args():
     description = 'kmeans clustering training'
     parser = argparse.ArgumentParser(description=description)
 
-    parser.add_argument('--input', dest='folder', required=True, type=str, action='store', help='Input folder')
-    parser.add_argument('--output', dest='out', required=True,  type=str, action='store', help='dst of second centroids set')
-    parser.add_argument('--n', dest='n', required=False, type=int, action='store', help='number of subsamples', default=100)
-    parser.add_argument('--init', dest='init', required=False, type=int, action='store', help='centroid initialization technique', default=0)
+    parser.add_argument('--input',
+                        dest='folder',
+                        required=True,
+                        type=str,
+                        action='store',
+                        help='Input folder')
+    parser.add_argument('--output',
+                        dest='out',
+                        required=True,
+                        type=str,
+                        action='store',
+                        help='dst of second centroids set')
+    parser.add_argument('--n',
+                        dest='n',
+                        required=False,
+                        type=int,
+                        action='store',
+                        help='number of subsamples',
+                        default=100)
+    parser.add_argument('--init',
+                        dest='init',
+                        required=False,
+                        type=int,
+                        action='store',
+                        help='centroid initialization technique',
+                        default=0)
 
     args = parser.parse_args()
     return args

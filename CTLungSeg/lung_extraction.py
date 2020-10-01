@@ -22,23 +22,42 @@ def parse_args():
     description = 'Lung Extraction'
     parser = argparse.ArgumentParser(description=description)
 
-    parser.add_argument('--input', dest='input', required=True, type=str, action='store', help='Input filename, must be .pkl.npy format')
-    parser.add_argument('--lung', dest='lung', required=True, type=str, action='store', help='Masked image filename')
-    parser.add_argument('--mask', dest='mask', required=False, type=str, action='store', help='Lung mask filename', default='')
-    parser.add_argument('--int_spot_area', dest='isa', required=False, type=int, action='store', default=700, help='minimum internal spot area')
-    parser.add_argument('--ext_spot_area', dest='esa', required=False, type=int, action='store', default=200, help='minimum external spot area')
+    parser.add_argument('--input',
+                        dest='input',
+                        required=True,
+                        type=str,
+                        action='store',
+                        help='Input filename, must be .pkl.npy format')
+    parser.add_argument('--lung',
+                        dest='lung',
+                        required=True,
+                        type=str,
+                        action='store',
+                        help='Masked image filename')
+    parser.add_argument('--mask',
+                        dest='mask',
+                        required=False,
+                        type=str,
+                        action='store',
+                        help='Lung mask filename',
+                        default='')
+    parser.add_argument('--int_spot_area',
+                        dest='isa',
+                        required=False,
+                        type=int,
+                        action='store',
+                        default=700, help='minimum internal spot area')
+    parser.add_argument('--ext_spot_area',
+                        dest='esa',
+                        required=False,
+                        type=int,
+                        action='store',
+                        default=200,
+                        help='minimum external spot area')
 
     args = parser.parse_args()
     return args
 
-#bimarize ??
-
-
-#def remove_int_ext_spots(isa, esa) :
-#   pass
-
-#def lung_extraction(DICOM, isa, esa) :
-#   pass
 
 def main():
 
@@ -66,11 +85,11 @@ def main():
     t_mask = bit_plane_slices(lung_mask * DICOM, (5,7,8))
     t_mask = otsu_threshold(preprocess(gaussian_blur(t_mask, (7,7))))
     t_mask = ~t_mask
-    lung_mask= lung_mask & t_mask
-    kernel = np.ones((7,7), dtype = np.uint8)
-    lung_mask = closing(lung_mask,kernel=kernel)
+    lung_mask = lung_mask & t_mask
+    kernel = np.ones((7, 7), dtype = np.uint8)
+    lung_mask = closing(lung_mask, kernel = kernel)
     #
-    kernel = np.ones((5,5), dtype = np.uint8)
+    kernel = np.ones((5, 5), dtype = np.uint8)
     lung_mask = opening(lung_mask, kernel)
 
     lung_mask = select_largest_connected_region_3d(lung_mask)
