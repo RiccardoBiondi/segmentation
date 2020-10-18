@@ -13,9 +13,10 @@ from CTLungSeg.segmentation import closing
 from CTLungSeg.segmentation import remove_spots
 from CTLungSeg.segmentation import select_largest_connected_region_3d
 from CTLungSeg.segmentation import find_ROI
+from CTLungSeg.segmentation import create_lung_mask
 from CTLungSeg.segmentation import bit_plane_slices
 from CTLungSeg.segmentation import imlabeling
-from CTLungSeg.segmentation import subsamples_kmeans_wo_bkg
+from CTLungSeg.segmentation import kmeans_on_subsamples
 
 
 import cv2
@@ -45,15 +46,13 @@ def kernel_strategy(draw, k_size = st.integers(3,9)) :
     return ones((k,k), dtype=np.uint8)
 
 @st.composite
-def centroids_strategy(draw, centroid = st.integers(0, 255)) :
-    a = draw(centroid)
-    b = draw(centroid)
-    c = draw(centroid)
-    d = draw(centroid)
-    assume(a < b)
-    assume(b < c)
-    assume(c < d)
-    return np.array([a, b, c, d], dtype=np.uint8)
+def centroids_strategy(draw) :
+    n_centr = draw(st.integers(2, 6))
+    n_features = draw(st.integers(1, 6))
+    centroids = np.asarray([draw(st.integers(0, 255))] * (n_centr * n_features))
+    assume(len(np.unique(centroids) > 4 ))
+
+    return centroids.reshape(n_centr, n_features)
 
 #square image strategy
 @st.composite
@@ -66,7 +65,7 @@ def square_stack_strategy(draw, side =st.integers(50, 200), n_imgs = st.integers
 
 
 #####################################################
-###                START TESTS                    ###
+###                TESTING                        ###
 #####################################################
 
 
@@ -84,6 +83,10 @@ def test_closing(img, kernel) :
     closed = closing(img[0], kernel)
     square_area = closed.size - np.sum(closed)
     assert (square_area <= (img[1]**2)*closed.shape[0])
+
+#@given()
+#@settings()
+#def test_remove_spots(stack, area)
 
 
 @given(square_stack_strategy())
@@ -109,6 +112,15 @@ def test_find_ROI(x, y, w, h) :
     assert (find_ROI(pd.DataFrame(stats, columns=columns)) == corners).all
 
 
+@given(rand_stack_strategy(), st.integers(100, 200))
+@settings(max_examples=15, deadline=None, suppress_health_check=(HC.too_slow,))
+def test_create_lung_mask(volume, threshold) :
+    mask = create_lung_mask(volume, threshold)
+    masked = volume * mask
+    assert ((np.unique(mask.astype(np.uint8))) == [0, 1]).all
+    assert masked.max() < (threshold + 1)
+
+
 @given(rand_stack_strategy())
 @settings(max_examples = 2, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_bit_plane_slices(stack) :
@@ -122,16 +134,41 @@ def test_bit_plane_slices(stack) :
 @given(rand_stack_strategy(), centroids_strategy() )
 @settings(max_examples  = 4, deadline=None)
 def test_imlabeling(stack, centroids) :
-    labeled = imlabeling(stack, centroids.reshape(4,1))
-    assert (np.unique(labeled) == [0, 1, 2, 3]).all()
+    mc = np.stack([stack for i in range(centroids.shape[1])], axis = -1)
+    labeled = imlabeling(mc, centroids)
+    assert len(np.unique(labeled)) == centroids.shape[0]
     assert labeled.shape == stack.shape
 
 
-@given(rand_stack_strategy(), st.integers(2, 3), st.integers(2,3))
+@given(rand_stack_strategy(),st.integers(2, 3),st.integers(2,3),st.integers(1,3))
 @settings(max_examples = 4, deadline = None)
-def test_subsamples_kmeans_wo_bkg(stack, n_centroids, n_subsamples) :
-    stopping_criteria =  (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-    samples = subsamples(stack, n_subsamples)
-    centr = subsamples_kmeans_wo_bkg(samples,n_centroids, stopping_criteria, cv2.KMEANS_RANDOM_CENTERS)
+def test_kmeans_on_subsamples(stack, n_centroids, n_subsamples, n_features) :
+    stopping_criteria =  (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
+                          10, 1.0)
+    mc = np.stack([stack for i in range(n_features)], axis = -1)
+    mc = subsamples(mc, n_subsamples)
+    centr = kmeans_on_subsamples(mc,
+                                 n_centroids,
+                                 stopping_criteria,
+                                 cv2.KMEANS_RANDOM_CENTERS)
 
-    assert centr.size == (n_subsamples * n_centroids)
+    assert centr.size == (n_subsamples * n_centroids * n_features)
+
+'''
+@given(rand_stack_strategy(),st.integers(2, 3),st.integers(2,3),st.integers(1,3))
+@settings(max_examples = 4, deadline = None)
+def test_kmeans_on_subsamples_wobkg(stack, n_centroids, n_subsamples, n_features) :
+    stopping_criteria =  (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
+                          10, 1.0)
+    mc = np.stack([stack for i in range(n_features)], axis = -1)
+    mc = np.stack([mc, (stack > 100).astype(np.uint8)], axis = -11)
+    mc = subsamples(mc, n_subsamples)
+    centr = kmeans_on_subsamples(mc,
+                                 n_centroids,
+                                 stopping_criteria,
+                                 cv2.KMEANS_RANDOM_CENTERS,
+                                 True)
+
+    assert centr.size == (n_subsamples * n_centroids * n_features)
+    assert (np.unique(centr) > 100).all()
+'''

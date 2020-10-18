@@ -3,7 +3,7 @@
 This script allows to isolate the lung regions from the rest of the body in an image stack. To achieve this purpose it will use some threshold and morphological operation.
 
 It takes as input the image tensor as numpy array stored into *.pkl.npy* or *.npz* format. An other accepted input is a path to a folder that contains the *.dcm* files.
-At the end of the execution the script save the stack with the extracted lung as *.pkl.npy* format. It is also possible to chose to save or not the binary lung mask.
+At the end of the execution the script save the stack with the extracted lung as *.pkl.npy* format.
 
 <a href="https://github.com/RiccardoBiondi/segmentation/blob/master/docs/CTLungSeg/images/thresholded.png">
   <div class="image">
@@ -31,22 +31,15 @@ At the end of the execution the script save the stack with the extracted lung as
 To use this script call it from powershell or bash and provide the required arguments.
 
 ```bash
-python -m CTLungSeg.lung_extraction --input='path/to/input/folder/filename.pkl.npy' --lung='path/to/output/folder/outputname'
+python -m CTLungSeg.lung_extraction --input='path/to/input/folder/filename.pkl.npy' --output='path/to/output/folder/outputname'
 ```
 
 Required arguments:
 
 * --input :str, path to input image or stack. the file must be in '.pkl.npy' format
 
-* --lung :str, path to the output folder, here we be saved the extracted lung regions in '.pkl.npy' format
+* --output :str, path to the output folder, here we be saved the extracted lung regions in '.pkl.npy' format
 
-Optional arguments:
-
-* --mask: str, path to output folder. If provided will save the lung mask in '.pkl.npy' format
-
-* --int_spot_area :int, default=700 **TODO**
-
-* --ext_spot_area :int, default=200 **TODO**
 
 You can also run this script on multiple samples by calling it from the provided powershell or bash scripts. In this case you have to create two folders: the first one(input) will contains the files to process, the second one the results. ll the data must be in *.pkl.npy* or in *.dcm* format. In the DICOM case in each folder you have to create a subfolder for each patient that contains the *.dcm* files.
 
@@ -55,10 +48,3 @@ You can also run this script on multiple samples by calling it from the provided
 ```powershell
 PS /> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
 ```
-
-If you want to provide the optional arguments you have to write them as third argument as follows:
-```powershell
-PS /> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/  --int_spot_area=300
-```
-
-**NOTE** : in this case you can't provide the *--mask* argument as optional.

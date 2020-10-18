@@ -7,8 +7,8 @@ reset='\033[0m]' #No Color
 
 input_dir=$1
 centroids=$2
-label1_dir=$3
-label2_dir=$4
+label_dir=$3
+
 
 
 # check if the input directory exists and it is provided
@@ -41,35 +41,21 @@ fi
 
 
 # check if the  first label dirrectory exists and it is provided
-if [ -z "$label1_dir" ]; then
+if [ -z "$label_dir" ]; then
 
-  echo -e "${red}Error! Output directory for label 1 not set${reset}"
+  echo -e "${red}Error! Output directory for label  not set${reset}"
   exit 1
 
 # comment the following lines if
 # the output directory could not exist
-elif [ ! -d "$label1_dir" ]; then
+elif [ ! -d "$label_dir" ]; then
 
-  echo -e "${red}Error! Output directory for label 1 not found${reset}"
+  echo -e "${red}Error! Output directory for label  not found${reset}"
   exit 1
 
 fi
 
 
-# check if the  first label dirrectory exists and it is provided
-if [ -z "$label1_dir" ]; then
-
-  echo -e "${red}Error! Output directory for label 1 not set${reset}"
-  exit 1
-
-# comment the following lines if
-# the output directory could not exist
-elif [ ! -d "$label1_dir" ]; then
-
-  echo -e "${red}Error! Output directory for label 1 not found${reset}"
-  exit 1
-
-fi
 
 # list all the pickle files into the input directory
 input_files=$(ls "$input_dir")
@@ -82,7 +68,7 @@ for file in $input_files; do
   printf "* Processing $file ...       "
   f="${file%%.*}"
 
-  python3 -m CTLungSeg.labeling --input="$input_dir$file"  --centroids="$centroids" --label1="$label1_dir$f" --label2="$label2_dir$f"
+  python3 -m CTLungSeg.labeling --input="$input_dir$file"  --centroids="$centroids" --label="$label_dir$f"
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

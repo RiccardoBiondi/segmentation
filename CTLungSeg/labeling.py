@@ -5,9 +5,11 @@ import cv2
 import argparse
 import numpy as np
 
-from CTLungSeg.utils import load_image, save_pickle, preprocess
-from CTLungSeg.method import median_blur
-from CTLungSeg.segmentation import opening, imlabeling
+from time import time
+
+from CTLungSeg.utils import load_image, save_pickle, hu2gl
+from CTLungSeg.method import median_blur, canny_edge_detection
+from CTLungSeg.segmentation import imlabeling
 
 __author__ = ['Riccado Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@tudio.unibo.it', 'nico.curti2@unibo.it']
@@ -17,11 +19,24 @@ def parse_args():
     description = 'Image labeling'
     parser = argparse.ArgumentParser(description=description)
 
-    parser.add_argument('--input', dest='filename', required=True, type=str, action='store', help='Input filename')
-    parser.add_argument('--centroids', dest='centroids', required=True, type=str, action='store', help='centroids')
-    parser.add_argument('--label1', dest='lab1', required=True, type=str, action='store', help='output name of first label')
-    parser.add_argument('--label2', dest='lab2', required=True, type=str, action='store', help='output name of second label')
-
+    parser.add_argument('--input',
+                        dest='filename',
+                        required=True,
+                        type=str,
+                        action='store',
+                        help='Input filename')
+    parser.add_argument('--centroids',
+                        dest='centroids',
+                        required=True,
+                        type=str,
+                        action='store',
+                        help='centroids')
+    parser.add_argument('--label',
+                        dest='lab',
+                        required=True,
+                        type=str,
+                        action='store',
+                        help='output name of first label')
 
     args = parser.parse_args()
     return args
@@ -29,26 +44,29 @@ def parse_args():
 
 def main():
     args = parse_args()
-    images = load_image(args.filename)
+    volume = load_image(args.filename)
     centroids = load_image(args.centroids)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
 
-    images = preprocess(images)
-    images = np.asarray(list(map(clahe.apply, images)))
-    images = median_blur(images, 5)
+    # prepare the image
+    volume = hu2gl(volume)
+    weight = (volume != 0).astype(np.uint8)
+    edge_map = canny_edge_detection(volume)
+    # build multi channel
+    mc = np.stack([
+                    median_blur(volume, 3),
+                    median_blur(volume, 7),
+                    median_blur(volume, 11),
+                    median_blur(edge_map, 5),
+                    median_blur(edge_map, 7)], axis = -1)
 
-    labels = imlabeling(images, centroids)
-
-    #separate the different labels
-    lab_1 = (labels == 1).astype(np.uint8)
-    lab_2 = (labels == 2).astype(np.uint8)
-    #clean up the labels
-    kernel = np.ones((5,5), dtype = np.uint8)
-    lab_1 = opening(lab_1, kernel)
-    lab_2 = opening(lab_2, kernel)
+    labels = imlabeling(mc, centroids, weight)
+    labels = (labels == 4).astype(np.uint8)
+    labels = median_blur(labels, 7)
     #
-    save_pickle(args.lab1, lab_1)
-    save_pickle(args.lab2, lab_2)
+    save_pickle(args.lab, labels)
 
 if __name__ == '__main__' :
+    start = time()
     main()
+    stop = time()
+    print('Process ended after {:f} seconds'.format(stop- start))

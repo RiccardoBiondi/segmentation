@@ -7,11 +7,13 @@ import numpy as np
 
 from glob import glob
 from tqdm import tqdm
+from time import time
 
 from CTLungSeg.utils import load_image, save_pickle
-from CTLungSeg.utils import preprocess, subsamples
-from CTLungSeg.method import median_blur
-from CTLungSeg.segmentation import subsamples_kmeans_wo_bkg
+from CTLungSeg.utils import subsamples, hu2gl
+from CTLungSeg.method import median_blur, histogram_equalization
+from CTLungSeg.method import canny_edge_detection
+from CTLungSeg.segmentation import kmeans_on_subsamples
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it']
@@ -53,41 +55,60 @@ def parse_args():
 
 
 def main():
-    #useful constants
+
+    # kmeans clustering
     init = [ "KMEANS_RANDOM_CENTERS", "KMEANS_PP_CENTERS"]
     centroid_init =  [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
-    stop_criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
-
+    stop_criteria = (cv2.TERM_CRITERIA_EPS
+                     + cv2.TERM_CRITERIA_MAX_ITER, 10, .001)
     args = parse_args()
 
     print("I'm Loading...", flush=True )
 
     files = glob(args.folder + '/*.pkl.npy')
-    imgs = np.concatenate(np.array([preprocess(load_image(f)) for f in files]))
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8,8))
-    imgs = np.asarray(list(map(clahe.apply, imgs)))
-    imgs = median_blur(imgs, 5)
 
-    print('Loaded {:d} files from {}\n'.format(len(files), args.folder), flush=True)
+    imgs = np.concatenate(np.array([hu2gl(load_image(f)) for f in files]))
+    # convert to multichannel
+    edge_map = canny_edge_detection(imgs)
+    imgs = np.stack([
+                    median_blur(imgs, 3),
+                    median_blur(imgs, 7),
+                    median_blur(imgs, 11),
+                    median_blur(edge_map, 5),
+                    median_blur(edge_map, 7)], axis = -1)
+    n_imgs = imgs.shape[0]
 
-    samples = subsamples(imgs, args.n)
-    #Recap for better parameter control
-    print('*****Starting custering*****\n', flush=True)
+    print('Loaded {:d} files from {}\n'.format(len(files),args.folder),
+            flush=True)
+
+    imgs = subsamples(imgs, args.n)
+    #Recap for better parameters control
+    print('*****Starting custering*****',flush=True)
     print('\tNumber of subsamples--> {:d}'.format(args.n) , flush=True)
-    print('\tTotal images --> {:d}'.format(imgs.shape[0]), flush=True)
-    print('\tCentroid initzialization technique--> {}'.format(init[args.init]), flush=True)
+    print('\tTotal images --> {:d}'.format(n_imgs), flush=True)
+    print('\tCentroid initialization technique--> {}'.format(init[args.init]),
+            flush=True)
 
     #First clustering
     print("\nI'm clustering...", flush = True)
-    center = subsamples_kmeans_wo_bkg(samples,3, stop_criteria,centroid_init[args.init])
+    center = kmeans_on_subsamples(imgs,
+                                  5,
+                                  stop_criteria,
+                                  centroid_init[args.init],
+                                  False)
     # clustering refinement
-    _, _, center = cv2.kmeans(center.reshape((-1,1)), 3, None, stop_criteria, 10, centroid_init[args.init])
-    center = np.sort(center.reshape((-1,1)), axis = 0)
+    _, _, center = cv2.kmeans(center.reshape((-1,5)),
+                              5, None,
+                              stop_criteria,
+                              10,
+                              centroid_init[args.init])
+    center = center[center[:, 0].argsort()]
     print("I'm saving..." , flush=True)
     save_pickle(args.out, center)
 
-    print('[DONE]', flush =True)
-
 
 if __name__ == '__main__' :
+    start = time()
     main()
+    stop = time()
+    print('[DONE] Total time: {:f} seconds'.format((stop - start)))

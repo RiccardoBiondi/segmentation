@@ -10,8 +10,10 @@ from CTLungSeg.utils import load_npz
 from CTLungSeg.utils import save_npz
 from CTLungSeg.utils import load_dicom
 from CTLungSeg.utils import load_image
+from CTLungSeg.utils import normalize
 from CTLungSeg.utils import rescale
-from CTLungSeg.utils import preprocess
+from CTLungSeg.utils import gl2bit
+from CTLungSeg.utils import hu2gl
 from CTLungSeg.utils import subsamples
 from CTLungSeg.utils import imfill
 from CTLungSeg.utils import stats2dataframe
@@ -71,6 +73,16 @@ def test_load_img() :
 @given(rand_stack_strategy())
 @settings(max_examples=20,
 deadline=None,suppress_health_check=(HC.too_slow,))
+def test_normalize(stack) :
+    normalized = normalize(stack)
+
+    assert np.isclose(np.std(normalized), 1)
+    assert np.isclose(np.mean(normalized), 0)
+
+
+@given(rand_stack_strategy())
+@settings(max_examples=20,
+deadline=None,suppress_health_check=(HC.too_slow,))
 def test_rescale(img):
 
     rescaled = rescale(img, np.amax(img), 0 )
@@ -80,12 +92,19 @@ def test_rescale(img):
     with pytest.raises(ZeroDivisionError) :
         assert rescale(img, 3, 3)
 
+@given(st.integers(1,30))
+@settings(max_examples = 2, deadline = None)
+def test_gl2bit(n_imgs) :
+    input = np.ones((n_imgs, 100, 100), dtype = np.uint8)
+    result = gl2bit(input)
+    assert (np.unique(result) == [0,1]).all()
+
 
 @given(rand_stack_strategy())
 @settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
-def test_preprocess(img):
+def test_hu2gl(img):
 
-    out = preprocess(img)
+    out = hu2gl(img)
     assert out.max() == 255
     assert out.min() == 0
 

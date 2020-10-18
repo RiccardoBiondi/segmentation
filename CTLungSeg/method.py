@@ -59,8 +59,8 @@ def dilate(img, kernel, iterations = 1 ):
 
 
 def connected_components_wStats(img):
-    """computes the connected components labeled image of boolean image and also
-    produces a statistics output for each label
+    """computes the connected components labeled image of
+    boolean image and also produces a statistics output for each label
 
     Parameters
     ----------
@@ -125,7 +125,7 @@ def median_blur(img, ksize):
     """
     if len(img.shape) == 2: #single image case
         return cv2.medianBlur(img, ksize)
-    return np.asarray(list(map(partial(cv2.medianBlur, ksize=ksize),img)), dtype=np.uint8)
+    return np.asarray(list(map(partial(cv2.medianBlur, ksize=ksize),img)))
 
 
 def gaussian_blur(img, ksize, sigmaX=0,
@@ -164,41 +164,24 @@ def otsu_threshold(img):
 
     Return
     ------
-    out: array-like
-        thresholded image stack
+    thresh: array-like
+        array that contains the estimated threshold value for each image slice
+
+    thresholded: array-like
+            thresholded image stack
     """
     if len(img.shape) == 2  :
-        _, out = cv2.threshold(img, 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        thresh, out = cv2.threshold(img, 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
         return out
     else:
         out = list(zip(*list(map(partial(cv2.threshold, thresh=0, maxval=1, type=cv2.THRESH_BINARY+cv2.THRESH_OTSU), img))))
-        return np.asarray(out[1])
+        return [np.asarray(out[0]), np.asarray(out[1])]
 
 
-def gl2bit(img) :
-    """Convert the gray level of each voxel of a stack of images into its binary representation.
-
-    Parameters
-    ----------
-    img : array-like
-        image tensor to convert
-    width : int
-        number of bit to display
-
-    Return
-    ------
-    binarized:  array-like
-        tensor of shape (8, img shape) composed by 1 image tesnor for each bit psition.
-
+def connected_components_wVolumes_3d(image) :
     """
-    x = np.unpackbits(img.reshape(1, -1), axis=0)
-    x = x.reshape(8, *img.shape)
-    return np.asarray(x, dtype=np.uint8)
-
-
-def connected_components_wAreas_3d(image) :
-    """
-    Found the connected components in three dimensions of  the image tensor and te corresponding areas. THhe used connectivity is 26.
+    Found the connected components in three dimensions of  the image tensor
+    and te corresponding areas. The used connectivity is 26.
 
     Parameter
     ---------
@@ -217,3 +200,51 @@ def connected_components_wAreas_3d(image) :
     connected = itk.array_from_image(connected)
     areas =  np.asarray([np.sum((connected == i)) for i in np.unique(connected)])
     return [connected, areas]
+
+
+def histogram_equalization(image, clipLimit = 2.0, tileGridSize = (8, 8)) :
+    '''
+    Apply the Contrast Limited Adaptive Histogram Equalization to enhance image
+    contrast.
+
+    Parameters
+    ----------
+    image: array-like
+        image or stack of images to equalize
+    clipLimit: float
+        threshold for contrast limiting, default 2.0
+    tileGridSize: tuple
+        number of tiles in the row and column
+
+    Return
+    ------
+    equalized : array-like
+        equalized image or stack of images
+    '''
+    clahe = cv2.createCLAHE(clipLimit = clipLimit, tileGridSize = tileGridSize)
+    if len(image.shape) == 2 :
+        equalized = clahe.apply(image)
+    else :
+        equalized = np.asarray(list(map(clahe.apply, image)))
+    return equalized
+
+
+def canny_edge_detection(image) :
+    '''
+    Found Image edges by using Canny algorithm. This function estimates the
+    required upper and lower thresholds values dinamically by appling an otsu
+    threshold on each slice of the stack.
+
+    Parameter
+    ---------
+    image: array-like of shape (n_img, height, width)
+        image or stack of images from which find contours
+    Return
+    ------
+    edge_map : array-like  of the same shape of image
+        binary edge map of the input stack
+    '''
+    thr, _ = otsu_threshold(image)
+    upper_thr = 2 * thr
+    lower_thr = 0.5 * thr
+    return np.asarray(list(map(cv2.Canny, image, lower_thr, upper_thr)))

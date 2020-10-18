@@ -80,12 +80,15 @@ def load_nifti(filename):
 
 
 def load_image(filename):
-    """Load a stack of images and return a 3D numpy array. The input file format can by .pkl.npy, .npz or a folder that contains .dcm files.
+    """Load a stack of images and return a 3D numpy array.
+    The input file format can by .pkl.npy, .npz or a folder
+    that contains .dcm files.
 
     Parameter
     ---------
     filename: str
-        path to the image file(.pkl.npy or .npz) or folder that contains .dcm files.
+        path to the image file(.pkl.npy or .npz) or folder that
+        contains .dcm files.
     Return
     ------
     imgs: array-like
@@ -139,6 +142,22 @@ def save_npz(filename, data):
         np.savez_compressed(file=fp, a=data)
 
 
+def normalize(image) :
+    '''
+    Rescale each GL according to the mean and std of the whole stack
+
+    Parameters:
+    -----------
+    image : array-like
+        image or stack to normalize
+    Return
+    ------
+    normalized : array-like
+        normalized images stack
+    '''
+    return ((image - np.mean(image)) / np.std(image)).astype(np.float32)
+
+
 def rescale(img, Max, Min):
     """Rescale the image accodring to max, min input
 
@@ -160,12 +179,35 @@ def rescale(img, Max, Min):
     return (img.astype(np.float32) - Min) * (1. / (Max - Min))
 
 
-def preprocess(img):
-    """Set to zero all the negative pixel values, rescale the image and convert it a 8bit GL image.
+def gl2bit(img) :
+    """Convert the gray level of each voxel of a stack of images
+    into its binary representation.
+
+    Parameters
+    ----------
+    img : array-like
+        image tensor to convert
+    width : int
+        number of bit to display
+
+    Return
+    ------
+    binarized:  array-like
+        tensor of shape (8, img shape) composed by 1 image tesnor for each bit psition.
+
+    """
+    x = np.unpackbits(img.reshape(1, -1), axis=0)
+    x = x.reshape(8, *img.shape)
+    return np.asarray(x, dtype=np.uint8)
+
+
+def hu2gl(images):
+    """
+    Convert an image from hounsfield unit to 8-bit gray scale
 
     Parameter
     ---------
-    img: array-like
+    images: array-like
         input image or stack of images
 
     Return
@@ -173,9 +215,8 @@ def preprocess(img):
     out: array like
         8-bit rescaled image
     """
-    out = img.copy()
-    out[out < 0] = 0
-    return (255 * rescale(out, np.amax(out), 0)).astype(np.uint8)
+
+    return (255 * rescale(images, images.max(), images.min())).astype(np.uint8)
 
 
 def subsamples(data, n_sub):
@@ -197,7 +238,7 @@ def subsamples(data, n_sub):
     img = data.copy()
     np.random.shuffle(img)
     img = np.array_split(img, n_sub)
-    return np.array(img, dtype=np.ndarray)
+    return np.array(img, dtype = np.ndarray)
 
 
 
@@ -239,7 +280,7 @@ def stats2dataframe (arr) :
         list of dataframe made from arr
     """
     columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
-    return list(map(partial(pd.DataFrame, columns=columns), arr))
+    return list(map(partial(pd.DataFrame, columns = columns), arr))
 
 
 

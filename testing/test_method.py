@@ -13,8 +13,9 @@ from CTLungSeg.method import imfill
 from CTLungSeg.method import median_blur
 from CTLungSeg.method import gaussian_blur
 from CTLungSeg.method import otsu_threshold
-from CTLungSeg.method import gl2bit
-from CTLungSeg.method import connected_components_wAreas_3d
+from CTLungSeg.method import connected_components_wVolumes_3d
+from CTLungSeg.method import histogram_equalization
+from CTLungSeg.method import canny_edge_detection
 
 import cv2
 import numpy as np
@@ -31,7 +32,7 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 @st.composite
 def rand_stack_strategy(draw, n_imgs = st.integers(1, 50)) :
     N = draw(n_imgs)
-    return (255 * np.random.rand(N, 512, 512)).astype(np.uint8)
+    return (np.abs(255 * np.random.randn(N, 512, 512))).astype(np.uint8)
 
 #square image strategy
 @st.composite
@@ -146,26 +147,34 @@ def test_connected_components_wStats_stack(n_img) :
 
 def test_otsu_threshold():
     image = (255 * np.random.rand(512, 512)).astype(np.uint8)
-    assert (np.unique(otsu_threshold(image))==np.array([0, 1])).all()
+    assert (np.unique(otsu_threshold(image)[1])==np.array([0, 1])).all()
 
 
 @given(rand_stack_strategy())
 @settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_otsu_threshold_stack(stack):
-    assert np.all(np.unique(otsu_threshold(stack))==np.array([0, 1]))
-
-
-@given(st.integers(1,30))
-@settings(max_examples = 2, deadline = None)
-def test_gl2bit(n_imgs) :
-    input = np.ones((n_imgs, 100, 100), dtype = np.uint8)
-    result = gl2bit(input)
-    assert (np.unique(result) == [0,1]).all()
+    assert np.all(np.unique(otsu_threshold(stack)[1])==np.array([0, 1]))
 
 
 @given(square_image_strategy())
-@settings(max_examples = 2, deadline = None, suppress_health_check=(HC.too_slow,))
-def test_connected_components_wAreas_3d(image) :
-    res = connected_components_wAreas_3d(image[0])
+@settings(max_examples=2, deadline=None, suppress_health_check=(HC.too_slow,))
+def test_connected_components_wVolumes_3d(image) :
+    res = connected_components_wVolumes_3d(image[0])
     assert (np.unique(res[0]) == [0,1]).all()
     assert (res[1][1] == image[1] ** 2)
+
+
+@given(rand_stack_strategy(), st.integers(2, 6), st.integers(8, 12))
+@settings(max_examples=20, deadline=None, suppress_health_check=(HC.too_slow,))
+def test_histogram_equalization(volume, clip, size ) :
+    equalized = histogram_equalization(volume, clip, (size, size))
+    assert np.std(equalized) > np.std(volume)
+
+
+@given(rand_stack_strategy())
+@settings(max_examples=20, deadline=None, suppress_health_check=(HC.too_slow,))
+def test_canny_edge_detection(stack) :
+    edge_map = canny_edge_detection(stack)
+
+    assert (np.unique(edge_map) == (0, 255)).all()
+    assert edge_map.shape == stack.shape

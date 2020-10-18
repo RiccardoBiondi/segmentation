@@ -5,12 +5,12 @@ This module contains useful functions to segment stack of images
 1. [opening](#opening)
 2. [closing](#closing)
 3. [remove_spots](#remove_spots)
-4. [select_larger_connected_region_3](#select_lergest_connected_region_3d)
+4. [select_largest_connected_region_3](#select_lergest_connected_region_3d)
 5. [reconstruct_gg_areas](#reconstruct_gg_areas)
 6. [find_ROI](#find_ROI)
 7. [bit_plane_slices](#bit_plane_slices)
 8. [imlabeling](#imlabeling)
-9. [subsamples_kmeans_wo_bkg](#subsamples_kmeans_wo_bkg)
+9. [kmeans_on_subsamples](#kmeans_on_subsamples)
 
 ## opening
 
@@ -139,30 +139,47 @@ Convert each voxel GL into its 8-bit binary rapresentation and return as output 
 
 ## imlabeling
 
-Label a an image tensor according to the provided centroids.
+Label an input stack of multichannel images according to the provided
+centroids and weight.
 
 **Parameters**
 
-  *image* : array-like, image to label
+ *image* : array-like of shape (n_images, height, width, n_channels), image
+          stack to label
 
-  *centroids* : array-like, Centroids vector for KMeans clustering
+ *centroids* : array-like of shape (n_centroids, n_channels), Centroids vector
+                for KMeans clustering.
+ *weight* : array-like of shape (n_images, height, width), The weights for each
+            observation in image. If None, all observations are assigned
+            equal weight.
 
 **Return**
 
-  *labeled* : array-like, Image in which each GL is assigned on its label.
+  *labeled* : array-like of shape (n_images, height, width ), Image in which
+              each GL ia assigned to the corresponding label
 
-## subsamples_kmeans_wo_bkg
+## kmeans_on_subsamples
 
-Apply the kmeans clustering on each stack of images in subsample. During clustering do not consider the background pixels that must be set to 0.
+Apply the kmenas clustering on each stack of images in subsample.
+Allow also to choose if consider or not some voxel during the segmentation.
+To allow these feature simply raise the flag 'weight' and provide as last
+channel a binary mask with 0 on each voxel you want to exclude
 
 **Parameters** :
 
-  *imgs* : array-like, array of images tensor
+  *imgs* : array-like of shape (n_subsamples, n_imgs, heigth, width, n_channels)
+           array of images tensor
   *n_centroids* : int, number of centroids to find
-  *stopping_criteria* :It is the iteration termination criteria. When this criteria
-      is satisfied, algorithm iteration stops.
-  *center_init* :centroid initialization technique; can be cv2.KMEANS_RANDOM_CENTERS or cv2.KMEANS_PP_CENTERS.
+
+  *stopping_criteria* :It is the iteration termination criteria.
+                       When this criteria is satisfied, algorithm iteration
+                       stops.
+  *center_init* : centroid initialization technique; can be
+                  cv2.KMEANS_RANDOM_CENTERS or cv2.KMEANS_PP_CENTERS.
+  *weight* : Bool , flag that allow to not consider some voxel in images.
+             Default = False
 
 **Return**
 
-  *centroids* : array-like, array that contains the n_centroids estimated for each subsample
+  *centroids* : array-like, array that contains the n_centroids estimated
+                for each subsample

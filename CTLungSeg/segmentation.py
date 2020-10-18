@@ -4,13 +4,14 @@
 import cv2
 import numpy as np
 
-from sklearn.cluster import KMeans
 from tqdm import tqdm
+from sklearn.cluster import KMeans
 
+from CTLungSeg.utils import gl2bit
 from CTLungSeg.method import connected_components_wStats
-from CTLungSeg.method import connected_components_wAreas_3d
+from CTLungSeg.method import connected_components_wVolumes_3d
 from CTLungSeg.method import erode, dilate
-from CTLungSeg.method import gl2bit
+from CTLungSeg.method import imfill
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
@@ -45,7 +46,8 @@ def closing(img, kernel):
 
 
 def remove_spots(img, area):
-    """Set to zero the GL of all the connected region with area lesser than area
+    """Set to zero the GL of all the connected region with
+    area lesser than the provided value
 
     Parameters
     ----------
@@ -81,14 +83,15 @@ def select_largest_connected_region_3d(img):
     dst : array-like
         binary image with only the largest connected region
     """
-    connected, areas = connected_components_wAreas_3d(img)
-    areas = np.delete(areas, np.argmax(areas))
+    connected, areas = connected_components_wVolumes_3d(img)
+    areas = np.delete(areas, np.argmax(areas)) # remove background
     dst = (connected == np.argmax(areas) + 1)
     return dst
 
 
 def reconstruct_gg_areas(mask):
-    """This function interpolate each slice of the input mask to reconstruct the missing gg areas.
+    """This function interpolate each slice of the input mask
+    to reconstruct the missing gg areas.
 
     Parameter
     ---------
@@ -117,7 +120,8 @@ def reconstruct_gg_areas(mask):
 
 
 def find_ROI(stats) :
-    """Found the upper and lower corner of the rectangular ROI according to the connected region stats
+    """Found the upper and lower corner of the
+    rectangular ROI according to the connected region stats
 
     Parameter
     ---------
@@ -127,11 +131,21 @@ def find_ROI(stats) :
     Return
     ------
     corners: array-like
-        array which contains the coordinates of the upper and lower corner of the ROI organized as [x_top, y_top, x_bottom, y_bottom]
+        array which contains the coordinates of the upper and
+        lower corner of the ROI organized as [x_top, y_top, x_bottom, y_bottom]
     """
     stats = stats.drop([0], axis = 0)
     corner = np.array([stats.min(axis = 0)['LEFT'], stats.min(axis = 0)['TOP'], np.max(stats['LEFT'] + stats['WIDTH']), np.max(stats['TOP'] + stats['HEIGHT'])])
     return np.nan_to_num(corner, copy=False).astype('int16')
+
+
+def create_lung_mask(volume, threshold) :
+    '''
+
+    '''
+    lung_mask = volume > threshold
+    body_mask = imfill(lung_mask)
+    return ((body_mask != 0) & ~lung_mask)
 
 
 def bit_plane_slices(stack, bits):
@@ -150,7 +164,8 @@ def bit_plane_slices(stack, bits):
     Returns
     -------
     output : array-like
-        images stack in which each GL depends only to the significance of each specfied bit
+        images stack in which each GL depends only to
+        the significance of each specfied bit
     """
     binary = gl2bit(stack)
     bit = np.asarray(bits)
@@ -159,38 +174,53 @@ def bit_plane_slices(stack, bits):
     return (np.sum(selection * significance, axis=0)).astype(np.uint8)
 
 
-def imlabeling(image, centroids) :
-    """Return the labeled image given the original image
-    tensor and the centroids
+def imlabeling(image, centroids, weight = None) :
+    """
+    Label an input stack of multichannel images according to the provided
+    centroids and weight.
 
     Parameters
     ----------
-    image : array-like
-    image to label
+    image : array-like of shape (n_images, height, width, n_channels)
+        image stack to label
 
-    centroids : array-like
-        Centroids vector for KMeans clustering
+    centroids : array-like of shape (n_centroids, n_channels)
+        Centroids vector for KMeans clustering. M
+
+    weight : array-like of shape (n_images, height, width)
+        The weights for each observation in image.
+        If None, all observations are assigned equal weight.
 
     Return
     ------
-    labeled : array-like
-        Image in which each GL ia assigned on its label.
+    labeled : array-like of shape (n_images, height, width )
+        Image in which each GL ia assigned to the corresponding label
     """
-    weigth = (image != 0).astype(np.uint8)
-    to_label = image.reshape((-1,1))
-    res = KMeans(n_clusters=centroids.shape[0], init=centroids, n_init=1).fit_predict(to_label, sample_weight = weigth.reshape(-1,))
+    if not weight is None :
+        weight = weight.reshape((-1, ))
 
-    return res.reshape(image.shape)
+    to_label = image.reshape((-1, image.shape[3]))
+    kmeans = KMeans(n_clusters = centroids.shape[0], init=centroids, n_init = 1)
+    lab = kmeans.fit_predict(to_label.astype(np.float32), sample_weight = weight)
+    return lab.reshape(image.shape[:3])
 
 
-def subsamples_kmeans_wo_bkg(imgs, n_centroids, stopping_criteria, centr_init) :
+
+
+def kmeans_on_subsamples(imgs,
+                         n_centroids,
+                         stopping_criteria,
+                         centr_init,
+                         weight = False) :
     """
     Apply the kmenas clustering on each stack of images in subsample.
-    During clustering do not consider the background pixels that must be set to 0.
+    Allow also to choose if consider or not some voxel during the segmentation.
+    To allow these feature simply raise the flag 'weight' and provide as last
+    channel a binary mask with 0 on each voxel you want to exclude
 
     Parameters :
     ----------
-    imgs : array-like
+    imgs : array-like of shape (n_subsamples, n_imgs, heigth, width, n_channels)
         array of images tensor
     n_centroids : int
         number of centroids to find
@@ -200,6 +230,8 @@ def subsamples_kmeans_wo_bkg(imgs, n_centroids, stopping_criteria, centr_init) :
     center_init :
         centroid initialization technique; can be
         cv2.KMEANS_RANDOM_CENTERS or cv2.KMEANS_PP_CENTERS.
+    weight : Bool ,
+        flag that allow to not consider some voxel in images. Default = False
 
     Return
     ------
@@ -207,11 +239,21 @@ def subsamples_kmeans_wo_bkg(imgs, n_centroids, stopping_criteria, centr_init) :
         array that contains the n_centroids estimated for each
         subsample
     """
-    centroids = []
+    ns = imgs[0].shape[3]
+    if weight :
+        vector = np.asarray([el[:, :, :, :ns - 1][el[: , :, :, ns - 1] != 0] for el in imgs])
+    else :
+        vector = np.asarray([el.reshape((-1, ns)) for el in imgs],
+                            dtype=np.ndarray)
 
-    for el in tqdm(imgs) :
-        to_cluster = el[el != 0] # remove bkg pixel
-        to_cluster =  to_cluster.astype(np.float32) # cast to correct type
-        _,_,centr = cv2.kmeans(to_cluster.reshape((-1,1)), n_centroids, None, stopping_criteria, 10, centr_init)
+    centroids = []
+    for el in tqdm(vector) :## TODO: improve efficiency
+
+        _, _, centr = cv2.kmeans(el.astype(np.float32),
+                                 n_centroids,
+                                 None,
+                                 stopping_criteria,
+                                 10,
+                                 centr_init)
         centroids.append(centr)
     return np.asarray(centroids, dtype= np.float32)

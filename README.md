@@ -35,7 +35,7 @@ To achieve this purpose the presented approach will use an algorithm to isolate 
 The segmentation of lung regions involves three steps:
 - Preprocessing: Involves lung, ROI and slice selection
 - Training: this process will estimate the centroids for the clusters
-- Labeling: In which the centroids estimated by using the train dataset are used to segment the TAC images
+- Labeling: In which the centroids estimated by using the train dataset are used to segment the CT images
 
 
 **Example of segmentation**. **Left:** Original image: **Right** original image with identified ground glass areas.
@@ -137,9 +137,10 @@ PS /> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
 
 - once you have extracted the lung you can start to label the dataset. To achieve this purpose simply run the *labeling.ps1* script by providing the required parameters:
 ```powershell
-PS /> ./labeling.ps1 path/to/input/folder/ path/to/centroids/file/centroids.pkl.npy /path/to/label1/output/folder/ /path/to/label2/output/folder/
+PS /> ./labeling.ps1 path/to/input/folder/ path/to/centroids/file/centroids.pkl.npy /path/to/output/folder/
 ```
-The input directory is the one that contains the images with the extracted lung. The two different output folder will contains the two different set of estimated labels: one for ground glass and one for blood vessels. The reason why provide this two labels is because sometimes may happen that ground glass are assigned to the centroid as vessel; so after the segmentation you have to check which of the two labels corresponds to the region of interest.
+The input directory is the one that contains the images with the extracted lung.
+The resulting labels will be saved in the output folder as *.pkl.npy*. 
 
 ## License
 

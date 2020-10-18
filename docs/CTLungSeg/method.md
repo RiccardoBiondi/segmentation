@@ -9,8 +9,9 @@ This module contains functions useful for the script execution. This functions e
 5. [median_blur](#media_blur)
 6. [gaussian_blur](#gaussian_blur)
 7. [otsu_threshold](#otsu_threshold)
-8. [gl2bit](#gl2bit)
-9. [connected_components_wAreas_3d](#connected_components_wAreas_3d)
+9. [connected_components_wVolumes_3d](#connected_components_wVolumes_3d)
+10. [histogram_equalization](#histogram_equalization)
+11. [canny_edge_detection](#canny_edge_detection)
 
 ## erode
 
@@ -315,22 +316,7 @@ Compute the best threshold value for each slice of the input image stack by usin
   <div class="text_caption"> Thresholded Image </div>
 </a>
 
-## gl2bit
-
-Convert the grey level of each voxel of a stack of images into its binary representation.
-
-**Parameters**
-
-  *img* : array-like , image tensor to convert
-
-  *width* : int, number of bit to display
-
-**Return**
-
-  *binarized* : array-like, image tensor in which each voxel GL value is replaced by a str that contains its binary representation.
-
-
-## connected_components_wAreas_3d
+## connected_components_wVolumes_3d
 
 Found all the connected components in three dimensions of  the image tensor and te corresponding areas. THhe used connectivity is 26.
 
@@ -342,3 +328,35 @@ Found all the connected components in three dimensions of  the image tensor and 
 
   *labeled* : array-like, image in which each voxel is assigned to a connected region
   *areas* :array-like, array of areas(in pixel) of each connected region.
+
+## histogram_equalization
+
+Apply the Contrast Limited Adaptive Histogram Equalization to enhance image
+contrast.
+
+**Parameters**
+
+  *image*: array-like, image or stack of images to equalize
+
+  *clipLimit*: float, threshold for contrast limiting, default 2.0
+
+  *tileGridSize*: tuple, number of tiles in the row and column
+
+**Return**
+
+  *equalized* : array-like, equalized image or stack of images
+
+## canny_edge_detection
+
+Found Image edges by using Canny algorithm. This function estimates the
+required upper and lower thresholds values dinamically by appling an otsu
+threshold on each slice of the stack.
+
+**Parameter**
+
+  *image*: array-like of shape (n_img, height, width), image or stack of images
+          from which find contours
+**Return**
+
+  *edge_map* : array-like  of the same shape of image, binary edge map of the
+               input stack
