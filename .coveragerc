@@ -3,3 +3,6 @@ branch = True
 omit =
     */CTLungSeg/__init__.py
     */CTLungSeg/__version__.py
+    */CTLungSeg/lung_extraction.py
+    */CTLungSeg/train.py
+    */CTLungSeg/labeling.py
