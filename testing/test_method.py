@@ -21,6 +21,7 @@ import cv2
 import numpy as np
 from numpy import ones, zeros
 from numpy.random import rand
+from skimage.util import random_noise
 from CTLungSeg.utils import load_image
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
@@ -31,12 +32,30 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 #random image stack
 @st.composite
 def rand_stack_strategy(draw, n_imgs = st.integers(1, 50)) :
+    '''
+    Generate a stack of n_imgs 512x512 with pixel values normal distributed in
+    range [0, 255]
+    '''
     N = draw(n_imgs)
     return (np.abs(255 * np.random.randn(N, 512, 512))).astype(np.uint8)
+
+@st.composite
+def rand_image_strategy(draw) :
+    '''
+    Generate a stack of n_imgs 512x512 with pixel values normal distributed in
+    range [0, 255]
+    '''
+
+    return (255 * np.random.randn(512, 512)).astype(np.uint8)
+
 
 #square image strategy
 @st.composite
 def square_image_strategy(draw, side = st.integers(50,200)) :
+    '''
+    Generate a binary image with 0 values on the background and a square of
+    random areas with pixel value 1
+    '''
     L = draw(side)
     square = zeros((512,512), dtype=np.uint8)
     square[100 : 100 + L, 100 : 100 + L ] = ones((L,L), dtype=np.uint8)
@@ -45,7 +64,12 @@ def square_image_strategy(draw, side = st.integers(50,200)) :
 
 #square image stack
 @st.composite
-def square_stack_strategy(draw, side =st.integers(50, 200), n_imgs = st.integers(2, 100)) :
+def square_stack_strategy(draw, side =st.integers(50, 200),
+                            n_imgs = st.integers(2, 100)) :
+    '''
+    Generate a stack of binary images with 0 values on the background and a
+    square of random areas with pixel value 1
+    '''
     N = draw(n_imgs)
     L = draw(side)
     image = zeros((L, 512, 512), dtype=np.uint8)
@@ -55,10 +79,22 @@ def square_stack_strategy(draw, side =st.integers(50, 200), n_imgs = st.integers
 #Kernel strategies
 @st.composite
 def kernel_strategy(draw, k_size = st.integers(3,9)) :
+    '''
+    return a matrix of ones with random size
+    '''
     k = draw(k_size)
     return ones((k,k), dtype=np.uint8)
 
 
+@st.composite
+def median_noise_strategy(draw) :
+    '''
+    Generates a black image with salt and pepper noise
+    '''
+    img = zeros((512, 512), dtype=np.uint8)
+    SvsP = draw(st.floats(0, .15))
+    image = random_noise(img, mode='s&p', salt_vs_pepper = SvsP)
+    return image, SvsP
 #####################################################
 ###                START TESTS                    ###
 #####################################################
@@ -92,14 +128,30 @@ def test_dilate_stack(image, kernel, iter) :
     assert (np.sum(res) > (image[1]**2)*res.shape[0])
 
 
-@given(rand_stack_strategy())
+@given(median_noise_strategy(), st.integers(10, 50))
 @settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
-def test_median_blur (stack) :
-    blurred = median_blur(stack.astype(np.float32), 5)
-    assert blurred.shape == stack.shape
+def test_median_blur_high_ksize (noisy_image, n_imgs) :
+    '''
+    Test the median blur with an high kernel size black image and stack of image
+    with a salt and pepper noise with small amount of salt.
+    The image is blurred with a very high kernel, the test veriphy that :
+
+    - Uniform image is returned
+    - Uniform stak of images is returned
+    - shape is preserved
+    '''
+    stack = np.asarray([noisy_image[0] for _ in range(n_imgs)])
+    blurred_image = median_blur(noisy_image[0].astype(np.uint8), 11)
+    blurred_stack = median_blur(stack.astype(np.uint8), 11)
+
+    assert blurred_image.shape == (512, 512)
+    assert blurred_stack.shape == (n_imgs, 512, 512)
+
+    assert (blurred_image == zeros((512, 512))).all()
+    assert (blurred_stack == zeros((n_imgs, 512, 512))).all()
 
 
-@given(rand_stack_strategy())
+
 @settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_gaussian_blur (stack) :
     blurred = gaussian_blur(stack.astype(np.float32), ksize=(5, 5))
