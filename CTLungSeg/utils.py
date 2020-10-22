@@ -235,9 +235,8 @@ def subsamples(data, n_sub):
         list of random subsamples
     """
     #shuffle the sample list
-    img = data.copy()
-    np.random.shuffle(img)
-    img = np.array_split(img, n_sub)
+    np.random.shuffle(data)
+    img = np.array_split(data, n_sub)
     return np.array(img, dtype = np.ndarray)
 
 
@@ -300,3 +299,24 @@ def imcrop(img, ROI) :
         cropped image
     """
     return img[ROI[1] : ROI[3], ROI[0] : ROI[2]]
+
+
+def _std_dev(image, size) :
+    '''
+    compute the standard deviation of the neighborhood of each pixel
+
+    Parameters
+    ----------
+
+    image : array-like
+        image to filter
+    size : int
+        radius of the neighborhood
+    '''
+
+    image = itk.image_from_array(image)
+    std = itk.NoiseImageFilter.New(image)
+    std.SetRadius(size)
+    std.Update()
+    out = itk.array_from_image(std.GetOutput())
+    return out

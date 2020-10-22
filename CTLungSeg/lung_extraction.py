@@ -7,7 +7,6 @@ import numpy as np
 from time import time
 
 from CTLungSeg.utils import load_image, save_pickle
-from CTLungSeg.method import imfill
 from CTLungSeg.method import median_blur
 from CTLungSeg.segmentation import select_largest_connected_region_3d
 from CTLungSeg.segmentation import create_lung_mask
@@ -61,6 +60,6 @@ if __name__ == '__main__' :
     lung_mask = median_blur(lung_mask.astype(np.uint8), 5)
     lung_mask = select_largest_connected_region_3d(lung_mask.astype(np.uint16))
     #save the results
-    save_pickle(args.output, (volume * lung_mask))
+    save_pickle(args.output ,volume * lung_mask)
     stop = time()
     print('Process ended after {} seconds'.format(stop - start))

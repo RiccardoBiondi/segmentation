@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-
-import cv2
 import argparse
 import numpy as np
 
 from time import time
 
-from CTLungSeg.utils import load_image, save_pickle, hu2gl
-from CTLungSeg.method import median_blur, canny_edge_detection
+from CTLungSeg.utils import load_image, save_pickle, hu2gl, normalize
+from CTLungSeg.method import median_blur, canny_edge_detection, std_filter
 from CTLungSeg.segmentation import imlabeling
 
 __author__ = ['Riccado Biondi', 'Nico Curti']
@@ -53,19 +51,18 @@ def main():
     edge_map = canny_edge_detection(volume)
     # build multi channel
     mc = np.stack([
-                    median_blur(volume, 3),
-                    median_blur(volume, 7),
-                    median_blur(volume, 11),
-                    median_blur(edge_map, 5),
+                    normalize(volume),
+                    normalize(median_blur(volume, 11)),
+                    normalize(std_filter(volume, 3)),
                     median_blur(edge_map, 7)], axis = -1)
 
     labels = imlabeling(mc, centroids, weight)
     labels = (labels == 4).astype(np.uint8)
-    labels = median_blur(labels, 7)
     #
     save_pickle(args.lab, labels)
 
 if __name__ == '__main__' :
+
     start = time()
     main()
     stop = time()

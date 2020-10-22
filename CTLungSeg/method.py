@@ -171,8 +171,8 @@ def otsu_threshold(img):
             thresholded image stack
     """
     if len(img.shape) == 2  :
-        thresh, out = cv2.threshold(img, 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        return out
+        out = cv2.threshold(img, 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+        return [np.asarray(out[0]), np.asarray(out[1])]
     else:
         out = list(zip(*list(map(partial(cv2.threshold, thresh=0, maxval=1, type=cv2.THRESH_BINARY+cv2.THRESH_OTSU), img))))
         return [np.asarray(out[0]), np.asarray(out[1])]
@@ -248,3 +248,28 @@ def canny_edge_detection(image) :
     upper_thr = 2 * thr
     lower_thr = 0.5 * thr
     return np.asarray(list(map(cv2.Canny, image, lower_thr, upper_thr)))
+
+
+def std_filter(image, size) :
+    '''
+    Replace each pixel value with the standard deviation computed on its
+    neighborhood.
+
+    Parameters:
+    ----------
+
+    image : array-like
+        image or stack of images to filter
+
+    size: int
+        radius of the neighborhood
+
+    Return
+    ------
+
+    filtered : array-like
+        filtered image
+    '''
+    if len(image.shape) == 2 :
+        return utils._std_dev(image, size)
+    return np.asarray(list(map(partial(utils._std_dev, size = size), image)))

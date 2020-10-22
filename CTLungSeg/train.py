@@ -6,13 +6,12 @@ import argparse
 import numpy as np
 
 from glob import glob
-from tqdm import tqdm
 from time import time
 
 from CTLungSeg.utils import load_image, save_pickle
-from CTLungSeg.utils import subsamples, hu2gl
-from CTLungSeg.method import median_blur, histogram_equalization
-from CTLungSeg.method import canny_edge_detection
+from CTLungSeg.utils import subsamples, hu2gl, normalize
+from CTLungSeg.method import std_filter
+from CTLungSeg.method import median_blur, canny_edge_detection
 from CTLungSeg.segmentation import kmeans_on_subsamples
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
@@ -71,17 +70,21 @@ def main():
     # convert to multichannel
     edge_map = canny_edge_detection(imgs)
     imgs = np.stack([
-                    median_blur(imgs, 3),
-                    median_blur(imgs, 7),
-                    median_blur(imgs, 11),
-                    median_blur(edge_map, 5),
-                    median_blur(edge_map, 7)], axis = -1)
+                    normalize(imgs),
+                    normalize(median_blur(imgs, 11)),
+                    normalize(std_filter(imgs, 3)),
+                    median_blur(edge_map, 7),
+                    (imgs != 0).astype(np.uint8)], axis = -1)
     n_imgs = imgs.shape[0]
+    print(n_imgs)
+    print(imgs.shape)
 
     print('Loaded {:d} files from {}\n'.format(len(files),args.folder),
             flush=True)
 
     imgs = subsamples(imgs, args.n)
+    print(imgs.shape)
+    print(imgs[0].shape)
     #Recap for better parameters control
     print('*****Starting custering*****',flush=True)
     print('\tNumber of subsamples--> {:d}'.format(args.n) , flush=True)
@@ -92,13 +95,13 @@ def main():
     #First clustering
     print("\nI'm clustering...", flush = True)
     center = kmeans_on_subsamples(imgs,
-                                  5,
+                                  4,
                                   stop_criteria,
                                   centroid_init[args.init],
-                                  False)
+                                  True)
     # clustering refinement
-    _, _, center = cv2.kmeans(center.reshape((-1,5)),
-                              5, None,
+    _, _, center = cv2.kmeans(center.reshape((-1,4)),
+                              4, None,
                               stop_criteria,
                               10,
                               centroid_init[args.init])

@@ -83,40 +83,9 @@ def select_largest_connected_region_3d(img):
     dst : array-like
         binary image with only the largest connected region
     """
-    connected, areas = connected_components_wVolumes_3d(img)
-    areas = np.delete(areas, np.argmax(areas)) # remove background
-    dst = (connected == np.argmax(areas) + 1)
+    connected, volumes = connected_components_wVolumes_3d(img)
+    dst = (connected == np.argsort(volumes)[-2])
     return dst
-
-
-def reconstruct_gg_areas(mask):
-    """This function interpolate each slice of the input mask
-    to reconstruct the missing gg areas.
-
-    Parameter
-    ---------
-    mask : array-like
-        lung mask to reconstruct
-    Return
-    ------
-    reconstructed : array-like
-        reconstructed lung mask
-    """
-    first  = mask.copy()
-    second = mask.copy()
-    reconstructed = mask.copy()
-
-    for i in range(first.shape[0] -1):
-        first[i + 1] = np.bitwise_or(first[i], first[i + 1], dtype=np.uint8)
-
-    for i in reversed(range(1, second.shape[0], 1)):
-        second[i - 1] = np.bitwise_or(second[i - 1], second[i], dtype = np.uint8)
-
-    for i in range(reconstructed.shape[0]):
-        reconstructed[i] = np.bitwise_and(first[i], second[i], dtype = np.uint8)
-    return reconstructed
-
-
 
 
 def find_ROI(stats) :
@@ -196,10 +165,10 @@ def imlabeling(image, centroids, weight = None) :
     labeled : array-like of shape (n_images, height, width )
         Image in which each GL ia assigned to the corresponding label
     """
-    if not weight is None :
+    if weight is not None :
         weight = weight.reshape((-1, ))
 
-    to_label = image.reshape((-1, image.shape[3]))
+    to_label = image.reshape((-1, image.shape[-1]))
     kmeans = KMeans(n_clusters = centroids.shape[0], init=centroids, n_init = 1)
     lab = kmeans.fit_predict(to_label.astype(np.float32), sample_weight = weight)
     return lab.reshape(image.shape[:3])
@@ -239,7 +208,7 @@ def kmeans_on_subsamples(imgs,
         array that contains the n_centroids estimated for each
         subsample
     """
-    ns = imgs[0].shape[3]
+    ns = imgs[0].shape[-1]
     if weight :
         vector = np.asarray([el[:, :, :, :ns - 1][el[: , :, :, ns - 1] != 0] for el in imgs])
     else :
