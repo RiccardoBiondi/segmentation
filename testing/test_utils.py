@@ -6,18 +6,15 @@ from  hypothesis import HealthCheck as HC
 
 from CTLungSeg.utils import load_pickle
 from CTLungSeg.utils import save_pickle
-from CTLungSeg.utils import load_npz
-from CTLungSeg.utils import save_npz
-from CTLungSeg.utils import load_dicom
-from CTLungSeg.utils import load_image
 from CTLungSeg.utils import normalize
 from CTLungSeg.utils import rescale
 from CTLungSeg.utils import gl2bit
 from CTLungSeg.utils import hu2gl
+from CTLungSeg.utils import center_hu
 from CTLungSeg.utils import subsamples
 from CTLungSeg.utils import imfill
 from CTLungSeg.utils import stats2dataframe
-from CTLungSeg.utils import imcrop
+from CTLungSeg.utils import _std_dev
 
 import cv2
 import numpy as np
@@ -42,7 +39,24 @@ def rand_stack_strategy(draw, n_imgs = st.integers(2, 50)) :
     N = draw(n_imgs)
     return (255 * np.random.rand(N, 512, 512)).astype(np.uint8)
 
-#START TESTING
+@st.composite
+def gl16_stack_strategy(draw):
+
+    n_imgs = draw(st.integers(1, 200))
+    stack = randint(-4000, 4000,  (n_imgs, 512, 512), dtype = np.int16)
+
+    return stack
+
+
+
+
+
+################################################################################
+###                                                                          ###
+###                                 TESTING                                  ###
+###                                                                          ###
+################################################################################
+
 
 @given(rand_stack_strategy(), filename_strategy)
 @settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
@@ -50,24 +64,6 @@ def test_save_and_load_pkl(imgs,  filename):
     save_pickle('./testing/images/' + filename, imgs)
     load = load_pickle('./testing/images/' + filename + '.pkl.npy')
     assert (load == imgs).all()
-
-
-@given(rand_stack_strategy(), filename_strategy)
-@settings(max_examples = 20, deadline = None,suppress_health_check=(HC.too_slow,))
-def test_save_and_load_npz(imgs, filename):
-    save_npz('./testing/images/' + filename, imgs)
-    load = load_npz('./testing/images/' + filename + '.npz')
-    assert (load == imgs).all()
-
-
-def test_load_img() :
-    ref = load_pickle('./testing/images/test_dicom/DICOM_gt.pkl.npy')
-    img_pkl = load_image('./testing/images/test_dicom/DICOM_gt.pkl.npy')
-#    img_dcm = load_image('./testing/images/test_dicom/DICOM/')
-    assert (ref == img_pkl).all()
-#    assert (ref == img_dcm).all()
-    with pytest.raises(FileNotFoundError) :
-        assert load_image('./testing/images/DICOM_gt.pkl.npy')
 
 
 @given(rand_stack_strategy())
@@ -92,32 +88,66 @@ def test_rescale(img):
     with pytest.raises(ZeroDivisionError) :
         assert rescale(img, 3, 3)
 
+
 @given(st.integers(1,30))
-@settings(max_examples = 2, deadline = None)
+@settings(max_examples = 2, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_gl2bit(n_imgs) :
     input = np.ones((n_imgs, 100, 100), dtype = np.uint8)
-    result = gl2bit(input)
+    result = gl2bit(input, 8)
     assert (np.unique(result) == [0,1]).all()
+
+
+@given(rand_stack_strategy(), st.integers(0, 7))
+@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+def test_gl2bit_value_error(image, bits) :
+    '''
+    Given a wrong number of bits, assert that a value error is raised
+    '''
+    with pytest.raises(ValueError) :
+        assert gl2bit(image, bits)
 
 
 @given(rand_stack_strategy())
 @settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_hu2gl(img):
-
+    '''
+    Given an image is hu to convert in an 8-bit image,
+    assert that :
+    - the minimum value is 0
+    - the maximum value is 255
+    '''
     out = hu2gl(img)
     assert out.max() == 255
     assert out.min() == 0
 
 
+@given(gl16_stack_strategy())
+@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+def test_center_hu(volume) :
+    '''
+    Given a stack of images whoch each values is a random 16-bit integers,
+    assert that :
+    - the shape is preserved
+    - the maximum value lesser than 2049
+    - the minimum value higher than -1S
+    '''
+    res = center_hu(volume)
+
+    assert res.shape == volume.shape
+    assert res.min() > -1
+    assert res.max() < 2049
+
 
 @given(st.integers(200, 1000), st.integers(2, 200))
 @settings(max_examples  = 20, deadline = None)
 def test_subsamples(n_sample, n_subsamples):
+    '''
+    Given
+    '''
     sample = np.array([np.ones((randint(1,301), randint(1, 301))) for i in range(n_sample)], dtype=np.ndarray)
     subsample = subsamples(sample, n_subsamples)
 
     assert subsample.shape[0] == n_subsamples
-
 
 
 def test_imfill():
@@ -134,12 +164,3 @@ def test_stats2dataframe(n_slices, cc):
     input = [np.empty(shape) for i in range(n_slices)]
     df = stats2dataframe(input)
     assert len(df) == n_slices
-
-
-@given(st.integers(0, 200), st.integers(0, 200), st.integers(1, 200), st.integers(1, 200))
-@settings(max_examples = 20, deadline = None)
-@example(x = 0, y = 0, h = 0, w = 0)
-def test_imcrop(x, y, w, h) :
-    roi = np.array([x, y, x + w, y + h], dtype = np.int16)
-    crop = imcrop(ones((512, 512), dtype = np.uint8), roi)
-    assert crop.shape == (h, w)
