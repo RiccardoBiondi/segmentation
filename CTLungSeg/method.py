@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import itk
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd

@@ -3,7 +3,6 @@
 
 import os
 import cv2
-#import itk
 import pickle
 import SimpleITK as sitk
 import numpy as np

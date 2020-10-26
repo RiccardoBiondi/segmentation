@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import itk
+
 import argparse
 import numpy as np
 
