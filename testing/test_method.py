@@ -344,9 +344,13 @@ def test_histogram_equalization(volume, clip, size ) :
     - the standard  deivation of the equalized image is higher than the original
         one
     '''
-    equalized = histogram_equalization(volume, clip, (size, size))
+    image = stack[0]
+    equalized_stack = histogram_equalization(volume, clip, (size, size))
+    equalized_image = histogram_equalization(image, clip, (size, size))
+
 
     assert np.std(equalized) > np.std(volume)
+    assert np.std(image) > np.std(image)
 
 
 @given(rand_stack_strategy())
@@ -357,10 +361,15 @@ def test_canny_edge_detection(stack) :
     - Return a binary image
     - the shape is preserved
     '''
-    edge_map = canny_edge_detection(stack)
+    image = stack[0]
+    edge_map_image = canny_edge_detection(image)
+    edge_map_stack = canny_edge_detection(stack)
 
-    assert (np.unique(edge_map) == (0, 255)).all()
-    assert edge_map.shape == stack.shape
+    assert (np.unique(edge_map_stack) == (0, 255)).all()
+    assert edge_map_stack.shape == stack.shape
+
+    assert (np.unique(edge_map_image) == (0, 255)).all()
+    assert edge_map_image.shape == image.shape
 
 
 @given(rand_stack_strategy())

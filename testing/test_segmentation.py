@@ -160,6 +160,18 @@ def test_imlabeling(stack, centroids) :
     assert labeled.shape == stack.shape
 
 
+def test_imlabeling_wWeigth(stack, centroids) :
+    '''
+    '''
+    w = (stack != 0).astype(np.uint8)
+    mc = np.stack([stack for i in range(centroids.shape[1])], axis = -1)
+    labeled = imlabeling(mc, centroids, w)
+
+    assert len(np.unique(labeled)) == centroids.shape[0]
+    assert labeled.shape == stack.shape
+
+
+
 @given(integer_stack_strategy(), st.integers(1, 4),st.integers(1, 5))
 @settings(max_examples = 1, deadline = None)
 def test_kmeans_on_subsamples(stack, n_features, n_subsamples) :
