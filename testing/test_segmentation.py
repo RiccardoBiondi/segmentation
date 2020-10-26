@@ -159,7 +159,8 @@ def test_imlabeling(stack, centroids) :
     assert len(np.unique(labeled)) == centroids.shape[0]
     assert labeled.shape == stack.shape
 
-
+@given(rand_stack_strategy(), centroids_strategy() )
+@settings(max_examples  = 4, deadline=None)
 def test_imlabeling_wWeigth(stack, centroids) :
     '''
     '''

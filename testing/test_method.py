@@ -344,13 +344,13 @@ def test_histogram_equalization(volume, clip, size ) :
     - the standard  deivation of the equalized image is higher than the original
         one
     '''
-    image = stack[0]
+    image = volume[0]
     equalized_stack = histogram_equalization(volume, clip, (size, size))
     equalized_image = histogram_equalization(image, clip, (size, size))
 
 
-    assert np.std(equalized) > np.std(volume)
-    assert np.std(image) > np.std(image)
+    assert np.std(equalized_stack) > np.std(volume)
+    assert np.std(equalized_image) > np.std(image)
 
 
 @given(rand_stack_strategy())
