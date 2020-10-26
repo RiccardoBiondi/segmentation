@@ -50,7 +50,7 @@ def centroids_strategy(draw) :
     n_centr = draw(st.integers(2, 6))
     n_features = draw(st.integers(1, 6))
     centroids = np.asarray([draw(st.integers(0, 255))] * (n_centr * n_features))
-    assume(len(np.unique(centroids) > 4 ))
+    assume(len(np.unique(centroids) > n_centr ))
 
     return centroids.reshape(n_centr, n_features)
 

@@ -280,7 +280,7 @@ def test_connected_components_wStats(n_imgs) :
 
 
 @given(square_image_strategy(), st.integers(2, 5))
-@settings(max_examples = 20, deadline = 20)
+@settings(max_examples = 20, deadline = None)
 def test_connected_components_wStats_centr_pos(image, n_imgs) :
     '''
     given an image with a white square, assert that:
