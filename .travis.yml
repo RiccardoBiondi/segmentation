@@ -45,11 +45,10 @@ before_install:
   - python -m pip install numpy==1.18
   - python -m pip install scipy>=1.2.1
   - python -m pip install scikit-learn>=0.20.3
-  - python -m pip install pydicom==1.3.0
   - python -m pip install pandas==0.25.3
   - python -m pip install opencv-python
   - python -m pip install tqdm
-  - python -m pip install itk
+  - python -m pip install SimpleITK
 
   # testing libraries
   - python -m pip install pytest==3.0.7

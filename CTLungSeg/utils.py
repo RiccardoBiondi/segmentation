@@ -3,14 +3,13 @@
 
 import os
 import cv2
+#import itk
 import pickle
-import pydicom
+import SimpleITK as sitk
 import numpy as np
 import pandas as pd
 
 from functools import partial
-from glob import glob
-
 
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
@@ -35,111 +34,168 @@ def load_pickle(filename):
     return data
 
 
-def load_npz(filename):
-    """Load the .npz image file
+def _read_dicom_series(filedir):
+    '''
+    Internal function to read a dicom series stored on filedir.
 
     Parameters
     ----------
-    filename: str
-        file name or path to load file
 
-    Returns
-    -------
-    data: array_like
-        array loaded from a given file
-    """
-    with open(filename, 'rb') as fp:
-        data_npz = np.load(fp, allow_pickle = True)
-        data = [data_npz[key] for key in data_npz.keys()]
-
-    return np.array(data)
-
-
-def load_dicom(filedir):
-    """Load image and store it into a 3D numpy array
-
-    Parameter
-    ---------
     filedir: str
         path to the directory that contains the dicom files
+
     Returns
     -------
     imgs: array-like
         image tensor
-    """
-    dicoms = glob('{}/*.dcm'.format(filedir))
-    z = [float(pydicom.dcmread(f, force = True)[('0020', '0032')][-1]) for f in dicoms]
-    order = np.argsort(z)
-    dicoms = np.asarray(dicoms)[order]
-    imgs = np.asarray([pydicom.dcmread(f, force = True).pixel_array for f in dicoms])
-    return imgs
+    spatial_informations : list
+        list of tuple which contains information about: series spatial origin,
+        spacing between pixls, series direction.
+    '''
+
+    reader = sitk.ImageSeriesReader()
+    dicom_names = reader.GetGDCMSeriesFileNames(filedir)
+    reader.SetFileNames(dicom_names)
+    image = reader.Execute()
+    spatial_informations = [image.GetOrigin(),
+                            image.GetSpacing(),
+                            image.GetDirection()]
+    image_array = sitk.GetArrayFromImage(image)
+
+    return image_array, spatial_informations
 
 
-def load_nifti(filename):
-    pass
+def _read_image(filename) :
+    '''
+    Internal function. Read an image from specified file in each format
+    supported by SimpleITK.
 
+    Parameters
+    ----------
+    filename : str
+        Path to the image file
 
-def load_image(filename):
-    """Load a stack of images and return a 3D numpy array.
-    The input file format can by .pkl.npy, .npz or a folder
-    that contains .dcm files.
-
-    Parameter
-    ---------
-    filename: str
-        path to the image file(.pkl.npy or .npz) or folder that
-        contains .dcm files.
-    Return
-    ------
-    imgs: array-like
+    Returns
+    -------
+    image_array : array-like
         image tensor
-    """
+
+    spatial_informations : list
+        list of tuple which contains information about: series spatial origin,
+        spacing between pixels, series direction.
+    '''
+    reader = sitk.ImageFileReader()
+    reader.SetFileName(filename)
+    image = reader.Execute();
+    spatial_informations = [image.GetOrigin(),
+                            image.GetSpacing(),
+                            image.GetDirection()]
+    arr_image = sitk.GetArrayFromImage(image)
+
+    return arr_image, spatial_informations
+
+
+
+def read_image(filename):
+    '''
+    Parameters
+    ----------
+    filename: str
+        Path to image file, each format supported by SimpleITK is allowed
+        To load a dicom series simpli provide the path to the dicrectory which
+        contains the .dcm files
+
+    Returns
+    -------
+    volume: array-like
+        image tensor
+    spatial_informations : list of tuple which
+        contains information about: series spatial origin,
+        spacing between pixls, series direction.
+
+    Example
+    ------
+    >>> from CTLungSeg.utils import read_image
+    >>>
+    >>> path = 'dicom/series/path'
+    >>> # load a DICOM series
+    >>> dicom, info = read_image(path)
+    >>> # load a Nifti image
+    >>> filename = 'path/to/nifti/file.nii'
+    >>> nifti, info2 = read_image(filename)
+
+    '''
     if os.path.exists(filename) :
         if os.path.isfile(filename) :
-            imgs = load_pickle(filename)
+            image, info = _read_image(filename)
         else :
-            imgs = load_dicom(filename)
+
+            image, info = _read_dicom_series(filename)
+
     else :
         raise FileNotFoundError()
-    return imgs
+    return image, info
 
+
+def write_volume(image, output_filename, spatial_informations = None, format_ = '.nrrd') :
+    '''
+    Write the image volume in a specified format. Each format supported by
+    SimpleITK is supported
+
+    Parameters
+    ----------
+
+    image : array-like
+        image tensor to write
+    output_filename : str
+        name of the output file
+    spatial_informations : list of tuple
+        spatial information for the image, if None no spatial information is
+        provided
+    format_ : str
+        output format, can be each of the one supported by SimpleITK. default is
+        .nrrd
+
+    Example
+    -------
+    >>> from CTLungSeg.utils import read_image, write_volume
+    >>>
+    >>> input_file = 'path/ti/input/image'
+    >>> image, info = read_image(input_file)
+    >>> # process the image
+    >>> # write the image as nrrd
+    >>> output_name = 'path/to/output/filename'
+    >>> write_volume(image, output_name, info)
+    >>> # write the image also as nifti
+    >>> write_volume(image, output_name, info, '.nii')
+    '''
+    image = sitk.GetImageFromArray(image)
+    if spatial_informations is not None :
+        image.SetOrigin(spatial_informations[0])
+        image.SetSpacing(spatial_informations[1])
+        image.SetDirection(spatial_informations[2])
+
+    output_filename = output_filename + format_
+    writer = sitk.ImageFileWriter()
+    writer.SetFileName(output_filename )
+    writer.Execute(image)
 
 
 def save_pickle(filename, data):
-    """Save the image stack as pickle
+    '''
+    Save the image stack as pickle
 
     Parameters
     ----------
+
     filename: str
         file name or path to dump as pickle file
     data: array-like
         image or stack to save
 
-    Return
-    ------
-    None
-    """
+    '''
     with open('{}.pkl.npy'.format(filename), 'wb') as fp:
         pickle.dump(data, fp)
-
-
-
-def save_npz(filename, data):
-    """Save the image stack as uncompressed npz file
-
-    Parameters
-    ----------
-    filename: str
-        file name or path to dump as npz file
-    data: array-like
-        image or stack to save
-
-    Return
-    ------
-    None
-    """
-    with open('{}.npz'.format(filename), 'wb') as fp :
-        np.savez_compressed(file=fp, a=data)
 
 
 def normalize(image) :
@@ -148,10 +204,13 @@ def normalize(image) :
 
     Parameters:
     -----------
+
     image : array-like
         image or stack to normalize
-    Return
-    ------
+
+    Returns
+    -------
+
     normalized : array-like
         normalized images stack
     '''
@@ -159,7 +218,8 @@ def normalize(image) :
 
 
 def rescale(img, Max, Min):
-    """Rescale the image accodring to max, min input
+    '''
+    Rescale the image accodring to max, min input
 
     Parameters
     ----------
@@ -169,58 +229,93 @@ def rescale(img, Max, Min):
         Maximum value of the output array
     min: float
         minimum value of the output array
-    Return
-    ------
+
+    Returns
+    -------
     rescaled: array-like
         Image rescaled according to min, max
-    """
-    if min == max :
+    '''
+    if Min == Max :
         raise ZeroDivisionError
     return (img.astype(np.float32) - Min) * (1. / (Max - Min))
 
 
-def gl2bit(img) :
-    """Convert the gray level of each voxel of a stack of images
+def gl2bit(img, width) :
+    '''
+    Convert the gray level of each voxel of a stack of images
     into its binary representation.
 
     Parameters
     ----------
+
     img : array-like
-        image tensor to convert
+        image tensor to convert, each value mut be 8 or 16 unsigned bit
     width : int
-        number of bit to display
+        number of bit to display, can be 8 or 16 bits.
 
-    Return
-    ------
+    Returns
+    -------
     binarized:  array-like
-        tensor of shape (8, img shape) composed by 1 image tesnor for each bit psition.
+        tensor of shape (width, img shape) composed by 1 image tesnor for each
+        bit psition.
 
-    """
-    x = np.unpackbits(img.reshape(1, -1), axis=0)
-    x = x.reshape(8, *img.shape)
-    return np.asarray(x, dtype=np.uint8)
+    '''
+    if width != 8 and width != 16 :
+        raise ValueError("Only 8 and 16 bit apresentation are allowed")
+
+    x = np.unpackbits(img.reshape((1, -1)).astype('>i2').view(np.uint8), axis = 0)
+    x = x.reshape(8, *img.shape,2)
+    x = x.transpose(4, 0, 1, 2, 3)
+    x = x.reshape((-1, *img.shape))
+    return np.asarray(x[16 - width:])
 
 
 def hu2gl(images):
-    """
+    '''
     Convert an image from hounsfield unit to 8-bit gray scale
 
-    Parameter
-    ---------
+    Parameters
+    ----------
+
     images: array-like
         input image or stack of images
 
-    Return
-    ------
+    Returns
+    -------
     out: array like
         8-bit rescaled image
-    """
+    '''
 
     return (255 * rescale(images, images.max(), images.min())).astype(np.uint8)
 
 
-def subsamples(data, n_sub):
-    """Randomly divide the sample into n_sub subsamples
+def center_hu(image) :
+    '''
+    Ensure that the air peack of hu is centerd on -1024 and shit it to reach 0.
+    After that ensure that the maximum hu value is +2048
+
+    Parameters
+    ----------
+    image: array-like
+        image or stack of images, each pixel value must be expressed in hounsfield
+        units
+
+    Returns
+    -------
+    centered : array-like
+        image or stack of images in whch the air value in HU is shifted to zero
+
+    '''
+    image[image <  -1024] = image[image > -1024].min()
+    image = image - image.min()
+    image[image > 2048] = 0
+
+    return image
+
+
+def subsamples(data, n_sub): #TODO: change name
+    '''
+    Randomly divide the sample into n_sub subsamples
 
     Parameters
     ----------
@@ -231,10 +326,10 @@ def subsamples(data, n_sub):
 
     Returns
     -------
+
     out: list of array-like
         list of random subsamples
-    """
-    #shuffle the sample list
+    '''
     np.random.shuffle(data)
     img = np.array_split(data, n_sub)
     return np.array(img, dtype = np.ndarray)
@@ -242,24 +337,26 @@ def subsamples(data, n_sub):
 
 
 def imfill(img):
-    """Internal function. Fill the holes of a single image.
+    '''
+    Internal function. Fill the holes of a single image.
 
     Parameters
     ----------
+
     img : array-like
         Image to fill
 
-    Return
-    ------
+    Returns
+    -------
     filled : array-like
         filled image
-    """
+    '''
     img = np.pad(img.astype('uint8'), pad_width=((1, 1), (1, 1)),
                       mode='constant', constant_values=(0., 0.))
     im_floodfill = img.copy()
     h, w = im_floodfill.shape[:2]
     mask = np.zeros((h+2, w+2), np.uint8)
-    cv2.floodFill(im_floodfill, mask, (0,0), 255);
+    cv2.floodFill(im_floodfill, mask, (0,0), 1);
     im_floodfill_inv = cv2.bitwise_not(im_floodfill)
     filled = img | im_floodfill_inv
     return filled[1:-1, 1:-1]
@@ -267,38 +364,22 @@ def imfill(img):
 
 
 def stats2dataframe (arr) :
-    """Convert 3D numpy array into a list of pandas dataframes
-
-    Parameter
-    ---------
-    arr: array-like
-        input array to convert in a dataframe
-    Return
-    ------
-    df: list of dataframe
-        list of dataframe made from arr
-    """
-    columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
-    return list(map(partial(pd.DataFrame, columns = columns), arr))
-
-
-
-def imcrop(img, ROI) :
-    """Crop the image according to ROI
+    '''
+    Convert 3D numpy array into a list of pandas dataframes
 
     Parameters
     ----------
-    img : array-like
-        image to crop
-    ROI : array-like
-        array with the coordinate of ROI vertex
 
-    Return
-    ------
-    cropped : array-like
-        cropped image
-    """
-    return img[ROI[1] : ROI[3], ROI[0] : ROI[2]]
+    arr: array-like
+        input array to convert in a dataframe
+
+    Returns
+    -------
+    df: list of dataframe
+        list of dataframe made from arr
+    '''
+    columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
+    return list(map(partial(pd.DataFrame, columns = columns), arr))
 
 
 def _std_dev(image, size) :
@@ -312,11 +393,22 @@ def _std_dev(image, size) :
         image to filter
     size : int
         radius of the neighborhood
-    '''
 
-    image = itk.image_from_array(image)
-    std = itk.NoiseImageFilter.New(image)
-    std.SetRadius(size)
-    std.Update()
-    out = itk.array_from_image(std.GetOutput())
+    Returns
+    -------
+     out: array-like
+        filtered image
+    '''
+    ## Old version
+    #image = itk.image_from_array(image)
+    #std = itk.NoiseImageFilter.New(image)
+    #std.SetRadius(size)
+    #std.Update()
+    #out = itk.array_from_image(std.GetOutput())
+    image = sitk.GetImageFromArray(image)
+    filter = sitk.NoiseImageFilter()
+    filter.SetRadius(size)
+    out = filter.Execute(image)
+    out = sitk.GetArrayFromImage(out)
+
     return out

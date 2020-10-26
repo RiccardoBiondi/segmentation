@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import itk
 import argparse
 import numpy as np
 
 from time import time
 
-from CTLungSeg.utils import load_image, save_pickle, hu2gl, normalize
+from CTLungSeg.utils import read_image, load_pickle, hu2gl, normalize
+from CTLungSeg.utils import write_volume
 from CTLungSeg.method import median_blur, canny_edge_detection, std_filter
 from CTLungSeg.segmentation import imlabeling
 
@@ -42,8 +44,8 @@ def parse_args():
 
 def main():
     args = parse_args()
-    volume = load_image(args.filename)
-    centroids = load_image(args.centroids)
+    volume, info = read_image(args.filename)
+    centroids = load_pickle(args.centroids)
 
     # prepare the image
     volume = hu2gl(volume)
@@ -57,9 +59,9 @@ def main():
                     median_blur(edge_map, 7)], axis = -1)
 
     labels = imlabeling(mc, centroids, weight)
-    labels = (labels == 4).astype(np.uint8)
+    labels = (labels == 2).astype(np.uint8)
     #
-    save_pickle(args.lab, labels)
+    write_volume(labels, args.lab, info)
 
 if __name__ == '__main__' :
 

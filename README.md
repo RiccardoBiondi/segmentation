@@ -3,7 +3,9 @@
 | [**R. Biondi**](https://github.com/RiccardoBiondi) <br/> [**N. Curti**](https://github.com/Nico-Curti) | **COVID-19 Lung Segmentation** | **Linux/MacOS** : [![Build Status](https://travis-ci.com/RiccardoBiondi/segmentation.svg?branch=master)](https://travis-ci.com/RiccardoBiondi/segmentation) <br/>  **Windows** : [![Build status](https://ci.appveyor.com/api/projects/status/om6elsnkoi22xii3?svg=true)](https://ci.appveyor.com/project/RiccardoBiondi/segmentation) | [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/RiccardoBiondi/segmentation/blob/master/LICENSE.md) | **Codacy** : [![Codacy Badge](https://app.codacy.com/project/badge/Grade/cc0fd47ae8e44ab1943b1f74c2a3d7e2)](https://www.codacy.com/manual/RiccardoBiondi/segmentation?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RiccardoBiondi/segmentation&amp;utm_campaign=Badge_Grade) <br/> **Codebeat** : [![CODEBEAT](https://codebeat.co/badges/927db14b-36fc-42ed-88f1-09b2a9e1b9c0)](https://codebeat.co/projects/github-com-riccardobiondi-segmentation-master) | [![codecov](https://codecov.io/gh/RiccardoBiondi/segmentation/branch/master/graph/badge.svg)](https://codecov.io/gh/RiccardoBiondi/segmentation) |
 
 ![Project CI](https://github.com/RiccardoBiondi/segmentation/workflows/CTLungSeg%20CI/badge.svg)
+![Docs CI](https://github.com/RiccardoBiondi/segmentation/workflows/CTLungSeg%20docs%20CI/badge.svg)
 
+[![docs](https://readthedocs.org/projects/covid-19-ggo-segmentation/badge/?version=latest)](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/?badge=latest)
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/RiccardoBiondi/segmentation.svg?style=plastic)](https://github.com/RiccardoBiondi/segmentation/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/RiccardoBiondi/segmentation.svg?style=plastic)](https://github.com/RiccardoBiondi/segmentation/issues)
 
@@ -72,7 +74,7 @@ For each script described below there are a powershell and a shell script which 
 
 ## Prerequisites
 
-Supported python version: ![Python version](https://img.shields.io/badge/python-3.5,3.6,3.7,3.8-blue.svg)
+Supported python version: ![Python version](https://img.shields.io/badge/python-3.5|3.6|3.7|3.8-blue.svg)
 
 First of all ensure to have the right python version installed.
 
@@ -100,8 +102,10 @@ python setup.py install
 
 ### testing
 
-Testing routines use ```PyTest``` and ```Hypothesis``` packages. please install these packages to perform the test.
-All the full set of test is provided in [testing](./testing) directory. You can run the full list of test with:
+Testing routines use ```PyTest``` and ```Hypothesis``` packages. please install
+these packages to perform the test.
+All the full set of test is provided in [testing](./testing) directory.
+You can run the full list of test with:
 ```bash
 python -m pytest
 ```
@@ -109,11 +113,16 @@ python -m pytest
 
 ## Usage
 
-Lets consider the case where you have an high number of patient. First of all you have to divide the data in train and test dataset: the first one to estimate the centroids used to segment the second one. To achieve these purpose create two folders named *train* and *test* and organize your sample inside them.
-All the data must be in *.pkl.npy* format or in *.dcm*. In the DICOM case in each folder you have to create a subfolder for each patient that contains the *.dcm* files.
+Lets consider the case where you have an high number of patient. First of all
+you have to divide the data in train and test dataset: the first one to
+estimate the centroids used to segment the second one.
+To achieve these purpose create two folders named *train* and *test* and
+organize your sample inside them. The supported input formats are the ones
+availabel from SimpleITK. In case of DICOM series in each folder you have to
+create a subfolder for each patient that contains the *.dcm* files.
 
 ### Training
- - first of all you have to create the *output* folder, in which all the results will be saved in  *.pkl.npy* format.
+ - first of all you have to create the *output* folder, in which all the results will be saved in  *.nii* format.
  - Now you have to isolate the lung from the rest of the body. To do that simply run lung_extraction.ps1 by providing as arguments the input folder and the output one:
  ```powershell
 PS \> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
@@ -140,7 +149,7 @@ PS /> ./lung_extraction.ps1 path/to/input/folder/ path/to/output/folder/
 PS /> ./labeling.ps1 path/to/input/folder/ path/to/centroids/file/centroids.pkl.npy /path/to/output/folder/
 ```
 The input directory is the one that contains the images with the extracted lung.
-The resulting labels will be saved in the output folder as *.pkl.npy*. 
+The resulting labels will be saved in the output folder as *.nrrd*
 
 ## License
 

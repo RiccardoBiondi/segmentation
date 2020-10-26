@@ -8,7 +8,7 @@ import numpy as np
 from glob import glob
 from time import time
 
-from CTLungSeg.utils import load_image, save_pickle
+from CTLungSeg.utils import read_image, save_pickle
 from CTLungSeg.utils import subsamples, hu2gl, normalize
 from CTLungSeg.method import std_filter
 from CTLungSeg.method import median_blur, canny_edge_detection
@@ -48,6 +48,12 @@ def parse_args():
                         action='store',
                         help='centroid initialization technique',
                         default=0)
+    parser.add_argument('--format',
+                        dest='format',
+                        required=False,
+                        action='store',
+                        default='.nii',
+                        help='Input image format, default .nii')
 
     args = parser.parse_args()
     return args
@@ -64,9 +70,11 @@ def main():
 
     print("I'm Loading...", flush=True )
 
-    files = glob(args.folder + '/*.pkl.npy')
+    files = glob(args.folder + '/*{}'.format(args.format))
+    print('Files : ')
+    print(files)
 
-    imgs = np.concatenate(np.array([hu2gl(load_image(f)) for f in files]))
+    imgs = np.concatenate(np.array(list(map(lambda f : hu2gl(read_image(f)[0]), files))))
     # convert to multichannel
     edge_map = canny_edge_detection(imgs)
     imgs = np.stack([
