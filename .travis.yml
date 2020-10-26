@@ -49,6 +49,7 @@ before_install:
   - python -m pip install opencv-python
   - python -m pip install tqdm
   - python -m pip install SimpleITK
+  - python -m pip install skimage
 
   # testing libraries
   - python -m pip install pytest==3.0.7
