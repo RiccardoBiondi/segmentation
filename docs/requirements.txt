@@ -1,0 +1,10 @@
+numpy>=1.17
+opencv-python
+pandas>=0.25.3
+tdqm
+SimpleITK
+
+sphinx==1.8
+sphinx-rtd-theme
+sphinxcontrib-napoleon
+sphinxcontrib-programoutput

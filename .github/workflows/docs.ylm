@@ -1,0 +1,44 @@
+name: CTLungSeg Docs CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  ubuntu:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        python-version: [3.8]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - uses: actions/checkout@v2
+
+    - name: 'Update apt'
+      run: sudo apt update
+    - name: Install dependencies
+      run: |
+        git submodule update --init --recursive
+        python -m pip install --upgrade pip
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+
+    - name: Install CTLungSeg
+      run: |
+        python setup.py install
+    - name: Install docs dependencies
+      run: |
+        python -m pip install -r docs/requirements.txt
+    - name: Build Python API
+      run: |
+        cd docs
+        make html
+        cd ..
