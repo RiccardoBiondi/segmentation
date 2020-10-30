@@ -111,6 +111,7 @@ setup(
         'lung_extraction = CTLungSeg.lung_extraction:main',
         'labeling = CTLungSeg.labeling:main',
         'train = CTLungSeg.tain:main'
+        'CTLungSeg = CTLungSeg.__main__:main'
     ]},
 
     classifiers=[

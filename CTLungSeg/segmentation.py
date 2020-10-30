@@ -2,10 +2,11 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import logging
 import numpy as np
 
 from tqdm import tqdm
-from sklearn.cluster import KMeans
+#from sklearn.cluster import KMeans
 
 from CTLungSeg.utils import gl2bit
 from CTLungSeg.method import connected_components_wStats
@@ -45,7 +46,17 @@ def opening(img, kernel):
     >>> #define the kernel
     >>> kernel = np.ones((5, 5), dtype = np.uint8)
     >>> opened = opening(image, kernel = kernel)
+
+    Note
+    ----
+
+    .. note::
+        This function will raise a warning if the input image is not binary. The
+        function will be executed, however the resukts may not be corrected.
     '''
+    if len(np.unique(img)) != 2 :
+        logging.warning('The image is not binary, the connected components may \
+                            not be accurate')
     opened = erode(img, kernel=kernel)
     return dilate(opened, kernel=kernel)
 
@@ -78,7 +89,16 @@ def closing(img, kernel):
     >>> #define the kernel
     >>> kernel = np.ones((5, 5), dtype = np.uint8)
     >>> closed = closing(image, kernel = kernel)
+
+    Note
+    ----
+    .. note::
+        This function will raise a warning if the input image is not binary. The
+        function will be executed, however the resukts may not be corrected.
     '''
+    if len(np.unique(img)) != 2 :
+        logging.warning('The image is not binary, the connected components may \
+                            not be accurate')
     closed = dilate(img, kernel=kernel)
     return erode(closed, kernel=kernel)
 
@@ -111,9 +131,11 @@ def remove_spots(img, area):
     >>> image = load_image(filename)
     >>> max_spot_area = 100
     >>> filled = remove_spots(image, max_spot_area)
+    .. note::
+        This function will raise a warning if the input image is not binary. The
+        function will be executed, however the resukts may not be corrected.
     '''
     _, lab, stats, _ = connected_components_wStats(img)
-
     for i,stat in enumerate(stats):
         for j in stat.query('AREA < {}'.format(str(area + 1))).index:
             lab[i][lab[i] == j] = 0
@@ -137,23 +159,17 @@ def select_largest_connected_region_3d(img):
 
     dst : array-like
         binary image with only the largest connected region
+
+    if len(np.unique(img)) != 2 :
+        logging.warning('The image is not binary, the connected components may \
+                            not be accurate')
     '''
     connected, volumes = connected_components_wVolumes_3d(img)
     dst = (connected == np.argsort(volumes)[-2])
     return dst
 
 
-def create_lung_mask(volume, threshold) :
-    '''
-
-
-    '''
-    lung_mask = volume > threshold
-    body_mask = imfill(lung_mask)
-    return ((body_mask != 0) & ~lung_mask)
-
-
-def bit_plane_slices(stack, bits, nbits):
+def bit_plane_slices(stack, bits, nbits = 8):
     '''
     Convert each voxel GL into its 8-bit binary
     rapresentation and return as output the stack
@@ -165,8 +181,13 @@ def bit_plane_slices(stack, bits, nbits):
 
     stack : array-like
         image stack. each GL must be an 8-bit unsigned int
+
     bits: tuple
         tuple that specify which bit sum
+
+    nbits: int
+        number of bit of the input image, must be 8 or 16
+
 
     Returns
     -------
@@ -197,8 +218,8 @@ def imlabeling(image, centroids, weight = None) :
         Centroids vector for KMeans clustering. M
 
     weight : array-like of shape (n_images, height, width)
-        The weights for each observation in image.
-        If None, all observations are assigned equal weight.
+        int array, each element marked as 0 will be removes from the
+        labeling.
 
     Returns
     -------
@@ -218,13 +239,32 @@ def imlabeling(image, centroids, weight = None) :
     >>> centroids = load_image(centroids_file)
     >>> labeled = imlabeling(to_label, centroids)
     '''
-    if weight is not None :
-        weight = weight.reshape((-1, ))
 
-    to_label = image.reshape((-1, image.shape[-1]))
-    kmeans = KMeans(n_clusters = centroids.shape[0], init=centroids, n_init = 1)
-    lab = kmeans.fit_predict(to_label.astype(np.float32), sample_weight = weight)
-    return lab.reshape(image.shape[:3])
+    # old version
+    #if weight is not None :
+    #    weight = weight.reshape((-1, ))
+    #
+    #to_label = image.reshape((-1, image.shape[-1]))
+    #kmeans = KMeans(n_clusters = centroids.shape[0], init=centroids, n_init = 1)
+    #lab = kmeans.fit_predict(to_label.astype(np.float32), sample_weight = weight)
+    #return lab.reshape(image.shape[:3])
+
+    # new version
+    if centroids.shape[1] != image.shape[-1] :
+        raise Exception('Number of image channel doesn t match the number of \
+                            centroids features : {} != {}\
+                            '.format(image.shape[-1], centroids.shape[1]))
+    if weight  is not None :
+          if weight.shape != image.shape[:-1] :
+              raise Exception('Weight shape doesn t match image one : {} != {}\
+                                '.format( weight.shape, image.shape[:-1]))
+          distances = np.asarray([np.linalg.norm(image[weight != 0] -c, axis = 1) for c in centroids])
+          weight[weight != 0] = np.argmin(distances, axis = 0)
+          return weight
+    else :
+        distances = np.asarray([np.linalg.norm(image -c, axis = 3) for c in centroids])
+        labels = np.argmin(distances, axis = 0)
+        return labels
 
 
 

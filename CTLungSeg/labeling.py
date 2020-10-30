@@ -27,12 +27,13 @@ def parse_args():
                         help='Input filename')
     parser.add_argument('--centroids',
                         dest='centroids',
-                        required=True,
+                        required=False,
                         type=str,
                         action='store',
-                        help='centroids')
-    parser.add_argument('--label',
-                        dest='lab',
+                        help='centroids',
+                        default='')
+    parser.add_argument('--output',
+                        dest='output',
                         required=True,
                         type=str,
                         action='store',
@@ -41,11 +42,16 @@ def parse_args():
     args = parser.parse_args()
     return args
 
+#pre-trainded centroids:
+centroids = {
+                'parenchima' : [1.425793, 2.0734222, 1.4296921, 0.],
+               'bronchi'    : [3.3890672, 4.4695177, 1.8599507, 255.],
+                'GG0'        : [4.9716797, 6.632072, 2.2960727, 0.],
+                'noise'      :  [ 6.169081, 2.0313184, 4.8563914, 0.]
+                }
 
-def main():
-    args = parse_args()
-    volume, info = read_image(args.filename)
-    centroids = load_pickle(args.centroids)
+def main(volume, centroids):
+
 
     # prepare the image
     volume = hu2gl(volume)
@@ -58,14 +64,27 @@ def main():
                     normalize(std_filter(volume, 3)),
                     median_blur(edge_map, 7)], axis = -1)
 
+
     labels = imlabeling(mc, centroids, weight)
     labels = (labels == 2).astype(np.uint8)
-    #
-    write_volume(labels, args.lab, info)
+
+    return labels
+
 
 if __name__ == '__main__' :
 
     start = time()
-    main()
+    #load parameters
+    args = parse_args()
+    volume, info = read_image(args.filename)
+    if args.centroids != '' :
+        center = load_pickle(args.centroids)
+    else :
+        center =np.asarray([np.array(v) for k, v in centroids.items()])
+
+    labels = main(volume, center)
+
+    write_volume(labels, args.output, info)
+
     stop = time()
     print('Process ended after {:f} seconds'.format(stop- start))

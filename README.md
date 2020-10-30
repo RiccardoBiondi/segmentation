@@ -113,6 +113,32 @@ python -m pytest
 
 ## Usage
 
+
+### Single Patient Case
+
+Once you have installed you can directly start to segment the images.
+Input CT scans must be in hounsfield units(HU), gray-scale images are not allowed.
+The input allowed formats are the one supported by SimpleITK_ .
+
+Single Patient Example
+----------------------
+
+To segment a single CT scan, simply run the following command from the bash or
+pawershell :
+
+.. code-block:: bash
+
+   python -m CTLungSeg --input='/path/to/input/series'  --output='/path/to/output/file'
+
+Which takes as input the CT scan in each format supported by SimpleITK_ . If the
+input is a dicom series, simply pass the path to the directory which contains
+the series files, please ensure that in the folder there is only one series.
+
+The output label will be saved as '.nrrd'.
+
+### Train your own centroids
+
+
 Lets consider the case where you have an high number of patient. First of all
 you have to divide the data in train and test dataset: the first one to
 estimate the centroids used to segment the second one.

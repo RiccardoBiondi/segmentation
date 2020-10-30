@@ -7,7 +7,7 @@ import numpy as np
 from time import time
 
 from CTLungSeg.utils import read_image, write_volume, hu2gl, center_hu
-from CTLungSeg.method import gaussian_blur, imfill
+from CTLungSeg.method import gaussian_blur, imfill, erode
 from CTLungSeg.segmentation import select_largest_connected_region_3d
 from CTLungSeg.segmentation import bit_plane_slices, remove_spots
 
@@ -36,12 +36,10 @@ def parse_args():
     return args
 
 
-def main() :
+def main(volume) :
 
         #load image
-    start = time()
-    args = parse_args()
-    volume, info = read_image(args.input)
+
     ####################################
     ##          OLD VERSION           ##
     ####################################
@@ -65,21 +63,31 @@ def main() :
     volume = center_hu(volume)
     bit = bit_plane_slices(volume, (11, 10, 9), 16)
     bit = hu2gl(bit)
-    bit = gaussian_blur(bit, (7, 7))
-    body = imfill((bit > 100).view(np.uint8)) # substitute with lung extraction
+    body = imfill((bit > 100).view(np.uint8))
     lung_mask = (body == 255) & (bit < 100)
+
+    kernel = np.ones((3,3), dtype = np.uint8)
+    lung_mask = erode(lung_mask.view(np.uint8), kernel)
 
     lung_mask = remove_spots(lung_mask, 100)
     lung_mask = remove_spots((lung_mask == 0).view(np.uint8), 100)
     lung_mask = select_largest_connected_region_3d((lung_mask == 0).view(np.uint8))
 
+    return lung_mask * volume
 
-    write_volume((lung_mask * volume), args.output, info, '.nii')
-    stop = time()
-    print('Process ended after {} seconds'.format(stop -start))
+
 
 
 
 if __name__ == '__main__' :
 
-    main()
+    start = time()
+    args = parse_args()
+    volume, info = read_image(args.input)
+
+    lung = main(volume)
+
+    write_volume(lung, args.output, info, '.nii')
+
+    stop = time()
+    print('Process ended after {} seconds'.format(stop -start))

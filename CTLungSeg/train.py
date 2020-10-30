@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import logging
 import argparse
 import numpy as np
 
@@ -9,7 +10,7 @@ from glob import glob
 from time import time
 
 from CTLungSeg.utils import read_image, save_pickle
-from CTLungSeg.utils import subsamples, hu2gl, normalize
+from CTLungSeg.utils import shuffle_and_split, hu2gl, normalize
 from CTLungSeg.method import std_filter
 from CTLungSeg.method import median_blur, canny_edge_detection
 from CTLungSeg.segmentation import kmeans_on_subsamples
@@ -51,9 +52,10 @@ def parse_args():
     parser.add_argument('--format',
                         dest='format',
                         required=False,
+                        type=str,
                         action='store',
-                        default='.nii',
-                        help='Input image format, default .nii')
+                        help='centroid initialization technique',
+                        default='.nii')
 
     args = parser.parse_args()
     return args
@@ -68,11 +70,10 @@ def main():
                      + cv2.TERM_CRITERIA_MAX_ITER, 10, .001)
     args = parse_args()
 
-    print("I'm Loading...", flush=True )
+    print("I'm Loading...", flush = True)
+
 
     files = glob(args.folder + '/*{}'.format(args.format))
-    print('Files : ')
-    print(files)
 
     imgs = np.concatenate(np.array(list(map(lambda f : hu2gl(read_image(f)[0]), files))))
     # convert to multichannel
@@ -84,15 +85,12 @@ def main():
                     median_blur(edge_map, 7),
                     (imgs != 0).astype(np.uint8)], axis = -1)
     n_imgs = imgs.shape[0]
-    print(n_imgs)
-    print(imgs.shape)
+
 
     print('Loaded {:d} files from {}\n'.format(len(files),args.folder),
             flush=True)
 
-    imgs = subsamples(imgs, args.n)
-    print(imgs.shape)
-    print(imgs[0].shape)
+    imgs = shuffle_and_split(imgs, args.n)
     #Recap for better parameters control
     print('*****Starting custering*****',flush=True)
     print('\tNumber of subsamples--> {:d}'.format(args.n) , flush=True)

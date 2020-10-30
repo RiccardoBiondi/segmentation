@@ -11,8 +11,8 @@ from CTLungSeg.utils import rescale
 from CTLungSeg.utils import gl2bit
 from CTLungSeg.utils import hu2gl
 from CTLungSeg.utils import center_hu
-from CTLungSeg.utils import subsamples
-from CTLungSeg.utils import imfill
+from CTLungSeg.utils import shuffle_and_split
+from CTLungSeg.utils import _imfill
 from CTLungSeg.utils import stats2dataframe
 from CTLungSeg.utils import _std_dev
 
@@ -140,12 +140,12 @@ def test_center_hu(volume) :
 
 @given(st.integers(200, 1000), st.integers(2, 200))
 @settings(max_examples  = 20, deadline = None)
-def test_subsamples(n_sample, n_subsamples):
+def test_shuffle_and_split(n_sample, n_subsamples):
     '''
     Given
     '''
     sample = np.array([np.ones((randint(1,301), randint(1, 301))) for i in range(n_sample)], dtype=np.ndarray)
-    subsample = subsamples(sample, n_subsamples)
+    subsample = shuffle_and_split(sample, n_subsamples)
 
     assert subsample.shape[0] == n_subsamples
 
@@ -153,7 +153,7 @@ def test_subsamples(n_sample, n_subsamples):
 def test_imfill():
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
     compare = 255 * ones(image.shape, dtype = np.uint8)
-    filled = imfill(image)
+    filled = _imfill(image)
     assert (compare == filled.astype(np.uint8)).all()
 
 

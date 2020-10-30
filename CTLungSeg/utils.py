@@ -16,18 +16,21 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 def load_pickle(filename):
-    """Load the pickle image file
+    '''
+    Load the pickle image file
 
     Parameters
     ----------
+
     filename: str
         file name or path to load file as pickle
 
     Returns
     -------
+
     data: array_like
         array loaded from a given file
-    """
+    '''
     with open(filename, 'rb') as fp:
         data = np.load(fp, allow_pickle = True)
     return data
@@ -312,9 +315,9 @@ def center_hu(image) :
     return image
 
 
-def subsamples(data, n_sub): #TODO: change name
+def shuffle_and_split(data, n_sub): #TODO: change name
     '''
-    Randomly divide the sample into n_sub subsamples
+    Shuffle the input array and divie it into n_sub sub-arrays
 
     Parameters
     ----------
@@ -335,7 +338,7 @@ def subsamples(data, n_sub): #TODO: change name
 
 
 
-def imfill(img):
+def _imfill(img):
     '''
     Internal function. Fill the holes of a single image.
 

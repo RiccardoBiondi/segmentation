@@ -6,13 +6,12 @@ import hypothesis.strategies as st
 from hypothesis import given, settings, assume
 from  hypothesis import HealthCheck as HC
 
-from CTLungSeg.utils import subsamples
+from CTLungSeg.utils import shuffle_and_split
 
 from CTLungSeg.segmentation import opening
 from CTLungSeg.segmentation import closing
 from CTLungSeg.segmentation import remove_spots
 from CTLungSeg.segmentation import select_largest_connected_region_3d
-from CTLungSeg.segmentation import create_lung_mask
 from CTLungSeg.segmentation import bit_plane_slices
 from CTLungSeg.segmentation import imlabeling
 from CTLungSeg.segmentation import kmeans_on_subsamples
@@ -45,14 +44,6 @@ def kernel_strategy(draw, k_size = st.integers(3,9)) :
     assume (k % 2) == 0
     return ones((k,k), dtype=np.uint8)
 
-@st.composite
-def centroids_strategy(draw) :
-    n_centr = draw(st.integers(2, 6))
-    n_features = draw(st.integers(1, 6))
-    centroids = np.asarray([draw(st.integers(0, 255))] * (n_centr * n_features))
-    assume(len(np.unique(centroids) > n_centr ))
-
-    return centroids.reshape(n_centr, n_features)
 
 #square image strategy
 @st.composite
@@ -129,15 +120,6 @@ def test_select_largest_connected_regions_3d(img):
     assert (np.sum(res) == (img[1] ** 2)*img[0].shape[0])
 
 
-@given(rand_stack_strategy(), st.integers(100, 200))
-@settings(max_examples=15, deadline=None, suppress_health_check=(HC.too_slow,))
-def test_create_lung_mask(volume, threshold) :
-    mask = create_lung_mask(volume, threshold)
-    masked = volume * mask
-    assert ((np.unique(mask.astype(np.uint8))) == [0, 1]).all
-    assert masked.max() < (threshold + 1)
-
-
 @given(rand_stack_strategy())
 @settings(max_examples = 2, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_bit_plane_slices(stack) :
@@ -148,29 +130,68 @@ def test_bit_plane_slices(stack) :
     assert ( np.unique(result) == ground_truth).all()
 
 
-@given(rand_stack_strategy(), centroids_strategy() )
+@given(integer_stack_strategy(), st.integers(1, 6))
 @settings(max_examples  = 4, deadline=None)
-def test_imlabeling(stack, centroids) :
+def test_imlabeling(stack, channels) :
     '''
+    given as input a random stack and a set of centroids, assert that:
 
+    - each voxel is assigned to the correct cluster
     '''
-    mc = np.stack([stack for i in range(centroids.shape[1])], axis = -1)
+    mc = np.stack([stack[0] for i in range(channels)], axis = -1)
+    centroids = np.stack([np.arange(stack[1]) for _ in range(channels)],axis=-1)
+
     labeled = imlabeling(mc, centroids)
-    assert len(np.unique(labeled)) == centroids.shape[0]
-    assert labeled.shape == stack.shape
 
-@given(rand_stack_strategy(), centroids_strategy() )
+    assert (labeled == stack[0]).all()
+
+
+
+@given(integer_stack_strategy(), st.integers(1, 4))
 @settings(max_examples  = 4, deadline=None)
-def test_imlabeling_wWeigth(stack, centroids) :
+def test_imlabeling_wWeigth(stack, channels) :
     '''
     '''
-    w = (stack != 0).astype(np.uint8)
-    mc = np.stack([stack for i in range(centroids.shape[1])], axis = -1)
+    #build the ground truth reference
+    gt = stack[0]
+    gt[gt != 0] = gt[gt != 0] - 1
+
+    w = (stack[0] != 0).astype(np.uint8)
+    mc = np.stack([stack[0] for i in range(channels)], axis = -1)
+    centroids = np.stack([np.arange(stack[1]) for _ in range(channels)],axis=-1)
+
     labeled = imlabeling(mc, centroids, w)
 
-    assert len(np.unique(labeled)) == centroids.shape[0]
-    assert labeled.shape == stack.shape
+    assert (labeled == gt).astype(np.uint8).all()
 
+
+
+@given(integer_stack_strategy(), st.integers(100, 200))
+@settings(max_examples  = 4, deadline=None)
+def test_imlabeling_raise_weight_exception(stack, dim) :
+    '''
+    Given as input a multi channel image and a weight vector wich a wrong
+    shape, assert that an exeption is raised
+    '''
+    mc = np.stack(stack for _ in range(3))
+    centroids = ones((5, 3), dtype = np.uint8)
+    weight = ones((dim, dim, dim), dtype = np.uint8)
+    with pytest.raises(Exception) :
+        assert imlabeling(mc, centroids, weight )
+
+
+@given(integer_stack_strategy(), st.integers(100, 200))
+@settings(max_examples  = 4, deadline=None)
+def test_imlabeling_raise_centroids_exception(stack, dim) :
+    '''
+    Given as input a multi channel image and a centroid matrix with the wrong
+    shape, asset that the correct exception is raised
+    '''
+    mc = np.stack(stack for _ in range(3))
+    centroids = ones((5, 4), dtype = np.uint8)
+
+    with pytest.raises(Exception) :
+        assert imlabeling(mc, centroids)
 
 
 @given(integer_stack_strategy(), st.integers(1, 4),st.integers(1, 5))
@@ -192,7 +213,7 @@ def test_kmeans_on_subsamples(stack, n_features, n_subsamples) :
     stopping_criteria =  (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
                           10, 1.0)
     mc = np.stack([stack[0] for _ in range(n_features) ], axis = -1)
-    mc = subsamples(mc, n_subsamples)
+    mc = shuffle_and_split(mc, n_subsamples)
     centr = kmeans_on_subsamples(mc,
                                  stack[1],
                                  stopping_criteria,
@@ -224,7 +245,7 @@ def test_kmeans_on_subsamples_wobkg(stack, n_subsamples) :
                           10, 1.0)
     mc = np.stack([stack[0], stack[0], (stack[0] != 0).astype(np.uint8)],
                     axis = -1)
-    mc = subsamples(mc, n_subsamples)
+    mc = shuffle_and_split(mc, n_subsamples)
     centr = kmeans_on_subsamples(mc,
                                  stack[1] - 1,
                                  stopping_criteria,
@@ -236,3 +257,4 @@ def test_kmeans_on_subsamples_wobkg(stack, n_subsamples) :
 
     assert centr.size == n_subsamples * (stack[1] - 1)* 2
     assert np.isclose(np.sort(centr.reshape((-1,))), gt).all()
+

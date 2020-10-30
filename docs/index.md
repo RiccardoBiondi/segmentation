@@ -43,8 +43,7 @@ To refer to script documentation:
 
 | **Script** | **Description** |
 |---              |---              |
-| [lung_extraction](./pipeline/lung_extraction.md)   |  Extract lung from TAC images										 																																|
-| [slice_and_ROI](./pipeline/slice_and_ROI.md)  | Select only slices and areas containing the lungs 										 																																 |
+| [lung_extraction](./pipeline/lung_extraction.md)   |  Extract lung from TAC images										 																																									 																																 |
 | [train](./pipeline/train.md)  | Apply colour quantization on a series of stacks in order to estimate the centroids to use to segment other images |
 | [labeling](./pipeline/labeling.md)  |  Segment the input image by using pre-estimated centroids 										 																																|
 

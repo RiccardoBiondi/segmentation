@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import cv2
+import logging
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -15,7 +16,7 @@ __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 def erode(img, kernel, iterations = 1):
     '''
-    Apply the erosion on the full image stack
+    Apply the erosion on the full image stack.
 
     Parameters
     ----------
@@ -107,11 +108,31 @@ def connected_components_wStats(img):
         labelled image or stack
 
     stats: list of pandas DataFrame
-        statistic for each lablel for each image of the stack
+        statistic for each lablel for each image of the stack stored in a
+        pandas dataframe. The provided statitics are stored into columns named :
+        ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
 
     centroids: array-like
         centroid for each label fr each image of the stack
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from CTLungSeg.utils import read_image, hu2gl
+    >>> from CTlungSeg.method import connected_components_wStats
+    >>>
+    >>> # load the series and convert it into 8-bit GL image
+    >>> filenname = '/path/to/input/series/'
+    >>> volume, info = read_image(filename)
+    >>> volume = hu2gl(volume)
+    >>> # binarize the image
+    >>> volume  = (volume > 100).astype(np.uint8)
+    >>> # found the connected compoents
+    >>> ret, labels, stats, center =  connected_components_wStats
     '''
+    if len(np.unique(img)) != 2 :
+        logging.warning('The image is not binary, the connected components may \
+                            not be accurate')
     columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     if len(img.shape) == 2 :
         retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype(np.uint8))
@@ -124,7 +145,7 @@ def connected_components_wStats(img):
 
 def imfill(img):
     '''
-    Fill the holes of the input image or stack of images
+    Flood fill a given image or stack of images.
 
     Parameters
     ----------
@@ -135,11 +156,31 @@ def imfill(img):
     -------
     filled: array-like
         binary image or stack with filled holes
-    '''
 
+    Examples
+    --------
+    >>> from CTLungSeg.utils import read_image, hu2gl
+    >>> from CTLungSeg.method import imfill
+    >>> # load the series and convert it into 8-bit grayscale image
+    >>> seriesname = 'path/to/input/series/'
+    >>> volume, info = read_image(seriesname)
+    >>> volume = hu2gl(volume)
+    >>> # binarize the image and fill the holes
+    >>> volume = (volume > 100).astype(np.uint8)
+    >>> filled = imfill(volume)
+
+    Notes
+    -----
+    .. note::
+        This function will raise a warning if the input image is not binary. The
+        function will be executed, however the resukts may not be corrected.
+    '''
+    if len(np.unique(img)) != 2 :
+        logging.warning('The image is not binary, the connected components may \
+                            not be accurate')
     if len(img.shape) == 2: #one image case
-        return utils.imfill(img.astype(np.uint8))
-    return np.asarray(list(map(utils.imfill,img.astype(np.uint8))))
+        return utils._imfill(img.astype(np.uint8))
+    return np.asarray(list(map(utils._imfill,img.astype(np.uint8))))
 
 
 def median_blur(img, ksize):
@@ -158,7 +199,22 @@ def median_blur(img, ksize):
     -------
     blurred : array-like
         median blurred image
+
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from CTLungSeg.utils import read_image, hu2gl
+    >>> from CTLungSeg.method import median_blur
+    >>> # load the series and convert it into 8-bit grayscale image
+    >>> seriesname = 'path/to/input/series/'
+    >>> volume, info = read_image(seriesname)
+    >>> volume = hu2gl(volume)
+    >>> # define the kernel size and apply the median filter
+    >>> ksize = 5
+    >>> filtered = median_blur(volume, ksize)
     '''
+
     if (ksize % 2) == 0 or ksize <= 1:
         raise ValueError('Kerne size must be odd and greater than one')
     if len(img.shape) == 2: #single image case
@@ -181,7 +237,9 @@ def gaussian_blur(img, ksize, sigmaX=0,
     sigmaX: float
         Gaussian kernel standard deviation in X direction
     sigmaY: float
-        Gaussian kernel standard deviation in Y direction; if sigmaY is zero, it is set to be equal to sigmaX, if both sigmas are zeros, they are computed from ksize
+        Gaussian kernel standard deviation in Y direction; if sigmaY is zero,
+        it is set to be equal to sigmaX, if both sigmas are zeros, they are
+        computed from ksize
     borderType:
         Specifies image boundaries while kernel is applied on image borders
 
@@ -216,7 +274,7 @@ def otsu_threshold(img):
 
     Returns
     -------
-    thresh: array-like
+    thr: array-like
         array that contains the estimated threshold value for each image slice
 
     thresholded: array-like
@@ -248,7 +306,16 @@ def connected_components_wVolumes_3d(image) :
         image in which each voxel is assigned to a connected region
     areas :array-like
         array of areas(in pixel) of each connected region.
+
+    Notes
+    -----
+    .. note::
+        This function will raise a warning if the input image is not binary. The
+        function will be executed, however the resukts may not be corrected.
     '''
+    if len(np.unique(image)) != 2 :
+        logging.warning('The image is not binary, the connected components may \
+                            not be accurate')
 
     # old
     #image = itk.image_from_array(image)
@@ -302,10 +369,10 @@ def canny_edge_detection(image, upper_thr = 255, lower_thr = 0) :
         8-bit image or stack of images from which find contours
 
     upper_thr : int
-        first threshold for the hysteresis procedure. Default = 255
+        first threshold for the hysteresis procedure.
 
     lower_thr : int
-        second threshold for the hysteresis procedure. Default = 0
+        second threshold for the hysteresis procedure.
 
 
     Returns
@@ -322,6 +389,7 @@ def canny_edge_detection(image, upper_thr = 255, lower_thr = 0) :
     >>> filename = 'path/to/input/image'
     >>> image = load_image(filename)
     >>> edges = canny_edge_detection(image)
+
     '''
     if len(image.shape) == 2 : #single image case
         return cv2.Canny(image, threshold1 = lower_thr, threshold2 = upper_thr)
@@ -334,7 +402,7 @@ def std_filter(image, size) :
     Replace each pixel value with the standard deviation computed on its
     neighborhood.
 
-    Parameters:
+    Parameters
     ----------
 
     image : array-like
