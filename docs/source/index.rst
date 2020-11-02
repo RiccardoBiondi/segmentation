@@ -94,6 +94,7 @@ as '.nrrd' and run the bash or powershell script .
 
   installation
   modules
+  script
 
 
 Indices and tables
