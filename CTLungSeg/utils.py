@@ -58,13 +58,7 @@ def _read_dicom_series(filedir):
     reader = sitk.ImageSeriesReader()
     dicom_names = reader.GetGDCMSeriesFileNames(filedir)
     reader.SetFileNames(dicom_names)
-    image = reader.Execute()
-    spatial_informations = [image.GetOrigin(),
-                            image.GetSpacing(),
-                            image.GetDirection()]
-    image_array = sitk.GetArrayFromImage(image)
-
-    return image_array, spatial_informations
+    return reader
 
 
 def _read_image(filename) :
@@ -88,13 +82,7 @@ def _read_image(filename) :
     '''
     reader = sitk.ImageFileReader()
     reader.SetFileName(filename)
-    image = reader.Execute();
-    spatial_informations = [image.GetOrigin(),
-                            image.GetSpacing(),
-                            image.GetDirection()]
-    arr_image = sitk.GetArrayFromImage(image)
-
-    return arr_image, spatial_informations
+    return reader
 
 
 
@@ -129,10 +117,15 @@ def read_image(filename):
     '''
     if os.path.exists(filename) :
         if os.path.isfile(filename) :
-            image, info = _read_image(filename)
+            reader = _read_image(filename)
         else :
+            reader = _read_dicom_series(filename)
 
-            image, info = _read_dicom_series(filename)
+        image = reader.Execute();
+        info = [image.GetOrigin(),
+                image.GetSpacing(),
+                image.GetDirection()]
+        image = sitk.GetArrayFromImage(image)
 
     else :
         raise FileNotFoundError()

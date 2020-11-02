@@ -6,6 +6,9 @@ from  hypothesis import HealthCheck as HC
 
 from CTLungSeg.utils import load_pickle
 from CTLungSeg.utils import save_pickle
+from CTLungSeg.utils import write_volume
+from CTLungSeg.utils import  _read_image
+from CTLungSeg.utils import read_image
 from CTLungSeg.utils import normalize
 from CTLungSeg.utils import rescale
 from CTLungSeg.utils import gl2bit
@@ -33,6 +36,10 @@ unicode_categories = ('Nd','Lu','Ll', 'Pc', 'Pd')
 legitimate_chars = st.characters(whitelist_categories=(unicode_categories))
 filename_strategy = st.text(alphabet=legitimate_chars, min_size=1, max_size=15)
 
+# medical image format strategy
+
+
+medical_image_formats = ['.nii', '.nrrd', '.nhdr', '.nii.gz']
 #strategy to generate a random stack of 8-bit images
 @st.composite
 def rand_stack_strategy(draw, n_imgs = st.integers(2, 50)) :
@@ -47,7 +54,14 @@ def gl16_stack_strategy(draw):
 
     return stack
 
+@st.composite
+def voxel_spatial_info_strategy(draw) :
 
+    origin = draw(st.tuples(*[st.floats(0., 100.)] * 3))
+    spacing = draw(st.tuples(*[st.floats(.1, 1.)] * 3))
+    direction = tuple([0., 0., 1., 1., 0., 0., 0., 1., 0.])
+
+    return [origin, spacing, direction]
 
 
 
@@ -61,9 +75,52 @@ def gl16_stack_strategy(draw):
 @given(rand_stack_strategy(), filename_strategy)
 @settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_save_and_load_pkl(imgs,  filename):
+    '''
+    Givena random 3D array and a random name :
+    - save the array as .pkl.npy with the random name
+    - reload the array
+    - assert that the input array and the loaded one are equal
+    '''
     save_pickle('./testing/images/' + filename, imgs)
     load = load_pickle('./testing/images/' + filename + '.pkl.npy')
     assert (load == imgs).all()
+
+
+@given(filename_strategy, st.sampled_from(medical_image_formats))
+@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+def test_reader(filename, format) :
+    '''
+    Given a filename and a file format, test that a reader object is created with the
+    correct parameters
+    '''
+    fname = filename + format
+    reader =  _read_image(fname)
+    assert reader.GetFileName() == fname
+
+
+@given(gl16_stack_strategy(), voxel_spatial_info_strategy(),
+        filename_strategy, st.sampled_from(medical_image_formats))
+@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+def test_read_and_write_image(volume, info, filename, format) :
+    '''
+    Given a random array, a random name, a random image format and random spatial
+    information :
+    - write the array as image
+    - reead the image
+    - assert that the red image array is equal to the input one
+    - assert that the red spatial information are aqual to the input one
+    '''
+
+    fname = './testing/images/{}'.format(filename)
+    write_volume(volume, fname, info, format)
+    red, red_info = read_image(fname + format)
+
+    assert (red == volume).all()
+    assert np.isclose(info[0], red_info[0]).all()
+    assert np.isclose(info[1], red_info[1]).all()
+    assert np.isclose(info[2], red_info[2]).all()
+
+
 
 
 @given(rand_stack_strategy())
