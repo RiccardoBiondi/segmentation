@@ -258,3 +258,15 @@ def test_kmeans_on_subsamples_wobkg(stack, n_subsamples) :
     assert centr.size == n_subsamples * (stack[1] - 1)* 2
     assert np.isclose(np.sort(centr.reshape((-1,))), gt).all()
 
+
+@given(rand_stack_strategy(), kernel_strategy())
+@settings(max_examples = 20, deadline = None)
+def test_warnings(stack, kernel) :
+
+    '''
+    Given as input an argument that will raise warinings:
+    assert that all functions raise warnings
+    '''
+    with pytest.warns(None) :
+        opening(stack, kernel)
+        closing(stack, kernel)

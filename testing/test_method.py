@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pytest
+import logging
 import hypothesis.strategies as st
 from hypothesis import given, settings
 from  hypothesis import HealthCheck as HC
@@ -391,3 +392,16 @@ def test_raise_error(stack) :
         assert histogram_equalization(stack)
         assert test_canny_edge_detection(image)
         assert canny_edge_detection(stack)
+
+
+@given(rand_stack_strategy())
+@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+def test_warnings(stack) :
+    '''
+    Given as input an argument that will raise warinings:
+    assert that all functions raise warnings
+    '''
+    with pytest.warns(None):
+        connected_components_wStats(stack)
+        imfill(stack)
+        connected_components_wVolumes_3d(stack)
