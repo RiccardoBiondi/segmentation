@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import logging
+import warnings
 import SimpleITK as sitk
 import numpy as np
 import pandas as pd
@@ -131,8 +131,8 @@ def connected_components_wStats(img):
     >>> ret, labels, stats, center =  connected_components_wStats
     '''
     if len(np.unique(img)) != 2 :
-        logging.warning('The image is not binary, the connected components may \
-                            not be accurate')
+        warnings.warn('The image is not binary, the connected components may \
+                        not be accurate', UserWarning)
     columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
     if len(img.shape) == 2 :
         retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype(np.uint8))
@@ -176,8 +176,8 @@ def imfill(img):
         function will be executed, however the resukts may not be corrected.
     '''
     if len(np.unique(img)) != 2 :
-        logging.warning('The image is not binary, the connected components may \
-                            not be accurate')
+        warnings.warn('The image is not binary, the connected components may \
+                            not be accurate', UserWarning)
     if len(img.shape) == 2: #one image case
         return utils._imfill(img.astype(np.uint8))
     return np.asarray(list(map(utils._imfill,img.astype(np.uint8))))
@@ -313,10 +313,10 @@ def connected_components_wVolumes_3d(image) :
         This function will raise a warning if the input image is not binary. The
         function will be executed, however the resukts may not be corrected.
     '''
-    if len(np.unique(image)) != 2 :
-        logging.warning('The image is not binary, the connected components may \
-                            not be accurate')
 
+    if len(np.unique(image)) != 2 :
+        warnings.warn('The image is not binary, the connected components may \
+                            not be accurate', UserWarning)
     # old
     #image = itk.image_from_array(image)
     #connected = itk.connected_component_image_filter(image)

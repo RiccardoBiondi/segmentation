@@ -37,7 +37,7 @@ def parse_args():
                         required=True,
                         type=str,
                         action='store',
-                        help='output name of first label')
+                        help='output name label')
 
     args = parser.parse_args()
     return args
@@ -56,17 +56,18 @@ def main(volume, centroids):
     # prepare the image
     volume = hu2gl(volume)
     weight = (volume != 0).astype(np.uint8)
-    edge_map = canny_edge_detection(volume)
+    edge_map = canny_edge_detection(volume, 241, 25)
     # build multi channel
     mc = np.stack([
                     normalize(volume),
                     normalize(median_blur(volume, 11)),
-                    normalize(std_filter(volume, 3)),
-                    median_blur(edge_map, 7)], axis = -1)
+                    normalize(std_filter(volume, 7)),
+                    median_blur(edge_map, 9)], axis = -1)
 
 
     labels = imlabeling(mc, centroids, weight)
-    labels = (labels == 2).astype(np.uint8)
+    labels = (labels == 3).astype(np.uint8)
+    labels = median_blur(labels, 11)
 
     return labels
 

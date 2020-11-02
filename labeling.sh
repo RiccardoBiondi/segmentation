@@ -6,8 +6,9 @@ reset='\033[0m]' #No Color
 
 
 input_dir=$1
-centroids=$2
-label_dir=$3
+label_dir=$2
+centroids=$3
+
 
 
 
@@ -28,8 +29,9 @@ fi
 #chck if the centroids file is provided
 if [ -z "$centroids" ]; then
 
-  echo -e "${red}Error! Centroid file not set${reset}"
-  exit 1
+  centroids=$""
+
+
 
 #check if the centroid file exist
 elif [ ! -f "$centroids" ]; then
@@ -68,7 +70,7 @@ for file in $input_files; do
   printf "* Processing $file ...       "
   f="${file%%.*}"
 
-  python3 -m CTLungSeg.labeling --input="$input_dir$file"  --centroids="$centroids" --label="$label_dir$f"
+  python3 -m CTLungSeg.labeling --input="$input_dir$file"  --centroids="$centroids" --output="$label_dir$f"
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

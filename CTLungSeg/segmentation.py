@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import logging
+import warnings
 import numpy as np
 
 from tqdm import tqdm
@@ -55,8 +55,8 @@ def opening(img, kernel):
         function will be executed, however the resukts may not be corrected.
     '''
     if len(np.unique(img)) != 2 :
-        logging.warning('The image is not binary, the connected components may \
-                            not be accurate')
+        warnings.warn('The image is not binary, the connected components may \
+                            not be accurate', UserWarning)
     opened = erode(img, kernel=kernel)
     return dilate(opened, kernel=kernel)
 
@@ -97,8 +97,8 @@ def closing(img, kernel):
         function will be executed, however the resukts may not be corrected.
     '''
     if len(np.unique(img)) != 2 :
-        logging.warning('The image is not binary, the connected components may \
-                            not be accurate')
+        warnings.warn('The image is not binary, the connected components may \
+                        not be accurate', UserWarning)
     closed = dilate(img, kernel=kernel)
     return erode(closed, kernel=kernel)
 
@@ -326,7 +326,8 @@ def kmeans_on_subsamples(imgs,
     '''
     ns = imgs[0].shape[-1]
     if weight :
-        vector = np.asarray([el[:, :, :, :ns - 1][el[: , :, :, ns - 1] != 0] for el in imgs])
+        vector = np.asarray([el[:, :, :, :- 1][el[: , :, :, - 1] != 0] for el in imgs],
+                                dtype = np.ndarray)
     else :
         vector = np.asarray([el.reshape((-1, ns)) for el in imgs],
                             dtype=np.ndarray)

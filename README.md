@@ -126,9 +126,9 @@ Single Patient Example
 To segment a single CT scan, simply run the following command from the bash or
 pawershell :
 
-.. code-block:: bash
-
+```bash
    python -m CTLungSeg --input='/path/to/input/series'  --output='/path/to/output/file'
+```
 
 Which takes as input the CT scan in each format supported by SimpleITK_ . If the
 input is a dicom series, simply pass the path to the directory which contains

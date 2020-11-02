@@ -1,8 +1,8 @@
 #!/usr/bin/env pwsh
 
 $input_dir = $args[0]
-$centroids = $args[1]
-$label_dir = $args[2]
+$label_dir = $args[1]
+$centroids = $args[2]
 
 
 
@@ -20,8 +20,7 @@ ElseIf (-not (Test-Path -Path $input_dir -PathType Container))
 
 If ( $null -eq $centroids)
 {
-  Write-Error -Message "Error! No centroids file provided"-Category NotSpecified
-  exit 1
+  $centroids = ""
 }
 ElseIf ( -not (Test-Path $centroids) )
 {
@@ -59,7 +58,7 @@ For ($i = 0; $i -lt $files.Length; $i++)
 
 
 
-  python -m CTLungSeg.labeling --input $files[$i] --centroids $centroids --label $label_name 
+  python -m CTLungSeg.labeling --input $files[$i] --centroids $centroids --label $label_name
 
   If ( $? )
   {

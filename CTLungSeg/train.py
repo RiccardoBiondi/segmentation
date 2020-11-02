@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import logging
 import argparse
 import numpy as np
 
@@ -77,12 +76,12 @@ def main():
 
     imgs = np.concatenate(np.array(list(map(lambda f : hu2gl(read_image(f)[0]), files))))
     # convert to multichannel
-    edge_map = canny_edge_detection(imgs)
+    edge_map = canny_edge_detection(imgs, 241, 25)
     imgs = np.stack([
                     normalize(imgs),
                     normalize(median_blur(imgs, 11)),
-                    normalize(std_filter(imgs, 3)),
-                    median_blur(edge_map, 7),
+                    normalize(std_filter(imgs, 7)),
+                    median_blur(edge_map, 9),
                     (imgs != 0).astype(np.uint8)], axis = -1)
     n_imgs = imgs.shape[0]
 
@@ -92,7 +91,7 @@ def main():
 
     imgs = shuffle_and_split(imgs, args.n)
     #Recap for better parameters control
-    print('*****Starting custering*****',flush=True)
+    print('*****Starting clustering*****',flush=True)
     print('\tNumber of subsamples--> {:d}'.format(args.n) , flush=True)
     print('\tTotal images --> {:d}'.format(n_imgs), flush=True)
     print('\tCentroid initialization technique--> {}'.format(init[args.init]),

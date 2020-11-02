@@ -7,7 +7,7 @@ import numpy as np
 from time import time
 
 from CTLungSeg.utils import read_image, write_volume, hu2gl, center_hu
-from CTLungSeg.method import gaussian_blur, imfill, erode
+from CTLungSeg.method import imfill, median_blur
 from CTLungSeg.segmentation import select_largest_connected_region_3d
 from CTLungSeg.segmentation import bit_plane_slices, remove_spots
 
@@ -65,13 +65,9 @@ def main(volume) :
     bit = hu2gl(bit)
     body = imfill((bit > 100).view(np.uint8))
     lung_mask = (body == 255) & (bit < 100)
-
-    kernel = np.ones((3,3), dtype = np.uint8)
-    lung_mask = erode(lung_mask.view(np.uint8), kernel)
-
-    lung_mask = remove_spots(lung_mask, 100)
-    lung_mask = remove_spots((lung_mask == 0).view(np.uint8), 100)
-    lung_mask = select_largest_connected_region_3d((lung_mask == 0).view(np.uint8))
+    lung_mask = median_blur(lung_mask.view(np.uint8), 5)
+    lung_mask = remove_spots(lung_mask, 113)
+    lung_mask = select_largest_connected_region_3d(lung_mask.view(np.uint8))
 
     return lung_mask * volume
 
