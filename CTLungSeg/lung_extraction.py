@@ -3,7 +3,6 @@
 
 import argparse
 import numpy as np
-import SimpleITK as sitk
 
 from time import time
 

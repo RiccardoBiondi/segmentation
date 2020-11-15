@@ -283,7 +283,9 @@ def test_shift_and_crop(volume) :
 
 
 @given(rand_stack_strategy(), st.integers(2, 5))
-@settings(max_examples  = 20, deadline = None)
+@settings(max_examples  = 20,
+            deadline = None,
+            suppress_health_check = (HC.too_slow,))
 def test_shuffle_and_split(sample, n_subsamples):
     '''
     Given :
@@ -320,7 +322,7 @@ def test_imfill():
 def test_stats2dataframe(n_slices, cc):
     '''
     Given :
-        - 
+        -
 
     '''
     shape = (cc, 5)

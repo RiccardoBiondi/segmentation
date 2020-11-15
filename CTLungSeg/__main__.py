@@ -40,7 +40,8 @@ def parse_args() :
 
 
 #pre-trainded centroids:
-centroids = { 'parenchima': [1.3822415, 2.4269834, 1.1459424, 1.832688 ],
+centroids = {
+                'parenchima': [1.3822415, 2.4269834, 1.1459424, 1.832688 ],
                 'edges'   : [1.6750793, 2.6646569, 3.829929 , 2.1440172],
                 'Bronchi' : [3.4454546, 3.0228717, 1.9430293, 3.3130786],
                 'Noise'   : [6.0392303, 2.7451596, 4.861056 , 5.6319346],
@@ -55,7 +56,7 @@ if __name__ == '__main__':
     if args.center != '' :
         center = load_pickle(args.center)
     else :
-        center = np.asarray([np.array(v) for k, v in centroids.items()])
+        center = np.asarray([np.array(v) for _, v in centroids.items()])
 
     lung = lung_extraction.main(volume)
     labels = labeling.main(lung, center)
