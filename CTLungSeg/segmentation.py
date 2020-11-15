@@ -6,13 +6,12 @@ import warnings
 import numpy as np
 
 from tqdm import tqdm
-#from sklearn.cluster import KMeans
 
 from CTLungSeg.utils import gl2bit
 from CTLungSeg.method import connected_components_wStats
 from CTLungSeg.method import connected_components_wVolumes_3d
 from CTLungSeg.method import erode, dilate
-from CTLungSeg.method import imfill
+
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
@@ -240,27 +239,17 @@ def imlabeling(image, centroids, weight = None) :
     >>> labeled = imlabeling(to_label, centroids)
     '''
 
-    # old version
-    #if weight is not None :
-    #    weight = weight.reshape((-1, ))
-    #
-    #to_label = image.reshape((-1, image.shape[-1]))
-    #kmeans = KMeans(n_clusters = centroids.shape[0], init=centroids, n_init = 1)
-    #lab = kmeans.fit_predict(to_label.astype(np.float32), sample_weight = weight)
-    #return lab.reshape(image.shape[:3])
-
-    # new version
     if centroids.shape[1] != image.shape[-1] :
         raise Exception('Number of image channel doesn t match the number of \
                             centroids features : {} != {}\
                             '.format(image.shape[-1], centroids.shape[1]))
     if weight  is not None :
-          if weight.shape != image.shape[:-1] :
-              raise Exception('Weight shape doesn t match image one : {} != {}\
+        if weight.shape != image.shape[:-1] :
+            raise Exception('Weight shape doesn t match image one : {} != {}\
                                 '.format( weight.shape, image.shape[:-1]))
-          distances = np.asarray([np.linalg.norm(image[weight != 0] -c, axis = 1) for c in centroids])
-          weight[weight != 0] = np.argmin(distances, axis = 0)
-          return weight
+        distances = np.asarray([np.linalg.norm(image[weight != 0] -c, axis = 1) for c in centroids])
+        weight[weight != 0] = np.argmin(distances, axis = 0)
+        return weight
     else :
         distances = np.asarray([np.linalg.norm(image -c, axis = 3) for c in centroids])
         labels = np.argmin(distances, axis = 0)

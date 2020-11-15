@@ -10,8 +10,8 @@ from time import time
 
 from CTLungSeg.utils import read_image, save_pickle
 from CTLungSeg.utils import shuffle_and_split, hu2gl, normalize
-from CTLungSeg.method import std_filter
-from CTLungSeg.method import median_blur, canny_edge_detection
+from CTLungSeg.method import std_filter, histogram_equalization
+from CTLungSeg.method import median_blur, compute_eigenvals
 from CTLungSeg.segmentation import kmeans_on_subsamples
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
@@ -74,14 +74,15 @@ def main():
 
     files = glob(args.folder + '/*{}'.format(args.format))
 
-    imgs = np.concatenate(np.array(list(map(lambda f : hu2gl(read_image(f)[0]), files))))
+    imgs = np.concatenate(np.array([ hu2gl(read_image(f)[0]) for f in files]))
     # convert to multichannel
-    edge_map = canny_edge_detection(imgs, 241, 25)
+    max_eigenvals = np.max(compute_eigenvals(imgs, 5, 9), axis = 3)
+    equalized = histogram_equalization(imgs, 2, (10, 10))
     imgs = np.stack([
-                    normalize(imgs),
-                    normalize(median_blur(imgs, 11)),
-                    normalize(std_filter(imgs, 7)),
-                    median_blur(edge_map, 9),
+                    normalize(equalized),
+                    normalize(median_blur(equalized, 11)),
+                    normalize(std_filter(imgs, 3)),
+                    normalize(max_eigenvals),
                     (imgs != 0).astype(np.uint8)], axis = -1)
     n_imgs = imgs.shape[0]
 
@@ -100,13 +101,13 @@ def main():
     #First clustering
     print("\nI'm clustering...", flush = True)
     center = kmeans_on_subsamples(imgs,
-                                  4,
+                                  5,
                                   stop_criteria,
                                   centroid_init[args.init],
                                   True)
     # clustering refinement
     _, _, center = cv2.kmeans(center.reshape((-1,4)),
-                              4, None,
+                              5, None,
                               stop_criteria,
                               10,
                               centroid_init[args.init])

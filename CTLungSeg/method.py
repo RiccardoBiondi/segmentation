@@ -9,7 +9,6 @@ import pandas as pd
 import CTLungSeg.utils as utils
 from functools import partial
 
-
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
@@ -420,3 +419,34 @@ def std_filter(image, size) :
     if len(image.shape) == 2 :
         return utils._std_dev(image, size)
     return np.asarray(list(map(partial(utils._std_dev, size = size), image)))
+
+
+def adjust_gamma(image, gamma=1.0):
+    '''
+    Build a lookup table mapping the pixel values [0, 255] to their adjusted
+    gamma values
+
+    Parameters
+    ----------
+    image : array-like
+        image stack to adjust
+    gamma : float
+        power of the correction
+
+    Returns
+    -------
+    out : array-like (same shape of image)
+        gamma corected image
+    '''
+    if gamma == 0 :
+        raise Exception('gamma vlaue cannot be zero')
+    invGamma = 1.0 / gamma
+    table = np.array([((i / 255.0) ** invGamma) * 255
+                            for i in np.arange(0, 256)]).astype("uint8")
+
+
+    if len(image.shape) == 2 : #single image case
+        return cv2.LUT(image, lut = table)
+    else :
+        func = partial(cv2.LUT, lut = table)
+        return np.asarray(list(map(func, image)))

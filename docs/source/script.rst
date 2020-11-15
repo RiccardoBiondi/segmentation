@@ -35,6 +35,11 @@ or its equivalent for powershell
   lung_extraction.ps1 /path/to/input/folder/ /path/to/output/folder/
 
 
+For the lung extraction a pre-trained UNet model was used. The model and the
+code used to apply it belong from this_ repository. For more detail please
+refer to the here_.
+
+
 Labeling
 --------
 
@@ -111,3 +116,5 @@ format.
 
 
 .. _SimpleITK: https://simpleitk.readthedocs.io/en/master/IO.html
+.. _this: https://github.com/JoHof/lungmask
+.. _here: https://eurradiolexp.springeropen.com/articles/10.1186/s41747-020-00173-2

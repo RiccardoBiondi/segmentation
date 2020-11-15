@@ -27,29 +27,33 @@ from numpy.random import rand, randint
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
-
- # Strategies definitions
+################################################################################
+##                          Define Test strategies                            ##
+################################################################################
 
 @st.composite
-def rand_stack_strategy(draw, n_imgs = st.integers(10, 30)) :
-    """Create a stack of white noise 8-bit images"""
-    N = draw(n_imgs)
+def rand_stack_strategy(draw) :
+    '''
+    Create a stack of N 512x512 white noise images
+    '''
+    N = draw(st.integers(10, 30))
     return (255 * rand(N, 300, 300)).astype(np.uint8)
 
 
 @st.composite
-def kernel_strategy(draw, k_size = st.integers(3,9)) :
-    """Create a random kernel for the morphological operation"""
-    k = draw(k_size)
+def kernel_strategy(draw) :
+    '''
+    Create a kernel fro morphological operations
+    '''
+    k = draw(st.integers(3,9))
     assume (k % 2) == 0
     return ones((k,k), dtype=np.uint8)
 
 
-#square image strategy
 @st.composite
 def square_stack_strategy(draw) :
     '''
-    Generate a stack of white images with a black square with random side
+    Generates a stack of N black images with a whote square
     '''
     N = draw(st.integers(2, 25))
     L = draw(st.integers(10, 50))
@@ -57,18 +61,16 @@ def square_stack_strategy(draw) :
     image[ : , 100 : 100 + L, 100 : 100 + L ] = zeros((L,L), dtype=np.uint8)
     return image, L
 
-# integer stack strategy
+
 @st.composite
 def integer_stack_strategy(draw) :
     '''
-    Generates a stack of images with pixel value between 0 and a random integer
-    less than 7.
+    Generates a stack o N 512x512 images with Gl between [0, 7]
     '''
     gl_max = draw(st.integers(3, 10))
     n_imgs = draw(st.integers(20, 70))
     stack = randint(0, gl_max, (n_imgs, 512, 512))
     return stack.reshape(n_imgs, 512, 512), gl_max
-
 
 ################################################################################
 ###                                                                          ###
@@ -80,6 +82,15 @@ def integer_stack_strategy(draw) :
 @given(square_stack_strategy(), kernel_strategy())
 @settings(max_examples = 20, deadline = None)
 def test_opening(img, kernel) :
+    '''
+    Given :
+        - stack of images with a white square
+        - kernel
+    So :
+        - perform an opening
+    Assert :
+        - the square area isincreased
+    '''
     opened = opening(img[0], kernel )
     square_area = opened.size - np.sum(opened)
     assert (square_area >= (img[1] ** 2)*opened.shape[0])
@@ -88,6 +99,16 @@ def test_opening(img, kernel) :
 @given(square_stack_strategy(), kernel_strategy())
 @settings(max_examples = 20, deadline = None)
 def test_closing(img, kernel) :
+
+    '''
+    Given :
+        - stack of images with a white square
+        - kernel
+    So :
+        - perform a closing
+    Assert :
+        - the square area decreased
+    '''
     closed = closing(img[0], kernel)
     square_area = closed.size - np.sum(closed)
     assert (square_area <= (img[1]**2)*closed.shape[0])
@@ -97,10 +118,15 @@ def test_closing(img, kernel) :
 @settings(max_examples = 20, deadline = None)
 def test_remove_spots_on_single_square(stack, side):
     '''
-    Receive as input a black image with a white square and the maximum spot area,
-    assert that:
-    - if max area < square area, square is not removed
-    - else a black image is returned
+    Given :
+        - black image with a white square
+         -a side value
+    So :
+        - remove_spots
+        - min area = side**2
+    Assert :
+        - if side < square side : same image
+        - inf side > square side : balck image
     '''
     volume = (stack[0] == 0).astype(np.uint8)
     side_of_square = stack[1]
@@ -115,6 +141,14 @@ def test_remove_spots_on_single_square(stack, side):
 @given(square_stack_strategy())
 @settings(max_examples = 20, deadline = None)
 def test_select_largest_connected_regions_3d(img):
+    '''
+    Given :
+        - stack of black images with a white square
+    So :
+        - found the larges connected region
+    Assert :
+        - the parallelepiped region is found as the largest
+    '''
     input = np.logical_not(img[0])
     res = select_largest_connected_region_3d(input.astype(np.uint8))
     assert (np.sum(res) == (img[1] ** 2)*img[0].shape[0])
@@ -123,6 +157,8 @@ def test_select_largest_connected_regions_3d(img):
 @given(rand_stack_strategy())
 @settings(max_examples = 2, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_bit_plane_slices(stack) :
+    '''
+    '''
     ground_truth = [0, 16, 64, 80, 128, 144, 192, 208]
     result = bit_plane_slices(stack, (5,7,8), 8)
 
@@ -134,9 +170,14 @@ def test_bit_plane_slices(stack) :
 @settings(max_examples  = 4, deadline=None)
 def test_imlabeling(stack, channels) :
     '''
-    given as input a random stack and a set of centroids, assert that:
-
-    - each voxel is assigned to the correct cluster
+    Given :
+        - image tensor with GL in [0, 7]
+        - number of channels
+    So :
+        - build the mulcti channel image
+        - build the centroids vector(1 value for each GL)
+    Assert:
+        - each voxel is assigned to the correct cluster
     '''
     mc = np.stack([stack[0] for i in range(channels)], axis = -1)
     centroids = np.stack([np.arange(stack[1]) for _ in range(channels)],axis=-1)
@@ -151,6 +192,15 @@ def test_imlabeling(stack, channels) :
 @settings(max_examples  = 4, deadline=None)
 def test_imlabeling_wWeigth(stack, channels) :
     '''
+    Given :
+        - image tensor with GL in [0, 7]
+        - number of channels
+    So :
+        - build the mulcti channel image
+        - build the weight tensor
+        - build the centroids vector(1 value for each GL except 0)
+    Assert:
+        - each voxel is assigned to the correct cluster
     '''
     #build the ground truth reference
     gt = stack[0]
@@ -170,8 +220,11 @@ def test_imlabeling_wWeigth(stack, channels) :
 @settings(max_examples  = 4, deadline=None)
 def test_imlabeling_raise_weight_exception(stack, dim) :
     '''
-    Given as input a multi channel image and a weight vector wich a wrong
-    shape, assert that an exeption is raised
+    Given :
+        - image tensor
+        - weight tensor with shape != image tensor shape
+    Assert :
+        - Exception is raised
     '''
     mc = np.stack(stack for _ in range(3))
     centroids = ones((5, 3), dtype = np.uint8)
@@ -180,12 +233,15 @@ def test_imlabeling_raise_weight_exception(stack, dim) :
         assert imlabeling(mc, centroids, weight )
 
 
-@given(integer_stack_strategy(), st.integers(100, 200))
+@given(integer_stack_strategy())
 @settings(max_examples  = 4, deadline=None)
-def test_imlabeling_raise_centroids_exception(stack, dim) :
+def test_imlabeling_raise_centroids_exception(stack) :
     '''
-    Given as input a multi channel image and a centroid matrix with the wrong
-    shape, asset that the correct exception is raised
+    Given :
+        - multi channel image tensor
+        - centroid with wron dimension
+    Assert :
+        - Exception is raise
     '''
     mc = np.stack(stack for _ in range(3))
     centroids = ones((5, 4), dtype = np.uint8)
@@ -198,17 +254,19 @@ def test_imlabeling_raise_centroids_exception(stack, dim) :
 @settings(max_examples = 1, deadline = None)
 def test_kmeans_on_subsamples(stack, n_features, n_subsamples) :
     '''
-    Receive a stack of images with itegers value in [0, max] where max in
-    [0, 7].
-    Create a multichannel image with a random number of channels and divide
-    it in subsamples.
-    Apply a kmeans with a number of centroids equal to the number of different
-    values.
-
-    assert that:
-    - the correct number of centroids is estimated
-    - the correct value of centroids is returned
-    - the backgrond isn't removed
+    Given :
+        - image tensor with GL in [0, 7]
+        - number of image channel
+        - number of subsamoles
+    So :
+        - Create a multichannel image
+        - Divide it into subsamples
+        - Perform kmenas of subsamples with number fo centroids equal to numebr
+            different GL
+    Assert :
+        - the correct number of centroids is estimated
+        - the correct value of centroids is returned
+        - the backgrond isn't removed
     '''
     stopping_criteria =  (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
                           10, 1.0)
@@ -230,6 +288,19 @@ def test_kmeans_on_subsamples(stack, n_features, n_subsamples) :
 @settings(max_examples = 1, deadline = None)
 def test_kmeans_on_subsamples_wobkg(stack, n_subsamples) :
     '''
+        Given :
+            - image tensor with GL in [0, 7]
+            - number of subsamoles
+        So :
+            - Create a multichannel image with background removal
+            - Divide it into subsamples
+            - Perform kmenas of subsamples with number fo centroids equal to numebr
+                different GL(except 0)
+        Assert :
+            - the correct number of centroids is estimated
+            - the correct value of centroids is returned
+            - the backgrond is removed
+
     Receive a stack of images with itegers value in [0, max] where max in [0, 7],
     Create a multichannel image with a 2 channel corresponding to the stack, and
     last one contains the mask for the background removal
@@ -264,8 +335,13 @@ def test_kmeans_on_subsamples_wobkg(stack, n_subsamples) :
 def test_warnings(stack, kernel) :
 
     '''
-    Given as input an argument that will raise warinings:
-    assert that all functions raise warnings
+    Given :
+        - non binary image tensor
+    So :
+        - perform opening
+        - perform closing
+    Assert :
+        - warning is raised
     '''
     with pytest.warns(None) :
         opening(stack, kernel)

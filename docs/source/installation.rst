@@ -13,12 +13,20 @@ The full list of prerequisites is the following:
 - tdqm
 - SimpleITK
 
+The lung extraction is performed by using apre-trained UNet, so plese ensure to
+have installed the lungmask_ package. For more information about how the network
+is trained, please refers here_.
+
 Installation
 ------------
+
+First of all ensure to have the right python version and the package for the
+lung extraction correctly installed
 
 To install this package first of all you have to clone the repositories from github :
 
 .. code-block:: bash
+
   git clone https://github.com/RiccardoBiondi/segmentation
   cd segmentation
 
@@ -44,7 +52,9 @@ You can run the full list of test with:
   python -m pytest
 
 
-.. |python version| image:: https://img.shields.io/badge/python-3.5|3.6|3.7|3.8-blue.svg
+.. |python version| image:: https://img.shields.io/badge/python-3.6|3.7|3.8-blue.svg
 .. _pytest: https://pypi.org/project/pytest/6.0.2/
 .. _hypothesis: https://hypothesis.readthedocs.io/en/latest/
 .. _testing: https://github.com/RiccardoBiondi/segmentation/tree/master/testing
+.. _lungmask: https://github.com/JoHof/lungmask
+.. _here: https://eurradiolexp.springeropen.com/articles/10.1186/s41747-020-00173-2

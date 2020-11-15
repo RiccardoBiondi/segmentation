@@ -3,6 +3,8 @@
 | [**R. Biondi**](https://github.com/RiccardoBiondi) <br/> [**N. Curti**](https://github.com/Nico-Curti) | **COVID-19 Lung Segmentation** | **Linux/MacOS** : [![Build Status](https://travis-ci.com/RiccardoBiondi/segmentation.svg?branch=master)](https://travis-ci.com/RiccardoBiondi/segmentation)  <br/>  **Windows** : [![Build status](https://ci.appveyor.com/api/projects/status/om6elsnkoi22xii3?svg=true)](https://ci.appveyor.com/project/RiccardoBiondi/segmentation) | [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/RiccardoBiondi/segmentation/blob/master/LICENSE.md) | **Codacy** : [![Codacy Badge](https://app.codacy.com/project/badge/Grade/cc0fd47ae8e44ab1943b1f74c2a3d7e2)](https://www.codacy.com/manual/RiccardoBiondi/segmentation?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=RiccardoBiondi/segmentation&amp;utm_campaign=Badge_Grade) <br/> **Codebeat** : [![CODEBEAT](https://codebeat.co/badges/927db14b-36fc-42ed-88f1-09b2a9e1b9c0)](https://codebeat.co/projects/github-com-riccardobiondi-segmentation-master) |[![codecov](https://codecov.io/gh/RiccardoBiondi/segmentation/branch/master/graph/badge.svg)](https://codecov.io/gh/RiccardoBiondi/segmentation)|
 
 ![Project CI](https://github.com/RiccardoBiondi/segmentation/workflows/CTLungSeg%20CI/badge.svg)
+![Docs CI](https://github.com/RiccardoBiondi/segmentation/workflows/CTLungSeg%20docs%20CI/badge.svg)
+
 
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/RiccardoBiondi/segmentation.svg?style=plastic)](https://github.com/RiccardoBiondi/segmentation/pulls)
 [![GitHub issues](https://img.shields.io/github/issues/RiccardoBiondi/segmentation.svg?style=plastic)](https://github.com/RiccardoBiondi/segmentation/issues)
@@ -43,7 +45,7 @@ To refer to script documentation:
 
 | **Script** | **Description** |
 |---              |---              |
-| [lung_extraction](./pipeline/lung_extraction.md)   |  Extract lung from TAC images										 																																									 																																 |
+| [lung_extraction](./pipeline/lung_extraction.md)   |  Extract lung from CT images										 																																									 																																 |
 | [train](./pipeline/train.md)  | Apply colour quantization on a series of stacks in order to estimate the centroids to use to segment other images |
 | [labeling](./pipeline/labeling.md)  |  Segment the input image by using pre-estimated centroids 										 																																|
 
@@ -57,9 +59,11 @@ To refer to modules documentation:
 
 ## Installation
 
-Supported python version: ![Python version](https://img.shields.io/badge/python-3.5,3.6,3.7,3.8-blue.svg)
+Supported python version: ![Python version](https://img.shields.io/badge/python-3.6|3.7|3.8-blue.svg)
 
 First of all ensure to have the right python version installed.
+
+This script use opencv-python, numpy, pandas, functool and pickle: see [requirements](#./requirements.txt) for more informations.
 
 Download the project or the latest release:
 
@@ -79,7 +83,7 @@ Now in ```segmentation``` directory execute:
 python setup.py install
 ```
 
-### testing
+### Testing
 
 Testing routines use ```PyTest``` and ```Hypothesis``` packages; please install these packages to perform the test.
 All the full set of test is provided in [testing]() directory. You can run the full list of test with:

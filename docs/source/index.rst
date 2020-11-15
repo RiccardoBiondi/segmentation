@@ -93,8 +93,10 @@ as '.nrrd' and run the bash or powershell script .
   :caption: Contents:
 
   installation
+  theory
   modules
   script
+  references
 
 
 Indices and tables

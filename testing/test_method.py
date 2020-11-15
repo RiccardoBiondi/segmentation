@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import pytest
-import logging
 import hypothesis.strategies as st
 from hypothesis import given, settings
 from  hypothesis import HealthCheck as HC
@@ -17,28 +16,29 @@ from CTLungSeg.method import otsu_threshold
 from CTLungSeg.method import connected_components_wVolumes_3d
 from CTLungSeg.method import histogram_equalization
 from CTLungSeg.method import canny_edge_detection
+from CTLungSeg.method import adjust_gamma
 
 import cv2
 import numpy as np
 from numpy import ones, zeros
-from numpy.random import rand
+from numpy.random import rand, choice
 from skimage.util import random_noise
 
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
+################################################################################
+##                          Define Test strategies                            ##
+################################################################################
 
-# define strategies
-
-#random image stack
 @st.composite
-def rand_stack_strategy(draw, n_imgs = st.integers(1, 50)) :
+def rand_stack_strategy(draw) :
     '''
     Generate a stack of n_imgs 512x512 with pixel values normal distributed in
     range [0, 255]
     '''
-    N = draw(n_imgs)
+    N = draw(st.integers(1, 50))
     return (np.abs(255 * np.random.randn(N, 512, 512))).astype(np.uint8)
 
 @st.composite
@@ -47,28 +47,28 @@ def rand_image_strategy(draw) :
     Generate a stack of n_imgs 512x512 with pixel values normal distributed in
     range [0, 255]
     '''
-
     return (255 * np.random.randn(512, 512)).astype(np.uint8)
 
 
 @st.composite
-def square_image_strategy(draw, side = st.integers(50,200)) :
+def square_image_strategy(draw) :
     '''
-    Generate a binary image with 0 values on the background and a square of
-    random areas with pixel value 1
+    Generate a stack of binary image with 0 values on the background and a
+    square of random areas with pixel value 1
     '''
-    L = draw(side)
-    square = zeros((512,512), dtype=np.uint8)
-    square[100 : 100 + L, 100 : 100 + L ] = ones((L,L), dtype=np.uint8)
-    return (square, L)
+    L = draw(st.integers(50,200))
+    N = draw(st.integers(1, 100))
+    square = zeros((N, 512,512), dtype=np.uint8)
+    square[: ,100 : 100 + L, 100 : 100 + L ] = ones((L,L), dtype=np.uint8)
+    return square
 
 #Kernel strategies
 @st.composite
-def kernel_strategy(draw, k_size = st.integers(3,9)) :
+def kernel_strategy(draw) :
     '''
     return a matrix of ones with random size
     '''
-    k = draw(k_size)
+    k = draw(st.integers(3,9))
     return ones((k,k), dtype=np.uint8)
 
 @st.composite
@@ -76,9 +76,11 @@ def median_noise_strategy(draw) :
     '''
     Generates a black image with salt and pepper noise
     '''
-    img = zeros((512, 512), dtype=np.uint8)
-    image = random_noise(img, mode='s&p', salt_vs_pepper = .15)
-    return image
+
+    N = draw(st.integers(1, 20))
+    image = choice([0, 1], (N, 512, 512),p = [.995, .005])
+
+    return image.astype(np.uint8)
 
 
 ################################################################################
@@ -90,34 +92,47 @@ def median_noise_strategy(draw) :
 
 @given(square_image_strategy(),
         kernel_strategy(),
-        st.integers(2,5),
-        st.integers(1, 50))
-@settings(max_examples=20, deadline=None)
-def test_erode_square(image, kernel, iter, n_imgs) :
+        st.integers(2,5))
+@settings(max_examples = 20, deadline = None)
+def test_erode_square(stack, kernel, iter) :
     '''
-    Given an balck image with a white square inside, assert that:
-
-    - the square area after the erosion is less than before
-    - the parallepiped volume after the erosion is less than before(stack case)
+    Given :
+         - black image with a white square
+         - kernel
+         - number of iterations
+    So :
+        - apply an erosion
+    Assert :
+        - the area of the square is diminshed(image case)
+        - the volume of the parallepiped is diminshed(stack case)
     '''
-    stack = np.asarray([image[0] for _ in range(n_imgs)])
-    eroded_image = erode(image[0], kernel, iter)
+    image = stack[0]
+    eroded_image = erode(image, kernel, iter)
     eroded_stack = erode(stack, kernel, iter)
 
-    assert np.sum(eroded_image) < np.sum(image[0])
+    assert np.sum(eroded_image) < np.sum(image)
     assert np.sum(eroded_stack) < np.sum(stack)
 
 
 @given(median_noise_strategy(), st.integers(10, 50), kernel_strategy())
-@settings(max_examples=20, deadline=None)
-def test_erode_on_sp_image(image, n_imgs, kernel) :
+@settings(max_examples = 20,
+        deadline = None,
+        suppress_health_check = (HC.too_slow,))
+def test_erode_on_sp_image(stack, iter, kernel) :
     '''
-    Given as inpup a black image with salt and pepper noise, assert that:
-    - the eroded image is a uniform black image for small amount of salt
+    Given :
+        - input stack of salt and pepper image
+        - numeber of iterations
+        - kernel
+    So :
+        - apply erosion
+    Assert :
+        - the eroded image is a uniform black image for small amount of salt
+
     '''
-    stack = np.asarray([image for _ in range(n_imgs)])
-    eroded_image = erode(image, kernel)
-    eroded_stack = erode(stack, kernel)
+    image = stack[0]
+    eroded_image = erode(image, kernel, iter)
+    eroded_stack = erode(stack, kernel, iter)
 
     assert (eroded_image == zeros((512, 512), dtype = np.uint8)).all()
     assert (eroded_stack == zeros(stack.shape, dtype = np.uint8)).all()
@@ -125,89 +140,109 @@ def test_erode_on_sp_image(image, n_imgs, kernel) :
 
 @given(square_image_strategy(),
         kernel_strategy(),
-        st.integers(2,5),
-        st.integers(1, 50))
-@settings(max_examples=20, deadline=None)
-def test_dilate_square(image, kernel, iter, n_imgs) :
+        st.integers(2,5))
+@settings(max_examples = 20, deadline = None)
+def test_dilate_square(stack, kernel, iter) :
     '''
-    Given an balck image with a white square inside, assert that:
-
-    - the square area after the dilation is higher than before
-    - the parallepiped volume after the dilate is higher than before(stack case)
+        Given :
+             - black image with a white square
+             - kernel
+             - number of iterations
+        So :
+            - apply dilation
+        Assert :
+            - the area of the square is increased(image case)
+            - the volume of the parallepiped is increased(stack case)
     '''
-    stack = np.asarray([image[0] for _ in range(n_imgs)])
-    dilated_image = dilate(image[0], kernel, iter)
+    image = stack[0]
+    dilated_image = dilate(image, kernel, iter)
     dilated_stack = dilate(stack, kernel, iter)
-
-    assert np.sum(dilated_image) > np.sum(image[0])
-    assert np.sum(dilated_stack) > np.sum(stack)
-
-
-@given(median_noise_strategy(), st.integers(10, 50), kernel_strategy())
-@settings(max_examples=20, deadline=None)
-def test_dilated_on_sp_image(image, n_imgs, kernel) :
-    '''
-    Given as inpup a black image with salt and pepper noise, assert that:
-    - the dilated image has an higher amount of salt
-    '''
-    stack = np.asarray([image for _ in range(n_imgs)])
-    dilated_image = dilate(image, kernel)
-    dilated_stack = dilate(stack, kernel)
 
     assert np.sum(dilated_image) > np.sum(image)
     assert np.sum(dilated_stack) > np.sum(stack)
 
 
-@given(median_noise_strategy(), st.integers(10, 50), st.integers(0, 13))
-@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
-def test_median_blur (noisy_image, n_imgs, ksize) :
+@given(median_noise_strategy(), st.integers(10, 50), kernel_strategy())
+@settings(max_examples = 20, deadline = None)
+def test_dilated_on_sp_image(stack, iter, kernel) :
     '''
-    Test the median blur with an random kernel size black image and stack of image
-    with a salt and pepper noise with small amount of salt.
-    The image is blurred,  the test veriphy that :
+        Given :
+            - input stack of salt and pepper image
+            - numeber of iterations
+            - kernel
+        So :
+            - apply dilation
+        Assert :
+            - the areas of salt is insreased (image)
+            - the volume of salt is increased (stack)
+    '''
+    image = stack[0]
+    dilated_image = dilate(image, kernel, iter)
+    dilated_stack = dilate(stack, kernel, iter)
 
-    - Uniform image is returned
-    - Uniform stak of images is returned
-    - shape is preserved
-    - if kernel isn't odd and greater than one a ValueError is raised
+    assert np.sum(dilated_image) > np.sum(image)
+    assert np.sum(dilated_stack) > np.sum(stack)
+
+
+@given(median_noise_strategy(), st.integers(0, 13))
+@settings(max_examples = 20,
+        deadline = None,
+        suppress_health_check = (HC.too_slow,))
+def test_median_blur (stack, ksize) :
     '''
-    stack = np.asarray([noisy_image for _ in range(n_imgs)])
+    Given :
+        - image tensor of salt and pepper
+        - kernel size
+    So :
+        - apply median blurring
+    Assert that :
+        - value error is raised if ksize is not odd
+        - shape is preserved
+        - return a stack of uniform image
+    '''
+    image = stack[0]
     if ksize % 2 == 0 or ksize <= 1 :
         with pytest.raises(ValueError) :
-            assert median_blur(noisy_image.astype(np.uint8), ksize)
+            assert median_blur(image.astype(np.uint8), ksize)
             assert median_blur(stack.astype(np.uint8), ksize)
     else :
-        blurred_image = median_blur(noisy_image.astype(np.uint8), ksize)
+        blurred_image = median_blur(image.astype(np.uint8), ksize)
         blurred_stack = median_blur(stack.astype(np.uint8), ksize)
 
         assert blurred_image.shape == (512, 512)
-        assert blurred_stack.shape == (n_imgs, 512, 512)
+        assert blurred_stack.shape == stack.shape
 
         assert (blurred_image == zeros((512, 512))).all()
-        assert (blurred_stack == zeros((n_imgs, 512, 512))).all()
+        assert (blurred_stack == zeros(stack.shape)).all()
 
 
-@given(rand_image_strategy(), st.integers(10 ,50), st.integers(3, 14))
-@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
-def test_gaussian_blur (image, n_imgs, size) :
+@given(rand_stack_strategy(), st.integers(3, 14))
+@settings(max_examples = 20,
+        deadline = None,
+        suppress_health_check = (HC.too_slow,))
+def test_gaussian_blur (stack, size, ) :
     '''
-    Takes an input an 8-bit image with random distributed pixels, after the
-    application of the gaussian blur will assert that :
+    Given :
+        - image tensor
+        - kernel size
+    So :
+        - apply a gaussian blurring
+    Assert :
+        - shape is presrved
+        - stack std is lower
+        - if ksize is not odd a value error is raised
 
-    - shape is preserved
-    - image std is decreased
-    - if wrong ksize a ValueError is rised
     '''
+    image = stack[0]
     if size % 2 == 0 :
         with pytest.raises(ValueError) :
             assert gaussian_blur(image, (size, size))
     else :
-        stack = np.asarray([image for _ in range(n_imgs)])
         blurred_image = gaussian_blur(image, ksize = (size, size))
         blurred_stack = gaussian_blur(stack, ksize = (size, size))
 
         assert blurred_image.shape == (512, 512)
-        assert blurred_stack.shape == (n_imgs, 512, 512)
+        assert blurred_stack.shape == stack.shape
 
         assert np.std(blurred_image) < np.std(image)
         assert np.std(blurred_stack) < np.std(stack)
@@ -215,18 +250,22 @@ def test_gaussian_blur (image, n_imgs, size) :
 
 @given(st.integers(20, 30))
 @settings(max_examples = 20, deadline = None)
-def test_imfill(n_imgs) :
+def test_imfill(N) :
     '''
-    Given as input a white image with different black spots, assert that :
-    - the output image is white
-    - the output stack is white
-
-    - the shape is preserved
+    Given :
+        - white image with different black spots
+    So :
+        - apply imfill
+    Assert :
+        - the output image is white
+        - the output stack is white
+        - the shape is preserved
     '''
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
-    # ensure that the input image is binary
-    image = (image != 0).astype(np.uint8)
-    stack = np.asarray([image for _ in range(n_imgs)])
+    image = (image != 0).astype(np.uint8) #ensure that the input image is binary
+    stack = np.asarray([ image for _ in range(N)])
+
+
     filled_image = imfill(image)
     filled_stack = imfill(stack)
 
@@ -237,19 +276,24 @@ def test_imfill(n_imgs) :
     assert filled_stack.shape == stack.shape
 
 
-@given(square_image_strategy(), st.integers(10, 200))
+@given(square_image_strategy())
 @settings(max_examples = 20, deadline = None)
-def test_imfill_square(image, n_imgs) :
+def test_imfill_square(stack) :
     '''
-    Given a white image with a blck square, apply imfill, assert that :
-    - the resulting image is white
-    - the shape is preserved
+    Given:
+        - stack of white images with a black square
+    So :
+        - apply imfill
+    Assert :
+        - the resulting image is white
+        - the shape is preserved
     '''
     # invert the provided image -> from black with a whirte square to white with
     #black square
-    image = (image[0] == 0).astype(np.uint8)
+    image = stack[0]
+    stack = (stack == 0).astype(np.uint8)
+    image = (image == 0).astype(np.uint8)
 
-    stack = np.array([image for _ in range(n_imgs)])
     filled_image = imfill(image)
     filled_stack = imfill(stack)
 
@@ -264,8 +308,10 @@ def test_imfill_square(image, n_imgs) :
 @settings(max_examples = 20, deadline = None)
 def test_connected_components_wStats(n_imgs) :
     '''
-    Given an image(and a stack) with 4 connected regions, assert that
-    - the correct number of different components is detected
+    Given :
+        - image whith 4 connected regions
+    Assert :
+        - the correct number of different components is detected
     '''
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
     image = np.logical_not(image)
@@ -282,35 +328,47 @@ def test_connected_components_wStats(n_imgs) :
 
 @given(square_image_strategy(), st.integers(2, 5))
 @settings(max_examples = 20, deadline = None)
-def test_connected_components_wStats_centr_pos(image, n_imgs) :
+def test_connected_components_wStats_centr_pos(stack, n_imgs) :
     '''
+    Given:
+        - image tensor with white suqare
+    So :
+        - compute the connected components
+    Assert :
+        - the centroids position is correct
     given an image with a white square, assert that:
 
     - the position of the centroids is correct
     '''
-    stack = np.array([image[0] for _ in range(n_imgs)])
-    connected_image = connected_components_wStats(image[0])
+    image = stack[0]
+    L = int(np.sqrt(np.sum(image)))
+    connected_image = connected_components_wStats(image)
     connected_stack = connected_components_wStats(stack)
 
-    gt = [(199 + image[1]) / 2, (199 + image[1]) / 2] # truth centroid position
+    gt = [(199 + L) / 2, (199 + L) / 2] # truth centroid position
 
     assert  (connected_image[3][1] == gt).all()
-    for i in range(n_imgs) :
+    for i in range(stack.shape[0]) :
         assert (connected_stack[3][i][1] == gt).all()
 
 
-@given(rand_image_strategy(), st.integers(2, 10))
-@settings(max_examples = 20, deadline = None)
-def test_otsu_threshold(image, n_imgs):
+@given(rand_stack_strategy())
+@settings(max_examples = 20,
+            deadline = None,
+            suppress_health_check = (HC.too_slow,))
+def test_otsu_threshold(stack):
     '''
-    given a stack of random 8-bit gl images, compute the otsu threshold,
-    assert that:
-    - the returned image is binary
-    - the returned stack is binary
-    - the minimum non zero value of the iamge convolved with the binary image
-      created, is higher than the estimated threshold
+    Given :
+        - image tensor
+    So :
+        - apply otsu threshold
+    Assert :
+        - the returned image is binary
+        - the returned stack is binary
+        - the minimum non zero value of the iage convolved with the binary image
+            created, is higher than the estimated threshold
     '''
-    stack = np.array([image for _ in range(n_imgs)])
+    image = stack[0]
 
     tval_img, thr_image = otsu_threshold(image)
     tval_stack, thr_stack = otsu_threshold(stack)
@@ -327,14 +385,23 @@ def test_otsu_threshold(image, n_imgs):
 
 @given(square_image_strategy())
 @settings(max_examples=2, deadline=None, suppress_health_check=(HC.too_slow,))
-def test_connected_components_wVolumes_3d(image) :
+def test_connected_components_wVolumes_3d(stack) :
     '''
-    Given a stack of images with awhite square, assert that the area of the
-    identified component is correct.
+    Given :
+        - stack of black images with a white square
+
+    So :
+        - found the connected compontens
+    Assert  :
+        - two connected components are found
+        - the volume is correct
     '''
-    res = connected_components_wVolumes_3d(image[0])
+    L = np.sqrt(np.sum(stack[0]))
+    N = stack.shape[0]
+    res = connected_components_wVolumes_3d(stack)
+
     assert (np.unique(res[0]) == [0,1]).all()
-    assert (res[1][1] == image[1] ** 2)
+    assert (res[1][1] == N * L * L)
 
 
 @given(rand_stack_strategy(), st.integers(2, 6), st.integers(8, 12))
@@ -358,9 +425,13 @@ def test_histogram_equalization(volume, clip, size ) :
 @settings(max_examples=20, deadline=None, suppress_health_check=(HC.too_slow,))
 def test_canny_edge_detection(stack) :
     '''
-    Given as input a random stack strategy, assert that :
-    - Return a binary image
-    - the shape is preserved
+    Ginven:
+        - image tensor
+    So :
+        - apply canny edge detection
+    Assert :
+        - A binary image is preserved
+        - the shape is preserved
     '''
     image = stack[0]
     edge_map_image = canny_edge_detection(image)
@@ -374,11 +445,59 @@ def test_canny_edge_detection(stack) :
 
 
 @given(rand_stack_strategy())
-@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+@settings(max_examples = 20,
+            deadline = None,
+            suppress_health_check=(HC.too_slow,))
+def test_adjust_gamma_null(stack) :
+    '''
+    Given :
+        - Image tensor
+    So :
+        - adjustd gamma with gamma == 1
+    Assert :
+        - no change in the image
+    '''
+    gamma_stack = adjust_gamma(stack)
+    gamma_image = adjust_gamma(stack[0])
+
+    assert np.isclose(gamma_stack, stack).all()
+    assert np.isclose(gamma_image, stack[0]).all()
+
+
+@given(rand_stack_strategy())
+@settings(max_examples = 20,
+            deadline = None,
+            suppress_health_check=(HC.too_slow,))
+def tast_adjust_gamma_exception(stack) :
+    '''
+    Given:
+        - image tensor
+    So :
+        - adjust_gamma with gamma == 0
+    Assert :
+        exception is raised
+    '''
+
+    with pytest.raises(Exception) as excinfo :
+        gamma_stack = adjust_gamma(stack, 0)
+        gamma_image = adjust_gamma(stack[0], 0)
+
+
+@given(rand_stack_strategy())
+@settings(max_examples = 20,
+            deadline = None,
+            suppress_health_check=(HC.too_slow,))
 def test_raise_error(stack) :
     '''
-    Assert that an error is raised ifwe pass as input an image or stack of
-    of images of the wrong type
+    Given :
+         - image tensor of float type
+    So :
+         - perform median blur with high kernel
+         - perform otsu threshold
+         - equalize histogram
+         -  Cenny edge detection
+    Assert:
+         - Exception is raised
     '''
     image =  stack[0].astype(np.float32)
     stack = stack.astype(np.float32)
@@ -390,7 +509,7 @@ def test_raise_error(stack) :
         assert otsu_threshold(stack)
         assert histogram_equalization(image)
         assert histogram_equalization(stack)
-        assert test_canny_edge_detection(image)
+        assert canny_edge_detection(image)
         assert canny_edge_detection(stack)
 
 
@@ -398,8 +517,12 @@ def test_raise_error(stack) :
 @settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
 def test_warnings(stack) :
     '''
-    Given as input an argument that will raise warinings:
-    assert that all functions raise warnings
+    Given :
+         - image tensor
+    So:
+        - perform operations that requires binary images
+    Assert :
+        - a warning is raised
     '''
     with pytest.warns(None):
         connected_components_wStats(stack)

@@ -118,6 +118,6 @@ setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent"
     ],
-    python_requires='>=3.5',
+    python_requires='>=3.6',
     license = 'MIT'
 )

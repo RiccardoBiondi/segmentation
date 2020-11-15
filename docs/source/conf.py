@@ -23,8 +23,7 @@ author = 'RiccardoBiondi, Nico Curti'
 
 # The full version, including alpha/beta/rc tags
 release = '0.1.0'
-
-
+master_doc = 'index'
 # -- General configuration ---------------------------------------------------
 
 # Add any Sphinx extension module names here, as strings. They can be
@@ -33,8 +32,7 @@ release = '0.1.0'
 extensions = [
               'sphinx.ext.autodoc',
               'sphinx.ext.napoleon',
-              'sphinx.ext.viewcode'
-]
+              'sphinx.ext.viewcode']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []

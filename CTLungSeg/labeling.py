@@ -8,7 +8,8 @@ from time import time
 
 from CTLungSeg.utils import read_image, load_pickle, hu2gl, normalize
 from CTLungSeg.utils import write_volume
-from CTLungSeg.method import median_blur, canny_edge_detection, std_filter
+from CTLungSeg.method import median_blur, std_filter
+from CTLungSeg.method import histogram_equalization, adjust_gamma
 from CTLungSeg.segmentation import imlabeling
 
 __author__ = ['Riccado Biondi', 'Nico Curti']
@@ -42,12 +43,13 @@ def parse_args():
     args = parser.parse_args()
     return args
 
-#pre-trainded centroids:
-centroids = {
-                'parenchima' : [1.6444744, 2.152333 , 1.9559685, 0.  ],
-                'bronchi'    : [4.315418 , 5.3087306, 2.6431215, 255.],
-                'noise'      : [5.5954723, 2.288158 , 3.316695 , 0.  ],
-                'GGO'        : [ 5.746537, 6.8778925, 3.4054325, 0.  ]}
+#pre-trained centroids
+centroids = { 'parenchima': [1.3822415, 2.4269834, 1.1459424, 1.832688 ],
+                'edges'   : [1.6750793, 2.6646569, 3.829929 , 2.1440172],
+                'Bronchi' : [3.4454546, 3.0228717, 1.9430293, 3.3130786],
+                'Noise'   : [6.0392303, 2.7451596, 4.861056 , 5.6319346],
+                'GGO'     : [6.359824 , 6.218402 , 3.42476  , 5.9504952]}
+
 
 def main(volume, centroids):
 
@@ -55,18 +57,17 @@ def main(volume, centroids):
     # prepare the image
     volume = hu2gl(volume)
     weight = (volume != 0).astype(np.uint8)
-    edge_map = canny_edge_detection(volume, 241, 25)
-    # build multi channel
-    mc = np.stack([
-                    normalize(volume),
-                    normalize(median_blur(volume, 11)),
-                    normalize(std_filter(volume, 7)),
-                    median_blur(edge_map, 9)], axis = -1)
+
+    equalized = histogram_equalization(volume, 2, (10, 10))
+    mc = np.stack([     normalize(equalized),
+                        normalize(median_blur(volume, 11)),
+                        normalize(std_filter(volume, 3)),
+                        normalize(adjust_gamma(volume, 1.5))], axis = -1)
 
 
     labels = imlabeling(mc, centroids, weight)
-    labels = (labels == 3).astype(np.uint8)
-    labels = median_blur(labels, 11)
+    labels = (labels == 4).astype(np.uint8)
+    labels = median_blur(labels, 5)
 
     return labels
 

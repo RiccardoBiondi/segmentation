@@ -244,7 +244,7 @@ def gl2bit(img, width) :
     ----------
 
     img : array-like
-        image tensor to convert, each value mut be 8 or 16 unsigned bit
+        image tensor to convert, each value must be 8 or 16 unsigned int
     width : int
         number of bit to display, can be 8 or 16 bits.
 
@@ -256,7 +256,7 @@ def gl2bit(img, width) :
 
     '''
     if width != 8 and width != 16 :
-        raise ValueError("Only 8 and 16 bit apresentation are allowed")
+        raise ValueError("Only 8 and 16 bit representation are allowed")
 
     x = np.unpackbits(img.reshape((1, -1)).astype('>i2').view(np.uint8), axis = 0)
     x = x.reshape(8, *img.shape,2)
@@ -267,7 +267,7 @@ def gl2bit(img, width) :
 
 def hu2gl(images):
     '''
-    Convert an image from hounsfield unit to 8-bit gray scale
+    Convert an image from hounsfield unit to 8-bit gray scale image
 
     Parameters
     ----------
@@ -284,7 +284,7 @@ def hu2gl(images):
     return (255 * rescale(images, images.max(), images.min())).astype(np.uint8)
 
 
-def center_hu(image) :
+def shift_and_crop(image) :
     '''
     Ensure that the air peack of hu is centerd on -1024 and shit it to reach 0.
     After that ensure that the maximum hu value is +2048
@@ -394,16 +394,10 @@ def _std_dev(image, size) :
      out: array-like
         filtered image
     '''
-    ## Old version
-    #image = itk.image_from_array(image)
-    #std = itk.NoiseImageFilter.New(image)
-    #std.SetRadius(size)
-    #std.Update()
-    #out = itk.array_from_image(std.GetOutput())
     image = sitk.GetImageFromArray(image)
-    filter = sitk.NoiseImageFilter()
-    filter.SetRadius(size)
-    out = filter.Execute(image)
+    filter_ = sitk.NoiseImageFilter()
+    filter_.SetRadius(size)
+    out = filter_.Execute(image)
     out = sitk.GetArrayFromImage(out)
 
     return out

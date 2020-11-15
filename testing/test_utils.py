@@ -13,7 +13,7 @@ from CTLungSeg.utils import normalize
 from CTLungSeg.utils import rescale
 from CTLungSeg.utils import gl2bit
 from CTLungSeg.utils import hu2gl
-from CTLungSeg.utils import center_hu
+from CTLungSeg.utils import shift_and_crop
 from CTLungSeg.utils import shuffle_and_split
 from CTLungSeg.utils import _imfill
 from CTLungSeg.utils import stats2dataframe
@@ -28,26 +28,30 @@ from numpy import ones
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
+################################################################################
+##                          Define Test strategies                            ##
+################################################################################
 
-#Define Test strategies
-
-#create filename
 unicode_categories = ('Nd','Lu','Ll', 'Pc', 'Pd')
 legitimate_chars = st.characters(whitelist_categories=(unicode_categories))
 filename_strategy = st.text(alphabet=legitimate_chars, min_size=1, max_size=15)
 
-# medical image format strategy
-
-
 medical_image_formats = ['.nii', '.nrrd', '.nhdr', '.nii.gz']
-#strategy to generate a random stack of 8-bit images
+
+
 @st.composite
-def rand_stack_strategy(draw, n_imgs = st.integers(2, 50)) :
-    N = draw(n_imgs)
+def rand_stack_strategy(draw) :
+    '''
+    Generates a stack of N 512x512 white noise 8-bit GL images
+    '''
+    N = draw(st.integers(10, 100))
     return (255 * np.random.rand(N, 512, 512)).astype(np.uint8)
 
 @st.composite
 def gl16_stack_strategy(draw):
+    '''
+    Generate a stack of N 512x512 16 bit images with Gl value in [-4000, 4000]
+    '''
 
     n_imgs = draw(st.integers(1, 200))
     stack = randint(-4000, 4000,  (n_imgs, 512, 512), dtype = np.int16)
@@ -56,6 +60,12 @@ def gl16_stack_strategy(draw):
 
 @st.composite
 def voxel_spatial_info_strategy(draw) :
+    '''
+    Generates spatial information of voxel. the information genrated are :
+    - origin
+    - spacing
+    - direction
+    '''
 
     origin = draw(st.tuples(*[st.floats(0., 100.)] * 3))
     spacing = draw(st.tuples(*[st.floats(.1, 1.)] * 3))
@@ -73,13 +83,20 @@ def voxel_spatial_info_strategy(draw) :
 
 
 @given(rand_stack_strategy(), filename_strategy)
-@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+@settings(max_examples = 20,
+        deadline = None,
+        suppress_health_check = (HC.too_slow,))
 def test_save_and_load_pkl(imgs,  filename):
     '''
-    Givena random 3D array and a random name :
-    - save the array as .pkl.npy with the random name
-    - reload the array
-    - assert that the input array and the loaded one are equal
+    Given:
+        - image tensor
+        - random filename
+
+    than :
+        - save the array as .pkl.npy with the random name
+        - reload the array
+    and :
+        - assert that the input array and the loaded one are equal
     '''
     save_pickle('./testing/images/' + filename, imgs)
     load = load_pickle('./testing/images/' + filename + '.pkl.npy')
@@ -87,28 +104,44 @@ def test_save_and_load_pkl(imgs,  filename):
 
 
 @given(filename_strategy, st.sampled_from(medical_image_formats))
-@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+@settings(max_examples = 20,
+        deadline = None,
+        suppress_health_check = (HC.too_slow,))
 def test_reader(filename, format) :
     '''
-    Given a filename and a file format, test that a reader object is created with the
-    correct parameters
+    Taking as input:
+        - image tensor
+        - random file name
+        - file format supported by SimpleITK
+    So:
+        - create a SimpleITK.reader object
+    And :
+        - assert that the object paramenters are consistent with the input one
     '''
-    fname = filename + format
+    fname = '{}{}'.format(filename, format)
     reader =  _read_image(fname)
     assert reader.GetFileName() == fname
 
 
 @given(gl16_stack_strategy(), voxel_spatial_info_strategy(),
         filename_strategy, st.sampled_from(medical_image_formats))
-@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+@settings(max_examples = 20,
+          deadline = None,
+          suppress_health_check=(HC.too_slow,))
 def test_read_and_write_image(volume, info, filename, format) :
     '''
-    Given a random array, a random name, a random image format and random spatial
-    information :
-    - write the array as image
-    - reead the image
-    - assert that the red image array is equal to the input one
-    - assert that the red spatial information are aqual to the input one
+    Given :
+        - image 16-GL image tensor
+        - file format supported by SimpleITK
+        - filename
+        - spatial information
+    So :
+
+        - write the array as image
+        - read the image
+    And :
+        - assert that the red image array is equal to the input one
+        - assert that the red spatial information are aqual to the input one
     '''
 
     fname = './testing/images/{}'.format(filename)
@@ -124,9 +157,19 @@ def test_read_and_write_image(volume, info, filename, format) :
 
 
 @given(rand_stack_strategy())
-@settings(max_examples=20,
-deadline=None,suppress_health_check=(HC.too_slow,))
+@settings(max_examples = 20,
+            deadline = None,
+            suppress_health_check = (HC.too_slow,))
 def test_normalize(stack) :
+    '''
+    Given:
+        - image tensor
+    So :
+        -apply normalization on mean and std
+    Assert that :
+        - The resuting mean is 0
+        - The resulting std is 1
+    '''
     normalized = normalize(stack)
 
     assert np.isclose(np.std(normalized), 1)
@@ -134,80 +177,138 @@ def test_normalize(stack) :
 
 
 @given(rand_stack_strategy())
-@settings(max_examples=20,
-deadline=None,suppress_health_check=(HC.too_slow,))
+@settings(max_examples = 20,
+            deadline = None,
+            suppress_health_check = (HC.too_slow,))
 def test_rescale(img):
+    '''
+    Given:
+        - image tensor
+    So:
+        - rescale ccording to min asn max valaue
+    Assert :
+        - the maximum value is 1
+        - the minimum value is zero
+    '''
 
-    rescaled = rescale(img, np.amax(img), 0 )
+    rescaled = rescale(img, np.amax(img), np.amin(img) )
     assert np.isclose(rescaled.max(), 1.)
-    assert np.amin(rescaled) >= 0.
+    assert np.isclose(rescaled.min(), 0.)
 
+
+@given(rand_stack_strategy(), st.integers(1, 20))
+@settings(max_examples = 20,
+            deadline = None,
+            suppress_health_check = (HC.too_slow,))
+def test_rescale_zero_division(image, value) :
+    '''
+    Given
+        - image tensor
+        - rescaling value
+    So :
+        - rescale the image by giving the same value for min and max
+    Check :
+        - ZeroDivisionError is raised
+    '''
     with pytest.raises(ZeroDivisionError) :
-        assert rescale(img, 3, 3)
-
+        assert rescale(image, value, value)
 
 @given(st.integers(1,30))
-@settings(max_examples = 2, deadline = None, suppress_health_check=(HC.too_slow,))
+@settings(max_examples = 2,
+        deadline = None,
+        suppress_health_check = (HC.too_slow,))
 def test_gl2bit(n_imgs) :
+    '''
+
+    '''
     input = np.ones((n_imgs, 100, 100), dtype = np.uint8)
     result = gl2bit(input, 8)
     assert (np.unique(result) == [0,1]).all()
 
 
 @given(rand_stack_strategy(), st.integers(0, 7))
-@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+@settings(max_examples = 20,
+            deadline = None,
+            suppress_health_check = (HC.too_slow,))
 def test_gl2bit_value_error(image, bits) :
     '''
-    Given a wrong number of bits, assert that a value error is raised
+    Given :
+        - a not allowed number of bits
+    Check :
+        - a ValueError is raised
     '''
     with pytest.raises(ValueError) :
         assert gl2bit(image, bits)
 
 
-@given(rand_stack_strategy())
-@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
+@given(gl16_stack_strategy())
+@settings(max_examples = 20,
+        deadline = None,
+        suppress_health_check = (HC.too_slow,))
 def test_hu2gl(img):
     '''
-    Given an image is hu to convert in an 8-bit image,
-    assert that :
-    - the minimum value is 0
-    - the maximum value is 255
+    Given :
+        - 16-bit image tensor
+    So :
+        - convert the tensor to 8-bit GL
+    Assert :
+        - the minimum value is 0
+        - the maximum value is 1
     '''
     out = hu2gl(img)
-    assert out.max() == 255
+    assert out.max() < 256
     assert out.min() == 0
 
 
 @given(gl16_stack_strategy())
-@settings(max_examples = 20, deadline = None, suppress_health_check=(HC.too_slow,))
-def test_center_hu(volume) :
+@settings(max_examples = 20,
+        deadline = None,
+        suppress_health_check = (HC.too_slow,))
+def test_shift_and_crop(volume) :
     '''
-    Given a stack of images whoch each values is a random 16-bit integers,
-    assert that :
-    - the shape is preserved
-    - the maximum value lesser than 2049
-    - the minimum value higher than -1S
+    Given:
+        - 16 bit image tensor
+    So :
+        - shif_and_crop is applied
+    Assert that:
+        - the shape if the tensor is preserved
+        - the maximum value is lower than 2049
+        - the minimum value is greater than -1
     '''
-    res = center_hu(volume)
+    res = shift_and_crop(volume)
 
     assert res.shape == volume.shape
     assert res.min() > -1
     assert res.max() < 2049
 
 
-@given(st.integers(200, 1000), st.integers(2, 200))
+@given(rand_stack_strategy(), st.integers(2, 5))
 @settings(max_examples  = 20, deadline = None)
-def test_shuffle_and_split(n_sample, n_subsamples):
+def test_shuffle_and_split(sample, n_subsamples):
     '''
-    Given
+    Given :
+        - image tensor
+        - number of subsamples
+    So :
+        - apply shuffle_and_split
+    Assert :
+        - the correct number of subsamples is created
     '''
-    sample = np.array([np.ones((randint(1,301), randint(1, 301))) for i in range(n_sample)], dtype=np.ndarray)
+
     subsample = shuffle_and_split(sample, n_subsamples)
 
     assert subsample.shape[0] == n_subsamples
 
 
 def test_imfill():
+    '''
+    Given :
+        - an input image with 3 holes
+    So :
+        - fill the holes
+    Assert :
+        - a white image is returned
+    '''
     image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
     compare = 255 * ones(image.shape, dtype = np.uint8)
     filled = _imfill(image)
@@ -217,6 +318,11 @@ def test_imfill():
 @given(st.integers(2,30), st.integers(2, 30))
 @settings(max_examples = 20, deadline = None)
 def test_stats2dataframe(n_slices, cc):
+    '''
+    Given :
+        - 
+
+    '''
     shape = (cc, 5)
     input = [np.empty(shape) for i in range(n_slices)]
     df = stats2dataframe(input)
