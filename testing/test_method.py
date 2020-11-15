@@ -22,7 +22,7 @@ import cv2
 import numpy as np
 from numpy import ones, zeros
 from numpy.random import rand, choice
-from skimage.util import random_noise
+
 
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
