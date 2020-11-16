@@ -16,7 +16,7 @@ format like '.nrrd' or '.nifti'. All the format supported by SimpleITK_ are supp
 
 .. _SimpleITK: https://simpleitk.readthedocs.io/en/master/IO.html
 
-.. automodule:: CTLungSeg.utils
+.. automodule:: utils
    :members:
    :undoc-members:
    :show-inheritance:
@@ -34,7 +34,7 @@ the filter slice by slice.
 
 .. _OpenCV: https://opencv.org/
 
-.. automodule:: CTLungSeg.method
+.. automodule:: method
    :members:
    :undoc-members:
    :show-inheritance:
@@ -49,7 +49,7 @@ This module contains the implementation of the functions used to perform the
 tasks on each script.
 
 
-.. automodule:: CTLungSeg.segmentation
+.. automodule:: segmentation
    :members:
    :undoc-members:
    :show-inheritance:
