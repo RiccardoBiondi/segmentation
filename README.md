@@ -39,7 +39,7 @@ to the nearest tissue.
 
 <a href="https://github.com/RiccardoBiondi/segmentation/blob/master/images/results.png">
   <div class="image">
-    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/images/results.png" width="400" height="725">
+    <img src="https://github.com/RiccardoBiondi/segmentation/blob/master/images/results.png" width="800" height="400">
   </div>
 </a>
 
@@ -70,7 +70,7 @@ For each script described below there are a powershell and a shell script which 
 
 ## Prerequisites
 
-Supported python version: ![Python version](https://img.shields.io/badge/python-3.6|3.7|3.8-blue.svg)
+Supported python version: ![Python version](https://img.shields.io/badge/python-3.5|3.6|3.7|3.8-blue.svg)
 
 First of all ensure to have the right python version installed.
 

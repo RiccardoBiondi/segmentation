@@ -32,7 +32,7 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 ##                          Define Test strategies                            ##
 ################################################################################
 
-unicode_categories = ('Nd','Lu','Ll', 'Pc', 'Pd')
+unicode_categories = ('Lu','Ll')
 legitimate_chars = st.characters(whitelist_categories=(unicode_categories))
 filename_strategy = st.text(alphabet=legitimate_chars, min_size=1, max_size=15)
 
