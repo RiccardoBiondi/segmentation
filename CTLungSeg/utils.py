@@ -197,8 +197,8 @@ def normalize(image) :
     '''
     Rescale each GL according to the mean and std of the whole stack
 
-    Parameters:
-    -----------
+    Parameters
+    ----------
 
     image : array-like
         image or stack to normalize

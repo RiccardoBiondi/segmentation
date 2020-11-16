@@ -69,7 +69,7 @@ def integer_stack_strategy(draw) :
     '''
     gl_max = draw(st.integers(3, 10))
     n_imgs = draw(st.integers(20, 70))
-    stack = randint(0, gl_max, (n_imgs, 512, 512))
+    stack = randint(0, gl_max, (n_imgs, 512, 512), dtype = np.uint8)
     return stack.reshape(n_imgs, 512, 512), gl_max
 
 ################################################################################
@@ -229,8 +229,10 @@ def test_imlabeling_raise_weight_exception(stack, dim) :
     mc = np.stack(stack for _ in range(3))
     centroids = ones((5, 3), dtype = np.uint8)
     weight = ones((dim, dim, dim), dtype = np.uint8)
-    with pytest.raises(Exception) :
-        assert imlabeling(mc, centroids, weight )
+    with pytest.raises(Exception) as exc:
+        labels  =  imlabeling(mc, centroids, weight )
+        assert exc == 'Weight shape doesn t match image one : {} != {}\
+                            '.format( weight.shape, mc.shape[:-1])
 
 
 @given(integer_stack_strategy())

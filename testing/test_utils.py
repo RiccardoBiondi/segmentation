@@ -33,10 +33,11 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 ################################################################################
 
 unicode_categories = ('Lu','Ll')
-legitimate_chars = st.characters(whitelist_categories=(unicode_categories))
+legitimate_chars = st.characters(whitelist_categories=(unicode_categories),
+                                    min_codepoint = 65, max_codepoint = 90)
 filename_strategy = st.text(alphabet=legitimate_chars, min_size=1, max_size=15)
 
-medical_image_formats = ['.nii', '.nrrd', '.nhdr', '.nii.gz']
+medical_image_formats = ['.nii', '.nrrd', '.nhdr']
 
 
 @st.composite
@@ -98,8 +99,8 @@ def test_save_and_load_pkl(imgs,  filename):
     and :
         - assert that the input array and the loaded one are equal
     '''
-    save_pickle('./testing/images/' + filename, imgs)
-    load = load_pickle('./testing/images/' + filename + '.pkl.npy')
+    save_pickle('./testing/images/{}'.format(filename), imgs)
+    load = load_pickle('./testing/images/{}.pkl.npy'.format(filename))
     assert (load == imgs).all()
 
 

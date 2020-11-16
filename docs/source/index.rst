@@ -10,12 +10,12 @@ Automatic Pipeline for the segmentation of Ground Glass Opacities on CT torax
 scans of COVID-19 affected patients.
 
 This package provides a fast way to isolate lung region and identify ground glass
- lesions on CT images of patients affected by COVID-19.
- The segmentation approach is based on color quantization,
- performed by kmeans clustering. This package provides a series of scripts to
- isolate lung regions, pre-process the images, estimate kmeans centroids and
- labels the lung regions; together with methods to perform thresholding,
- morphological and statistical operations on stack of images.
+lesions on CT images of patients affected by COVID-19.
+The segmentation approach is based on color quantization,
+performed by kmeans clustering. This package provides a series of scripts to
+isolate lung regions, pre-process the images, estimate kmeans centroids and
+labels the lung regions; together with methods to perform thresholding,
+morphological and statistical operations on stack of images.
 
 .. image :: ../../images/results.png
 

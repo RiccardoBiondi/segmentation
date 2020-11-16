@@ -479,8 +479,11 @@ def tast_adjust_gamma_exception(stack) :
     '''
 
     with pytest.raises(Exception) as excinfo :
+
         gamma_stack = adjust_gamma(stack, 0)
         gamma_image = adjust_gamma(stack[0], 0)
+        assert excinfo == 'gamma vlaue cannot be zero'
+
 
 
 @given(rand_stack_strategy())

@@ -7,21 +7,14 @@ Supported python versions :
 The full list of prerequisites is the following:
 
 - numpy>=1.17
-- scikit-learn>=0.20.3
 - opencv-python
 - pandas>=0.25.3
 - tdqm
 - SimpleITK
 
-The lung extraction is performed by using apre-trained UNet, so plese ensure to
-have installed the lungmask_ package. For more information about how the network
-is trained, please refers here_.
 
 Installation
 ------------
-
-First of all ensure to have the right python version and the package for the
-lung extraction correctly installed
 
 To install this package first of all you have to clone the repositories from github :
 
