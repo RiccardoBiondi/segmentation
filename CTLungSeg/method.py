@@ -450,3 +450,30 @@ def adjust_gamma(image, gamma=1.0):
     else :
         func = partial(cv2.LUT, lut = table)
         return np.asarray(list(map(func, image)))
+
+
+def compute_eigenvals(image, block_size, k_size) : 
+    '''
+    Computes Eigenvalues of the covariation matrix of derivatives over the neighborhood block_sixe x block_size
+    
+    Parameters
+    ----------
+    image : array-like
+        stack of images
+        
+    block_size : int
+        Neighborhood size
+        
+    k_size : int
+        Aperture parameter for the Sobel operator
+        
+    Retuns
+    ------
+    out : array-like of shape (image.shape, 2)
+        
+    '''
+    func = partial(cv2.cornerEigenValsAndVecs, blockSize = block_size, ksize = k_size)
+    res = np.array(list(zip(* list(map(func, image)))))
+    res = res.transpose(1, 0, 2, 3)
+    res = res[: , : , : , :2]
+    return res

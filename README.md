@@ -76,6 +76,10 @@ First of all ensure to have the right python version installed.
 
 This script use opencv-python, numpy, pandas, functool and pickle: see [requirements](#./requirements.txt) for more informations.
 
+The lung extraction is performed by using apre-trained UNet, so plese ensure to
+have installed the [lungmask](https://github.com/JoHof/lungmask) package. For
+more information about how the network is trained, plese refers to https://doi.org/10.1186/s41747-020-00173-2 .
+
 ## Installation
 
 Download the project or the latest release:

@@ -58,7 +58,7 @@ if __name__ == '__main__':
     else :
         center = np.asarray([np.array(v) for _, v in centroids.items()])
 
-    lung = lung_extraction.main(volume)
+    lung = lung_extraction.main(volume, info)
     labels = labeling.main(lung, center)
 
     write_volume(labels, args.output, info, '.nrrd')

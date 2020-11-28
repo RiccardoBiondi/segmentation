@@ -287,6 +287,8 @@ def kmeans_on_subsamples(imgs,
 
     Returns
     -------
+    retval : array-like 
+         It is vector of the sum of squared distance from each point to their corresponding centers for each subsample
 
     centroids : array-like
         array that contains the n_centroids estimated for each
@@ -311,7 +313,7 @@ def kmeans_on_subsamples(imgs,
     >>> n_centroids = 3
     >>>
     >>> sub = subsamples(mc)
-    >>> center = kmeans_on_subsamples(sub, n_centroids,  stop_criteria, init, True)
+    >>> ret, center = kmeans_on_subsamples(sub, n_centroids,  stop_criteria, init, True)
     '''
     ns = imgs[0].shape[-1]
     if weight :
@@ -322,13 +324,15 @@ def kmeans_on_subsamples(imgs,
                             dtype=np.ndarray)
 
     centroids = []
+    ret = []
     for el in tqdm(vector) :
 
-        _, _, centr = cv2.kmeans(el.astype(np.float32),
+        r, _, centr = cv2.kmeans(el.astype(np.float32),
                                  n_centroids,
                                  None,
                                  stopping_criteria,
                                  10,
                                  centr_init)
         centroids.append(centr)
-    return np.asarray(centroids, dtype= np.float32)
+        ret.append(r)
+    return [np.asarray(ret, dtype = np.float32), np.asarray(centroids, dtype= np.float32)]

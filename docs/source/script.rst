@@ -1,10 +1,10 @@
 Script
 ======
-Since the segmentation of several patient is time consuming, some scripts
-to automatize this process are provided. The script are in two version: bash and
-powershell. The segmentation approach is different, instead to perform the
+Since the segmentation of several patients is time-consuming, some scripts
+to automatize this process are provided. The scripts are in two versions: bash and
+Powershell. The segmentation approach is different, instead of to perform the
 entire segmentation of all the patient all at once, the segmentation steps are
-divided into the two different steps :
+divided into two different steps :
 
 - lung extraction
 - labeling
@@ -12,15 +12,15 @@ divided into the two different steps :
 Lung Extraction
 ---------------
 
-This scrip allows to run the lung segmentation on the whole set of patients,
+This script allows to run the lung segmentation on the whole set of patients,
 that is the preliminary step of the GGO identification. Its implemented both for
-bash and powershell.
+bash and Powershell.
 To perform the segmentation simply organize all the CT scans in the same folder
 (input folder), and create an empty folder in which the results will be saved.
-Ensure that in the input folder there are only the file corresponding to the scan
+Ensure that in the input folder there are only the files corresponding to the scan
 to segment. The supported input format are all the ones supported by SimpleITK_.
 you can provide as input also DICOM series, simply arrange them into one folder
-for each scan. Please ensure that all the subsamples contains only one series.
+for each scan. Please ensure that all the subsamples contain only one series.
 
 Now you can simply run the following command from bash :
 
@@ -34,20 +34,21 @@ or its equivalent for powershell
 
   lung_extraction.ps1 /path/to/input/folder/ /path/to/output/folder/
 
-
-For the lung extraction a pre-trained UNet model was used. The model and the
+For lung extraction, a pre-trained UNet model was used. The model and the
 code used to apply it belong from this_ repository. For more detail please
 refer to the here_.
+
 
 
 Labeling
 --------
 
-Once you have isolate the lung, you can run the actual segmentation. As for
+Once you have isolated the lung, you can run the actual segmentation. As for
 lung extraction, simply arrange all the results of the previous script into an
-input folder; as before create an empty folder in which the resulting labels
+input folder; as before creating an empty folder in which the resulting labels
 will be saved in '.nrrd' format.
 Simply run the bash script:
+
 
 .. code-block:: bash
 
@@ -60,7 +61,7 @@ or its equivalent for powershell
     labeling.ps1 /path/to/input/folder/ /path/to/output/folder/
 
 This will run the segmentation by using the already estimated centroids. If you
-want to use an other set of centroids, simply provide as third arguments the path
+want to use another set of centroids, simply provide as third arguments the path
 of the file in which the set of centroids is saved
 
 
@@ -68,9 +69,9 @@ Train
 -----
 
 Even if with the script a set of pre-estimated centroids is provided, we also provide
-a script to train other set of centroids. To perform the training simply organize
+a script to train another set of centroids. To perform the training simply organize
 the scans resulting from the lung extraction into the same folder, this will be the
-training set. Now simply the the training script:
+training set. Now simply the training script:
 
 .. code-block:: bash
 
@@ -93,8 +94,8 @@ displayed :
   [DONE]
 
 
-All  the images will be divided into N subsamples, and a kmeans clustering is
-performed for each subsamples, after that a second clustering i performed in order
+All the images will be divided into N subsamples, and a K-means clustering is
+performed for each subsamples, after that a second clustering is performed in order
 to refine the clustering and provide the set of centroids.
 To control the parameters simply provides the following arguments when the script
 is execute:

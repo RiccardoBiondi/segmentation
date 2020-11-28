@@ -58,7 +58,7 @@ here = os.path.abspath(os.path.dirname(__file__))
 
 #Package-Metadata
 NAME = "CTLungSeg"
-DESCRIPTION = ''
+DESCRIPTION = 'Package for GGO and CS segmentation in lung CT scans'
 URL = 'https://github.com/RiccardoBiondi/segmentation'
 EMAIL = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 AUTHOR = ['Riccardo Biondi', 'Nico Curti']
@@ -118,6 +118,6 @@ setup(
         "Programming Language :: Python :: 3",
         "Operating System :: OS Independent"
     ],
-    python_requires='>=3.6',
+    python_requires='>=3.5',
     license = 'MIT'
 )

@@ -3,13 +3,12 @@
 
 import argparse
 import numpy as np
+import SimpleITK as sitk
 
 from time import time
-
-from CTLungSeg.utils import read_image, write_volume, hu2gl, shift_and_crop
-from CTLungSeg.method import imfill, median_blur
-from CTLungSeg.segmentation import select_largest_connected_region_3d
-from CTLungSeg.segmentation import bit_plane_slices, remove_spots
+from lungmask.mask import apply
+from CTLungSeg.utils import read_image, write_volume, hu2gl, shift_and_crop, normalize
+from CTLungSeg.method import compute_eigenvals
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
@@ -37,33 +36,39 @@ def parse_args():
     return args
 
 
-def main(volume) :
+def main(array, info) :
 
 
-    volume = shift_and_crop(volume)
-    bit = bit_plane_slices(volume, (11, 10, 9), 16)
-    bit = hu2gl(bit)
-    body = imfill((bit > 100).view(np.uint8))
-    lung_mask = (body == 255) & (bit < 100)
-    lung_mask = median_blur(lung_mask.view(np.uint8), 5)
-    lung_mask = remove_spots(lung_mask, 113)
-    lung_mask = select_largest_connected_region_3d(lung_mask.view(np.uint8))
+    image = sitk.GetImageFromArray(array)
+    image.SetOrigin(info[0])
+    image.SetSpacing(info[1])
+    image.SetDirection(info[2])
 
-
-    return lung_mask * volume
+    # find the lungmask
+    mask = apply(image)
+    mask = (mask != 0).astype(np.uint8)
+    
+    array = shift_and_crop(array)
+    lung = array * mask
+    lung = hu2gl(lung)
+    e1 = np.max(compute_eigenvals(lung, 5, 9), axis = 3)
+    e1 = normalize(e1)
+    m1 = (e1 < 10.)
+    l1 = lung * m1
+    e2 = np.max(compute_eigenvals(l1, 5, 9), axis = 3)
+    e2 = normalize(e2)
+    lung = l1 * (e2 < 10.)
+    
+    return lung
 
 
 if __name__ == '__main__' :
 
     start = time()
 
-
     args = parse_args()
     volume, info = read_image(args.input)
-
-    lung = main(volume)
-
-
+    lung = main(volume, info)
     write_volume(lung, args.output, info, '.nii')
 
     stop = time()

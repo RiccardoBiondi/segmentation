@@ -274,7 +274,7 @@ def test_kmeans_on_subsamples(stack, n_features, n_subsamples) :
                           10, 1.0)
     mc = np.stack([stack[0] for _ in range(n_features) ], axis = -1)
     mc = shuffle_and_split(mc, n_subsamples)
-    centr = kmeans_on_subsamples(mc,
+    _, centr = kmeans_on_subsamples(mc,
                                  stack[1],
                                  stopping_criteria,
                                  cv2.KMEANS_RANDOM_CENTERS)
@@ -319,7 +319,7 @@ def test_kmeans_on_subsamples_wobkg(stack, n_subsamples) :
     mc = np.stack([stack[0], stack[0], (stack[0] != 0).astype(np.uint8)],
                     axis = -1)
     mc = shuffle_and_split(mc, n_subsamples)
-    centr = kmeans_on_subsamples(mc,
+    _, centr = kmeans_on_subsamples(mc,
                                  stack[1] - 1,
                                  stopping_criteria,
                                  cv2.KMEANS_RANDOM_CENTERS,
