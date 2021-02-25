@@ -2,11 +2,9 @@
 # -*- coding: utf-8 -*-
 
 import os
-import cv2
 import pickle
 import SimpleITK as sitk
 import numpy as np
-import pandas as pd
 
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
@@ -228,9 +226,10 @@ def shift_and_crop(image) :
         image or stack of images in whch the air value in HU is shifted to zero
 
     '''
-    cropped = sitk.Threshold(image, 0, 1500, 0)
-    shifted = sitk.ShiftScale(cropped, 1000, 1.0)
-    return cropped
+    shifted = sitk.ShiftScale(image, 1000, 1.0)
+    cropped = sitk.Threshold(shifted, 0, 2048, 0)
+
+    return corpped
 
 
 

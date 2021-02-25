@@ -80,7 +80,7 @@ def std_filter(image, radius) :
 
     std = sitk.NoiseImageFilter()
     std.SetRadius(radius)
-    return srd.Execute()
+    return std.Execute()
 
 
 
@@ -131,7 +131,7 @@ def adaptive_histogram_equalization(image, radius) :
 
 
 
-def adjust_gamma(image, gamma=1.0, type = 'HU'):
+def adjust_gamma(image, gamma=1.0, image_type = 'HU'):
     '''
 
     Parameters
@@ -140,7 +140,7 @@ def adjust_gamma(image, gamma=1.0, type = 'HU'):
         image stack to adjust
     gamma : float
         power of the correction
-    type : str
+    image_type : str
         input data type: can be ['uint8', 'uint16', 'HU'].
 
     Returns

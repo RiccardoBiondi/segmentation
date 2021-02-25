@@ -256,7 +256,7 @@ def test_threshold_and_apply_mask(image, lower, upper) :
 @settings(max_examples = 20,
           deadline = None,
           suppress_health_check = (HC.too_slow,))
-def test_cst_image(image, new_type) :
+def test_cast_image(image, new_type) :
     '''
     Given :
         - image

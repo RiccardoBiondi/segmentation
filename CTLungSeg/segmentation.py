@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 
 import cv2
-import warnings
 import numpy as np
 
 from tqdm import tqdm
