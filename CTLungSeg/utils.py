@@ -229,7 +229,7 @@ def shift_and_crop(image) :
     shifted = sitk.ShiftScale(image, 1000, 1.0)
     cropped = sitk.Threshold(shifted, 0, 2048, 0)
 
-    return corpped
+    return cropped
 
 
 

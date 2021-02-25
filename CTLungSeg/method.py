@@ -10,7 +10,7 @@ __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 bounding_values = {'uint8' : [0, 255],
                    'uint16': [0, 2**16],
                    'HU' : [0, 2**12]}
-image_type = {
+image_types = {
               'uint8' : sitk.sitkUInt8,
               'uint16': sitk.sitkUInt16,
               'HU' : sitk.sitkUInt16 }
@@ -159,10 +159,10 @@ def adjust_gamma(image, gamma=1.0, image_type = 'HU'):
     c = sitk.PowImageFilter()
     out = c.Execute(img, invGamma)
     # saturate out of bounds voxels
-    bound = bounding_values[type]
+    bound = bounding_values[image_type]
     out = sitk.Threshold(out, bound[0], bound[1], bound[1])
     # cast to the correct type
-    out = sitk.Cast(out, image_type[type])
+    out = sitk.Cast(out, image_types[image_type])
     return out
 
 
