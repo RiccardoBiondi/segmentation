@@ -2,7 +2,7 @@ Script
 ======
 Since the segmentation of several patients is time-consuming, some scripts
 to automatize this process are provided. The scripts are in two versions: bash and
-Powershell. The segmentation approach is different, instead of to perform the
+PowerShell. The segmentation approach is different, instead of to perform the
 entire segmentation of all the patient all at once, the segmentation steps are
 divided into two different steps :
 
@@ -14,7 +14,7 @@ Lung Extraction
 
 This script allows to run the lung segmentation on the whole set of patients,
 that is the preliminary step of the GGO identification. Its implemented both for
-bash and Powershell.
+bash and PowerShell.
 To perform the segmentation simply organize all the CT scans in the same folder
 (input folder), and create an empty folder in which the results will be saved.
 Ensure that in the input folder there are only the files corresponding to the scan
@@ -35,8 +35,8 @@ or its equivalent for powershell
   lung_extraction.ps1 /path/to/input/folder/ /path/to/output/folder/
 
 For lung extraction, a pre-trained UNet model was used. The model and the
-code used to apply it belong from this_ repository. For more detail please
-refer to the here_.
+code used to apply it belong to this_ repository. For more details, please
+refers here_.
 
 
 
@@ -95,15 +95,15 @@ displayed :
 
 
 All the images will be divided into N subsamples, and a K-means clustering is
-performed for each subsamples, after that a second clustering is performed in order
+performed for each subsample, after that a second clustering is performed in order
 to refine the clustering and provide the set of centroids.
 To control the parameters simply provides the following arguments when the script
 is execute:
 
---init : centroid initialization algorithm : if 0 the centroids will be intialized
-            randomly, if 1 the kmeans++ center will be used.
+--init : centroid initialization algorithm: if 0 the centroids will be initialized
+            randomly, if 1 the K-means++ center will be used.
 
---n : number of subsamples, as default is 100.
+--n : number of subsamples, as default as 100.
 
 
 

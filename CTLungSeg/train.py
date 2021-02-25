@@ -4,15 +4,18 @@
 import cv2
 import argparse
 import numpy as np
+import SimpleITK as sitk
 
 from glob import glob
 from time import time
+from tqdm import tqdm
 
 from CTLungSeg.utils import read_image, save_pickle
-from CTLungSeg.utils import shuffle_and_split, hu2gl, normalize
-from CTLungSeg.method import std_filter, histogram_equalization
-from CTLungSeg.method import median_blur, adjust_gamma
+from CTLungSeg.utils import shuffle_and_split, normalize
+from CTLungSeg.method import std_filter, adaptive_histogram_equalization
+from CTLungSeg.method import median_filter, adjust_gamma, threshold
 from CTLungSeg.segmentation import kmeans_on_subsamples
+
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it']
@@ -62,7 +65,9 @@ def parse_args():
 
 def main():
 
-    # kmeans clustering
+    # kmeans clustering aguments :
+    # - initalization technique -> choose between random or kmeans++
+    # - stop_criteria : criteria used to stop the kmeans algorithm
     init = [ "KMEANS_RANDOM_CENTERS", "KMEANS_PP_CENTERS"]
     centroid_init =  [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
     stop_criteria = (cv2.TERM_CRITERIA_EPS
@@ -73,16 +78,28 @@ def main():
 
 
     files = glob(args.folder + '/*{}'.format(args.format))
+    stks = []
+    for f in tqdm(files) :
 
-    imgs = np.concatenate(np.array([ hu2gl(read_image(f)[0]) for f in files]))
-    # convert to multichannel
-    equalized = histogram_equalization(imgs, 2, (10, 10))
-    imgs = np.stack([
-                    normalize(equalized),
-                    normalize(median_blur(imgs, 11)),
-                    normalize(std_filter(imgs, 3)),
-                    normalize(adjust_gamma(imgs, 1.5)),
-                    (imgs != 0).astype(np.uint8)], axis = -1)
+        img = read_image(f)
+        # create the mask to remove the background
+        mask = threshold(img, 4000, 1)
+        # filter all the images, normalize and convert to numpy array
+        he = normalize(adaptive_histogram_equalization(img, 2))
+        med = normalize(median_filter(img, 3))
+        std = normalize(std_filter(img, 3))
+        gamma = normalize(adjust_gamma(img, 1.5))
+
+        he = sitk.GetArrayFromImage(he)
+        med = sitk.GetArrayFromImage(med)
+        std = sitk.GetArrayFromImage(std)
+        gamma = sitk.GetArrayFromImage(gamma)
+        mask = sitk.GetArrayFromImage(mask)
+
+        stk = np.stack([he, med, gamma, std, mask], axis = -1)
+        stks.append(stk)
+    imgs = np.concatenate(stks)
+
     n_imgs = imgs.shape[0]
 
 
@@ -104,12 +121,7 @@ def main():
                                   stop_criteria,
                                   centroid_init[args.init],
                                   True)
-    # clustering refinement
-    #_, _, center = cv2.kmeans(center.reshape((-1,4)),
-    #                          5, None,
-    #                          stop_criteria,
-    #                          10,
-    #                          centroid_init[args.init])
+
     center = centr[np.argmin(ret)]
     center = center[center[:, 0].argsort()]
     print("I'm saving..." , flush=True)

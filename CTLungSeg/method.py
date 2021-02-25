@@ -1,402 +1,61 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import cv2
-import warnings
 import SimpleITK as sitk
-import numpy as np
-import pandas as pd
-import CTLungSeg.utils as utils
-from functools import partial
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
-def erode(img, kernel, iterations = 1):
+bounding_values = {'uint8' : [0, 255],
+                   'uint16': [0, 2**16],
+                   'HU' : [0, 2**12]}
+image_type = {
+              'uint8' : sitk.sitkUInt8,
+              'uint16': sitk.sitkUInt16,
+              'HU' : sitk.sitkUInt16 }
+
+
+
+def median_filter(img, radius):
     '''
-    Apply the erosion on the full image stack.
+    Apply median blurring filter on an image or stack of images.
 
     Parameters
     ----------
 
-    img: array-like
-        image or stack of images to erode
-    kernel: (2D)array-like
-        kernel to apply to the input stack
-    iterations: int
-        number of iterations
-
-    Returns
-    -------
-
-    eroded: array-like
-        eroded stack
-
-    Example
-    -------
-    >>> import numpy as np
-    >>> from CTLungSeg.utils import load_image
-    >>> from CTLungSeg.method import erode
-    >>>
-    >>> filename = 'path/to/input/image'
-    >>> image = load_image(filename)
-    >>> # binarize the image
-    >>> binary = (image < 100).astype(np.uint8)
-    >>> #define the kernel and apply the erosion
-    >>> kernel = np.ones((5, 5), dtype = np.uint8)
-    >>> eroded = erode(binary, kernel)
-    '''
-    if len(img.shape) == 2 :
-        return cv2.erode(img.astype('uint8'), kernel, iterations)
-    return np.asarray(list(map(partial(cv2.erode, kernel=kernel, iterations=iterations),img)))
-
-
-def dilate(img, kernel, iterations = 1 ):
-    '''
-    Apply dilation to a whole stack of images
-
-    Parameters
-    ----------
-    img: array-like
-        input image or stack to dilate
-    kernel: (2D)array-like
-        kernel to apply to the input stack
-    iterations: int
-        number of iterations to apply
-
-    Returns
-    -------
-    processed: array-like
-        dilated stack
-
-    Example
-    -------
-    >>> import numpy as np
-    >>> from CTLungSeg.utils import load_image
-    >>> from CTLungSeg.method import dilate
-    >>>
-    >>> filename = 'path/to/input/image'
-    >>> image = load_image(filename)
-    >>> # binarize the image
-    >>> binary = (image < 100).astype(np.uint8)
-    >>> #define the kernel and apply the erosion
-    >>> kernel = np.ones((5, 5), dtype = np.uint8)
-    >>> dilated = dilate(binary, kernel)
-    '''
-    if len(img.shape) == 2 :
-        return cv2.dilate(img.astype('uint8'), kernel, iterations)
-    return np.asarray(list(map(partial(cv2.dilate, kernel=kernel, iterations=iterations),img)))
-
-
-def connected_components_wStats(img):
-    '''
-    computes the connected components labeled image of
-    boolean image and also produces a statistics output for each label
-
-    Parameters
-    ----------
-    img: array-like
-        input image or stack of images
-
-    Returns
-    -------
-    retval: array-like
-
-    labels: array-like
-        labelled image or stack
-
-    stats: list of pandas DataFrame
-        statistic for each lablel for each image of the stack stored in a
-        pandas dataframe. The provided statitics are stored into columns named :
-        ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
-
-    centroids: array-like
-        centroid for each label fr each image of the stack
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from CTLungSeg.utils import read_image, hu2gl
-    >>> from CTlungSeg.method import connected_components_wStats
-    >>>
-    >>> # load the series and convert it into 8-bit GL image
-    >>> filenname = '/path/to/input/series/'
-    >>> volume, info = read_image(filename)
-    >>> volume = hu2gl(volume)
-    >>> # binarize the image
-    >>> volume  = (volume > 100).astype(np.uint8)
-    >>> # found the connected compoents
-    >>> ret, labels, stats, center =  connected_components_wStats
-    '''
-    if len(np.unique(img)) != 2 :
-        warnings.warn('The image is not binary, the connected components may \
-                        not be accurate', UserWarning)
-    columns = ['LEFT', 'TOP', 'WIDTH', 'HEIGHT', 'AREA']
-    if len(img.shape) == 2 :
-        retval, labels, stats, centroids = cv2.connectedComponentsWithStats(img.astype(np.uint8))
-        return [retval, labels, pd.DataFrame(np.array(stats), columns=columns), centroids]
-
-
-    out = list(zip(*list(map(cv2.connectedComponentsWithStats, img.astype(np.uint8)))))
-    return [np.array(out[0]), np.array(out[1]), utils.stats2dataframe(list(out[2])), list(out[3])]
-
-
-def imfill(img):
-    '''
-    Flood fill a given image or stack of images.
-
-    Parameters
-    ----------
-    img: array-like
-        binary image to fill
-
-    Returns
-    -------
-    filled: array-like
-        binary image or stack with filled holes
-
-    Examples
-    --------
-    >>> from CTLungSeg.utils import read_image, hu2gl
-    >>> from CTLungSeg.method import imfill
-    >>> # load the series and convert it into 8-bit grayscale image
-    >>> seriesname = 'path/to/input/series/'
-    >>> volume, info = read_image(seriesname)
-    >>> volume = hu2gl(volume)
-    >>> # binarize the image and fill the holes
-    >>> volume = (volume > 100).astype(np.uint8)
-    >>> filled = imfill(volume)
-
-    Notes
-    -----
-    .. note::
-        This function will raise a warning if the input image is not binary. The
-        function will be executed, however the resukts may not be corrected.
-    '''
-    if len(np.unique(img)) != 2 :
-        warnings.warn('The image is not binary, the connected components may \
-                            not be accurate', UserWarning)
-    if len(img.shape) == 2: #one image case
-        return utils._imfill(img.astype(np.uint8))
-    return np.asarray(list(map(utils._imfill,img.astype(np.uint8))))
-
-
-def median_blur(img, ksize):
-    '''
-    Apply median blurring filter on an image or stack of images
-
-    Parameters
-    ----------
-
-    img: array-like
+    img: SimleITK image
         image or stack of images to filter
-    ksize : int
-        aperture linear size; it must be odd and greater than 1
+    radius : int
+        neighbourhood radius. must be greater or equal than 1.
 
     Returns
     -------
-    blurred : array-like
+    blurred : SimpleITK image
         median blurred image
 
 
     Examples
     --------
-    >>> import numpy as np
-    >>> from CTLungSeg.utils import read_image, hu2gl
-    >>> from CTLungSeg.method import median_blur
-    >>> # load the series and convert it into 8-bit grayscale image
+    >>> from CTLungSeg.utils import read_image
+    >>> from CTLungSeg.method import median_filter
+    >>> # load the image series
     >>> seriesname = 'path/to/input/series/'
-    >>> volume, info = read_image(seriesname)
-    >>> volume = hu2gl(volume)
+    >>> volume = read_image(seriesname)
     >>> # define the kernel size and apply the median filter
-    >>> ksize = 5
-    >>> filtered = median_blur(volume, ksize)
+    >>> radius = 5
+    >>> filtered = median_blur(volume, radius)
     '''
 
-    if (ksize % 2) == 0 or ksize <= 1:
-        raise ValueError('Kerne size must be odd and greater than one')
-    if len(img.shape) == 2: #single image case
-        return cv2.medianBlur(img, ksize)
-    return np.asarray(list(map(partial(cv2.medianBlur, ksize=ksize),img)))
+    if radius <=0 :
+        raise ValueError('Radius must be greater or equal than one')
+    median = sitk.MedianImageFilter()
+    median.SetRadius(int(radius))
+    return median.Execute(img)
 
 
-def gaussian_blur(img, ksize, sigmaX=0,
-                    sigmaY=0,borderType=cv2.BORDER_DEFAULT):
-    '''
-    Apply a gaussian blurring filter on an image or stack of images
 
-    Parameters
-    ----------
-
-    img: array-like
-        image or stack of images to filter
-    ksize : tuple of int
-        aperture linear size; it must be odd and greater than 1
-    sigmaX: float
-        Gaussian kernel standard deviation in X direction
-    sigmaY: float
-        Gaussian kernel standard deviation in Y direction; if sigmaY is zero,
-        it is set to be equal to sigmaX, if both sigmas are zeros, they are
-        computed from ksize
-    borderType:
-        Specifies image boundaries while kernel is applied on image borders
-
-    Returns
-    -------
-
-    blurred : array-like
-        blurred image
-    '''
-    if ksize[0] % 2 == 0 or ksize[1] % 2 == 0 or ksize[0]< 0 or ksize[1] < 0 :
-        raise ValueError('ksize must be odd and positive')
-    if len(img.shape) == 2: #single image case
-        return cv2.GaussianBlur(img, ksize,
-                                sigmaX = sigmaX,
-                                sigmaY = sigmaY,
-                                borderType = borderType)
-    return np.asarray(list(map(partial(cv2.GaussianBlur, ksize = ksize,
-                                                        sigmaX=sigmaX,
-                                                        sigmaY=sigmaY,
-                                                        borderType = borderType),
-                                                        img)), dtype=np.uint8)
-
-
-def otsu_threshold(img):
-    '''
-    Compute the best threshld value for each slice of the input image stack by using otsu algorithm
-
-    Parameters
-    ----------
-    img: array-like
-        input image or stack of images. must be uint8 type
-
-    Returns
-    -------
-    thr: array-like
-        array that contains the estimated threshold value for each image slice
-
-    thresholded: array-like
-            thresholded image stack
-    '''
-    if len(img.shape) == 2  :
-        out = cv2.threshold(img, 0., 1., cv2.THRESH_BINARY+cv2.THRESH_OTSU)
-        return [np.asarray(out[0]), np.asarray(out[1])]
-    else:
-        out = list(zip(*list(map(partial(cv2.threshold, thresh=0, maxval=1, type=cv2.THRESH_BINARY+cv2.THRESH_OTSU), img))))
-        return [np.asarray(out[0]), np.asarray(out[1])]
-
-
-def connected_components_wVolumes_3d(image) :
-    '''
-    Found the connected components in three dimensions of  the image tensor
-    and te corresponding areas. The used connectivity is 26.
-
-    Parameters
-    ----------
-
-    image : array-like
-        Binary stack of images
-
-    Returns
-    -------
-
-    labeled : array-like
-        image in which each voxel is assigned to a connected region
-    areas :array-like
-        array of areas(in pixel) of each connected region.
-
-    Notes
-    -----
-    .. note::
-        This function will raise a warning if the input image is not binary. The
-        function will be executed, however the resukts may not be corrected.
-    '''
-
-    if len(np.unique(image)) != 2 :
-        warnings.warn('The image is not binary, the connected components may \
-                            not be accurate', UserWarning)
-    # old
-    #image = itk.image_from_array(image)
-    #connected = itk.connected_component_image_filter(image)
-    #connected = itk.array_from_image(connected)
-    #areas =  np.asarray([np.sum((connected == i)) for i in np.unique(connected)])
-
-    image = sitk.GetImageFromArray(image)
-    connected = sitk.ConnectedComponentImageFilter()
-    image =  connected.Execute(image)
-    image = sitk.GetArrayFromImage(image)
-    areas =  np.asarray([np.sum((image == i)) for i in np.unique(image)])
-
-    return [image, areas]
-
-
-def histogram_equalization(image, clipLimit = 2.0, tileGridSize = (8, 8)) :
-    '''
-    Apply the Contrast Limited Adaptive Histogram Equalization to enhance image
-    contrast.
-
-    Parameters
-    ----------
-    image: array-like
-        image or stack of images to equalize
-    clipLimit: float
-        threshold for contrast limiting, default 2.0
-    tileGridSize: tuple
-        number of tiles in the row and column
-
-    Returns
-    -------
-    equalized : array-like
-        equalized image or stack of images
-    '''
-    clahe = cv2.createCLAHE(clipLimit = clipLimit, tileGridSize = tileGridSize)
-    if len(image.shape) == 2 :
-        equalized = clahe.apply(image)
-    else :
-        equalized = np.asarray(list(map(clahe.apply, image)))
-    return equalized
-
-
-def canny_edge_detection(image, upper_thr = 255, lower_thr = 0) :
-    '''
-    Found Image edges by using Canny algorithm.
-
-    Parameters
-    ----------
-    image: array-like of shape (n_img, height, width)
-        8-bit image or stack of images from which find contours
-
-    upper_thr : int
-        first threshold for the hysteresis procedure.
-
-    lower_thr : int
-        second threshold for the hysteresis procedure.
-
-
-    Returns
-    -------
-    edge_map : array-like  of the same shape of image
-        binary edge map of the input stack
-
-    Example
-    -------
-    >>> import numpy as np
-    >>> from CTLungSeg.utils import load_image
-    >>> from CTLungSeg.method import canny_edge_detection
-    >>>
-    >>> filename = 'path/to/input/image'
-    >>> image = load_image(filename)
-    >>> edges = canny_edge_detection(image)
-
-    '''
-    if len(image.shape) == 2 : #single image case
-        return cv2.Canny(image, threshold1 = lower_thr, threshold2 = upper_thr)
-    func = partial(cv2.Canny, threshold1 = lower_thr, threshold2 = upper_thr)
-    return np.asarray(list(map(func, image)))
-
-
-def std_filter(image, size) :
+def std_filter(image, radius) :
     '''
     Replace each pixel value with the standard deviation computed on its
     neighborhood.
@@ -404,76 +63,198 @@ def std_filter(image, size) :
     Parameters
     ----------
 
-    image : array-like
+    image : SimpleITK image
         image or stack of images to filter
 
-    size: int
+    radius: int
         radius of the neighborhood
 
     Returns
     -------
 
-    filtered : array-like
+    filtered : SimpleITK image
         filtered image
     '''
-    if len(image.shape) == 2 :
-        return utils._std_dev(image, size)
-    return np.asarray(list(map(partial(utils._std_dev, size = size), image)))
+    if radius <=0 :
+        raise ValueError('Radius must be greater or equal than one')
+
+    std = sitk.NoiseImageFilter()
+    std.SetRadius(radius)
+    return srd.Execute()
 
 
-def adjust_gamma(image, gamma=1.0):
+
+def gauss_smooth(image, sigma = 1.):
     '''
-    Build a lookup table mapping the pixel values [0, 255] to their adjusted
-    gamma values
+    Apply a gaussian smooth to the input image
 
     Parameters
     ----------
-    image : array-like
-        image stack to adjust
-    gamma : float
-        power of the correction
+    image : SimpleITK image
+        image to smooth
+    sigma : float
+        noise sigma
 
     Returns
     -------
-    out : array-like (same shape of image)
+    smoothed : SimpleITK image
+        smoothed image
+    '''
+    gauss = sitk.SmoothingRecursiveGaussianImageFilter()
+    gauss.SetSigma(sigma)
+    return  gauss.Execute(image)
+
+
+
+def adaptive_histogram_equalization(image, radius) :
+    '''
+    Apply the histogram equalization in a neighbourhood of each voxel.
+
+    Parameters
+    ----------
+    image : SimpleITK image
+
+    radius : int > 0
+        neighbourhood radius
+
+    Returns
+    -------
+    equalized : SimpleITK image
+        equalized image or stack of images
+    '''
+    ahe = sitk.AdaptiveHistogramEqualizationImageFilter()
+    ahe.SetAlpha(1)
+    ahe.SetBeta(1)
+    ahe.SetRadius(radius)
+
+    return ahe.Execute()
+
+
+
+def adjust_gamma(image, gamma=1.0, type = 'HU'):
+    '''
+
+    Parameters
+    ----------
+    image : SimpleITK image
+        image stack to adjust
+    gamma : float
+        power of the correction
+    type : str
+        input data type: can be ['uint8', 'uint16', 'HU'].
+
+    Returns
+    -------
+    out : SimpleITK image
         gamma corected image
     '''
     if gamma == 0 :
         raise Exception('gamma vlaue cannot be zero')
+    if type not in ['HU', 'uint8', 'uint16'] :
+        raise Exception('image type {} not supported'.format(type))
     invGamma = 1.0 / gamma
-    table = np.array([((i / 255.0) ** invGamma) * 255
-                            for i in np.arange(0, 256)]).astype("uint8")
+
+    # cast image to float
+    img = cast_image(image, sitk.sitkFloat32)
+    c = sitk.PowImageFilter()
+    out = c.Execute(img, invGamma)
+    # saturate out of bounds voxels
+    bound = bounding_values[type]
+    out = sitk.Threshold(out, bound[0], bound[1], bound[1])
+    # cast to the correct type
+    out = sitk.Cast(out, image_type[type])
+    return out
 
 
-    if len(image.shape) == 2 : #single image case
-        return cv2.LUT(image, lut = table)
-    else :
-        func = partial(cv2.LUT, lut = table)
-        return np.asarray(list(map(func, image)))
 
-
-def compute_eigenvals(image, block_size, k_size) : 
+def apply_mask(image, mask, masking_value = 0, outside_value = -1500) :
     '''
-    Computes Eigenvalues of the covariation matrix of derivatives over the neighborhood block_sixe x block_size
-    
+    Apply a mask to image
+
     Parameters
     ----------
-    image : array-like
-        stack of images
-        
-    block_size : int
-        Neighborhood size
-        
-    k_size : int
-        Aperture parameter for the Sobel operator
-        
-    Retuns
+    image : SimpleITK image
+        image to mask
+    mask : SimpleITK image
+        image mask
+
+    Return
     ------
-    out : array-like of shape (image.shape, 2)
-        
+    masked : SimpleITK image
     '''
-    func = partial(cv2.cornerEigenValsAndVecs, blockSize = block_size, ksize = k_size)
-    res = np.array(list(zip(* list(map(func, image)))))
-    res = res.transpose(1, 0, 2, 3)
-    res = res[: , : , : , :2]
-    return res
+    mf = sitk.MaskImageFilter()
+    mf.SetMaskingValue(masking_value)
+    mf.SetOutsideValue(outside_value)
+    return mf.Execute(image, mask)
+
+
+
+def vesselness(image) :
+    '''
+    Apply Frangi filter to find the likelihood of image regions to contains
+    vessels (tubular structures)
+
+    Parameters
+    ----------
+    image : SimpleITK image
+
+    Return
+    ------
+    vesseness_map : SimpleITK image
+    '''
+    vess = sitk.ObjectnessMeasureImageFilter()
+    vess.SetObjectDimension(1)
+    return vess.Execute(image)
+
+
+
+def threshold(image, upper, lower, inside = 1, outside = 0) :
+    '''
+    Apply an interval threshold to the image
+
+    Parameters
+    ----------
+    image : SimpeITK image
+        input image
+    upper : int
+        upper threshold value
+    lower : int
+        lower threshold value
+    inside : int
+
+    outside : int
+
+    Returns
+    -------
+    thr : SimpleITK image
+        thresholded image
+    '''
+
+    thr = sitk.BinaryThresholdImageFilter()
+    thr.SetLowerThreshold(lower)
+    thr.SetUpperThreshold(upper)
+    thr.SetOutsideValue(outside)
+    thr.SetInsideValue(inside)
+    return thr.Execute(image)
+
+
+
+def cast_image(image, new_pixel_type) :
+    '''
+    Cast image Pixels to pixel_type
+
+    Parameters
+    ----------
+    image : SimpleITK image
+        image to cast
+    new_pixel_type : SimpleITK PixelIDValueEnum
+        new pixel type
+
+    Returns
+    -------
+    casted : SimpleITK image
+        image with new pixel type
+    '''
+    caster = sitk.CastImageFilter()
+    caster.SetOutputPixelType(new_pixel_type)
+    return caster.Execute(image)

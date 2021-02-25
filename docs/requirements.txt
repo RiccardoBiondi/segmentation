@@ -1,6 +1,5 @@
 numpy>=1.17
 opencv-python
-pandas>=0.25.3
 tdqm
 SimpleITK
 

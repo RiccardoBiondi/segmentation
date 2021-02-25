@@ -8,21 +8,13 @@ from  hypothesis import HealthCheck as HC
 
 from CTLungSeg.utils import shuffle_and_split
 
-from CTLungSeg.segmentation import opening
-from CTLungSeg.segmentation import closing
-from CTLungSeg.segmentation import remove_spots
-from CTLungSeg.segmentation import select_largest_connected_region_3d
-from CTLungSeg.segmentation import bit_plane_slices
 from CTLungSeg.segmentation import imlabeling
 from CTLungSeg.segmentation import kmeans_on_subsamples
 
-
 import cv2
 import numpy as np
-import pandas as pd
-from CTLungSeg.method import connected_components_wStats
-from numpy import ones, zeros
-from numpy.random import rand, randint
+from numpy import ones
+from numpy.random import randint
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
@@ -30,38 +22,6 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 ################################################################################
 ##                          Define Test strategies                            ##
 ################################################################################
-
-@st.composite
-def rand_stack_strategy(draw) :
-    '''
-    Create a stack of N 512x512 white noise images
-    '''
-    N = draw(st.integers(10, 30))
-    return (255 * rand(N, 300, 300)).astype(np.uint8)
-
-
-@st.composite
-def kernel_strategy(draw) :
-    '''
-    Create a kernel fro morphological operations
-    '''
-    k = draw(st.integers(3,9))
-    assume (k % 2) == 0
-    return ones((k,k), dtype=np.uint8)
-
-
-@st.composite
-def square_stack_strategy(draw) :
-    '''
-    Generates a stack of N black images with a whote square
-    '''
-    N = draw(st.integers(2, 25))
-    L = draw(st.integers(10, 50))
-    image = ones((N, 512, 512), dtype=np.uint8)
-    image[ : , 100 : 100 + L, 100 : 100 + L ] = zeros((L,L), dtype=np.uint8)
-    return image, L
-
-
 @st.composite
 def integer_stack_strategy(draw) :
     '''
@@ -78,92 +38,6 @@ def integer_stack_strategy(draw) :
 ###                                                                          ###
 ################################################################################
 
-
-@given(square_stack_strategy(), kernel_strategy())
-@settings(max_examples = 20, deadline = None)
-def test_opening(img, kernel) :
-    '''
-    Given :
-        - stack of images with a white square
-        - kernel
-    So :
-        - perform an opening
-    Assert :
-        - the square area isincreased
-    '''
-    opened = opening(img[0], kernel )
-    square_area = opened.size - np.sum(opened)
-    assert (square_area >= (img[1] ** 2)*opened.shape[0])
-
-
-@given(square_stack_strategy(), kernel_strategy())
-@settings(max_examples = 20, deadline = None)
-def test_closing(img, kernel) :
-
-    '''
-    Given :
-        - stack of images with a white square
-        - kernel
-    So :
-        - perform a closing
-    Assert :
-        - the square area decreased
-    '''
-    closed = closing(img[0], kernel)
-    square_area = closed.size - np.sum(closed)
-    assert (square_area <= (img[1]**2)*closed.shape[0])
-
-
-@given(square_stack_strategy(), st.integers(45, 201))
-@settings(max_examples = 20, deadline = None)
-def test_remove_spots_on_single_square(stack, side):
-    '''
-    Given :
-        - black image with a white square
-         -a side value
-    So :
-        - remove_spots
-        - min area = side**2
-    Assert :
-        - if side < square side : same image
-        - inf side > square side : balck image
-    '''
-    volume = (stack[0] == 0).astype(np.uint8)
-    side_of_square = stack[1]
-
-    filtered = remove_spots(volume, side**2)
-    if side < side_of_square :
-        assert (filtered == volume).all()
-    else :
-        assert (filtered == zeros(filtered.shape, dtype = np.uint8)).all()
-
-
-@given(square_stack_strategy())
-@settings(max_examples = 20, deadline = None)
-def test_select_largest_connected_regions_3d(img):
-    '''
-    Given :
-        - stack of black images with a white square
-    So :
-        - found the larges connected region
-    Assert :
-        - the parallelepiped region is found as the largest
-    '''
-    input = np.logical_not(img[0])
-    res = select_largest_connected_region_3d(input.astype(np.uint8))
-    assert (np.sum(res) == (img[1] ** 2)*img[0].shape[0])
-
-
-@given(rand_stack_strategy())
-@settings(max_examples = 2, deadline = None, suppress_health_check=(HC.too_slow,))
-def test_bit_plane_slices(stack) :
-    '''
-    '''
-    ground_truth = [0, 16, 64, 80, 128, 144, 192, 208]
-    result = bit_plane_slices(stack, (5,7,8), 8)
-
-    assert result.shape == stack.shape
-    assert ( np.unique(result) == ground_truth).all()
 
 
 @given(integer_stack_strategy(), st.integers(1, 6))
@@ -330,21 +204,3 @@ def test_kmeans_on_subsamples_wobkg(stack, n_subsamples) :
 
     assert centr.size == n_subsamples * (stack[1] - 1)* 2
     assert np.isclose(np.sort(centr.reshape((-1,))), gt).all()
-
-
-@given(rand_stack_strategy(), kernel_strategy())
-@settings(max_examples = 20, deadline = None)
-def test_warnings(stack, kernel) :
-
-    '''
-    Given :
-        - non binary image tensor
-    So :
-        - perform opening
-        - perform closing
-    Assert :
-        - warning is raised
-    '''
-    with pytest.warns(None) :
-        opening(stack, kernel)
-        closing(stack, kernel)

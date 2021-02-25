@@ -50,7 +50,7 @@ for file in $input_files; do
 
   printf "* Processing $file ...       "
 
-  f="${file%%.*}"
+  f="${file%%.n*}"
   python3 -m CTLungSeg.lung_extraction --input="$input_dir$file" --output="$output_dir$f"
 
   if [ "$?" = 0 ]; then

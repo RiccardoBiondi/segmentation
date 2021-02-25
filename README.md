@@ -14,7 +14,7 @@
 
 # COVID-19 Lung Segmentation
 
-This package provides a fast way to isolate lung region and identify ground glass lesions on CT images of patients affected by COVID-19. The segmentation approach is based on color quantization, performed by kmeans clustering. This package provides a series of scripts to isolate lung regions, pre-process the images, estimate kmeans centroids and labels the lung regions.
+This package provides a fast way to isolate the lung region and identify ground glass lesions on CT images of patients affected by COVID-19. The segmentation approach is based on colour quantization, performed by K-means clustering. This package provides a series of scripts to isolate lung regions, pre-process the images, estimate K-means centroids and labels the lung regions.
 1. [Overview](#Overview)
 2. [Contents](#Contents)
 3. [Prerequisites](#prerequisites)
@@ -28,14 +28,12 @@ This package provides a fast way to isolate lung region and identify ground glas
 
 ## Overview
 
-This package provides an automatic pipeline for the segmentation of ground glass
-opacities and consolidation areas on CT chest scans of patient affected by COVID-19.
+This package provides an automatic pipeline for the segmentation of ground glass opacities and consolidation areas on CT chest scans of patient affected by COVID-19.
 
-The segmentation is achieved by color quantization: each voxel is groped by color
-simiarity: The characteristic color of each tissue was fond, and the voxel are classified
-to the nearest tissue.
+The segmentation is achieved by colour quantization: each voxel is grouped by colour similarity:
+The characteristic colour of each tissue was fond, and the voxel is classified to the nearest tissue.
 
-**Example of segmentation**. **Left:** Original image: **Right** original image with identified ground glass areas.
+**Example of segmentation**. **Left:** Original image: **Right** original image with identified ground-glass areas.
 
 <a href="https://github.com/RiccardoBiondi/segmentation/blob/master/images/results.png">
   <div class="image">
@@ -47,16 +45,16 @@ to the nearest tissue.
 ## Contents
 
 COVID-19 Lung segmentation is composed of scripts and modules:
-- scripts allows to isolate lung regions, find the centroids for colours quantization and segment the images.
-- modules allows to load and save the images from and in different extensions and perform operations on stack of images.
+- scripts allows to isolate lung regions, find the centroids for colour quantization and segment the images.
+- modules allows to load and save the images from and to different extensions and perform operations on image series.
 
 To refer to script documentation:
 
 | **Script** | **Description** |
 |:----------:|:---------------:|
 | [lung_extraction](./docs/pipeline/lung_extraction.md) | Extract lung from CT scans 										 																																				|
-| [train](./docs/pipeline/train.md) | Apply colour quantization on a series of stacks in order to estimate the centroid to use for segmentation																																													|
-| [labeling](./docs/pipeline/labeling.md) |Segment the input image by using pre-estimated centroids or user provided set|
+| [train](./docs/pipeline/train.md) | Apply colour quantization on a series of stacks to estimate the centroid to use for segmentation																																													|
+| [labeling](./docs/pipeline/labeling.md) |Segment the input image by using pre-estimated centroids or user-provided set|
 
 To refer to modules documentation:
 
@@ -66,7 +64,7 @@ To refer to modules documentation:
 | [method](./docs/CTLungSeg/method.md) | method to filter the image tensor |
 | [segmentation](./docs/CTLungSeg/segmentation.md) | contains useful function to segment stack of images and select ROI																										|
 
-For each script described below there are a powershell and a shell script which allow to execute the script on multiple patient.
+For each script described below, there are a PowerShell and a shell script that allows executing the script on multiple patients scans.
 
 ## Prerequisites
 
@@ -74,11 +72,11 @@ Supported python version: ![Python version](https://img.shields.io/badge/python-
 
 First of all ensure to have the right python version installed.
 
-This script use opencv-python, numpy, pandas, functool and pickle: see [requirements](#./requirements.txt) for more informations.
+This script use opencv-python, numpy and SimpleITK: see [requirements](#./requirements.txt) for more informations.
 
-The lung extraction is performed by using apre-trained UNet, so plese ensure to
+The lung extraction is performed by using a pre-trained UNet, so please ensure to
 have installed the [lungmask](https://github.com/JoHof/lungmask) package. For
-more information about how the network is trained, plese refers to https://doi.org/10.1186/s41747-020-00173-2 .
+more information about how the network is trained, please refers to https://doi.org/10.1186/s41747-020-00173-2.
 
 ## Installation
 
@@ -117,52 +115,52 @@ python -m pytest
 ### Single Patient Case
 
 Once you have installed you can directly start to segment the images.
-Input CT scans must be in hounsfield units(HU), gray-scale images are not allowed.
-The input allowed formats are the one supported by SimpleITK. If the input is a dicom series, simply pass the path to the directory which contains
+Input CT scans must be in Hounsfield units(HU), gray-scale images are not allowed.
+The input allowed formats are the ones supported by SimpleITK. If the input is a Dicom series, simply pass the path to the directory which contains
 the series files, please ensure that in the folder there is only one series.
 This will return the GGO and CS labels is as '.nrrd'.
 
 
-To segment a single CT scan, simply run the following command from the bash or
-pawershell :
+To segment a single CT scan, simply run the following
+command from the bash or PowerShell:
 
 ```bash
-   python -m CTLungSeg --input='/path/to/input/series'  --output='/path/to/output/file'
+   python -m CTLungSeg --input='/path/to/input/series/'  --output='/path/to/output/file/'
 ```
 
 
 
-### Train your own centroids
+### Train your own centroids set
 
 
-Lets consider the case where you have an high number of patient and you. In this case the two main step of segmentation are execute separately.
+Let us consider the case where you have a high number of patient and you. In this case, the two main steps of segmentation are executed separately.
 
-First of all you have to create three folders :
+First of all, you have to create three folders :
 
-- input folder : contains all and oly the CT scans to segment
-- temporary folder : empty folder. Will contain the scans after the lung segentation
-- output folder : empty folder, will contains the labels files.
+- input folder: contains all and only the CT scans to segment
+- temporary folder: empty folder. Will contain the scans after the lung segmentation
+- output folder: empty folder, will contain the labels files.
 
-Now you can proceed with the lung segmentation. To achive this purpose simply run
-from powershell the  script .:
- ```powershell
+Now you can proceed with the lung segmentation. To achieve this purpose simply run
+from PowerShell the  script .:
+ ```PowerShell
 PS \> ./lung_extraction.ps1 path/to/input/folder/ path/to/temporary/folder/
  ```
 
- Or its equal version in bash :
+ Or its equivalent bash version:
 
   ```bash
     $ ./lung_extraction.sh path/to/input/folder/ path/to/temporary/folder/
   ```
 
- Once you have successfully isolated the lung, you are ready to perform the actual segmentation. Simply run the labeling scrip from powershell :
+ Once you have successfully isolated the lung, you are ready to perform the actual segmentation. Simply run the labelling scrip from PowerShell :
 
-```powershell
+```PowerShell
 PS /> ./labeling.ps1 path/to/temporary/folder/ p /path/to/output/folder/
 ```
 
-Or its corresponding version in bash:
-```powershell
+Or its corresponding bash version:
+```bash
 $ ./labeling.sh path/to/temporary/folder/ p /path/to/output/folder/
 ```
 

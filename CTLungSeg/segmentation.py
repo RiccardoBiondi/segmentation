@@ -7,199 +7,40 @@ import numpy as np
 
 from tqdm import tqdm
 
-from CTLungSeg.utils import gl2bit
-from CTLungSeg.method import connected_components_wStats
-from CTLungSeg.method import connected_components_wVolumes_3d
-from CTLungSeg.method import erode, dilate
+from CTLungSeg.method import gauss_smooth
+from CTLungSeg.method import vesselness
+from CTLungSeg.method import apply_mask
+from CTLungSeg.method import threshold
 
 
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
-def opening(img, kernel):
+
+def remove_vessels(image, sigma = 2., thr = 8) :
     '''
-    Perform an erosion followed by a dilation
+    Remove vessels by applying a fixed threshold to the vesselness map.
+    Before computing the vesselness a gaussian smoothing is applied.
 
     Parameters
     ----------
-
-    img : array-like
-        image tensor
-    kernel : array-like
-        kernel used for the morphological operations
-
-    Returns
-    -------
-
-    opened : array-like
-        Opened image
-
-    Example
-    -------
-    >>> from CTLungSeg.utils import load_image
-    >>> from CTLungSeg.segmentation import opening
-    >>>
-    >>> filename = 'path/to/input/image'
-    >>> image = load_image(filename)
-    >>> #define the kernel
-    >>> kernel = np.ones((5, 5), dtype = np.uint8)
-    >>> opened = opening(image, kernel = kernel)
-
-    Note
-    ----
-
-    .. note::
-        This function will raise a warning if the input image is not binary. The
-        function will be executed, however the resukts may not be corrected.
+    image : SimpleITK image
+        input image
+    sigma : float
+        sigma of the gaussian smoothing filter
+    thr : float
+        fixed threshold value
+    Return
+    ------
+    wo_vessels : SimpleITK image
+        Image without the vessels
     '''
-    if len(np.unique(img)) != 2 :
-        warnings.warn('The image is not binary, the connected components may \
-                            not be accurate', UserWarning)
-    opened = erode(img, kernel=kernel)
-    return dilate(opened, kernel=kernel)
+    smooth = gauss_smooth(image, sigma)
+    vessel = vesselness(smooth)
+    mask = threshold(vessel, 4000, thr, 0, 1)
+    return apply_mask(image, mask, outside_value = -1000)
 
-
-def closing(img, kernel):
-    '''
-    Perform a dilation followed by an erosion
-
-    Parameters
-    ----------
-
-    img : array-like
-        image tensor
-    kernel : array-like
-        kernel used for the morphological operations
-
-    Results
-    -------
-
-    closed : array-like
-        closed image stack
-
-    Example
-    -------
-    >>> from CTLungSeg.utils import load_image
-    >>> from CTLungSeg.segmentation import closing
-    >>>
-    >>> filename = 'path/to/input/image'
-    >>> image = load_image(filename)
-    >>> #define the kernel
-    >>> kernel = np.ones((5, 5), dtype = np.uint8)
-    >>> closed = closing(image, kernel = kernel)
-
-    Note
-    ----
-    .. note::
-        This function will raise a warning if the input image is not binary. The
-        function will be executed, however the resukts may not be corrected.
-    '''
-    if len(np.unique(img)) != 2 :
-        warnings.warn('The image is not binary, the connected components may \
-                        not be accurate', UserWarning)
-    closed = dilate(img, kernel=kernel)
-    return erode(closed, kernel=kernel)
-
-
-def remove_spots(img, area):
-    '''
-    Set to zero the GL of all the connected region with
-    area lesser than the provided value
-
-    Parameters
-    ----------
-
-    img: array-like
-        binary image from which remove spots
-    area: int
-        maximun area in pixels of the removed spots
-
-    Returns
-    -------
-
-    filled: array-like
-        binary image with spot removed
-
-    Example
-    -------
-    >>> from CTLungSeg.utils import load_image
-    >>> from CTLungSeg.segmentation import remove_spots
-    >>> # load image to process
-    >>> filename = '/path/ti/input/image'
-    >>> image = load_image(filename)
-    >>> max_spot_area = 100
-    >>> filled = remove_spots(image, max_spot_area)
-    .. note::
-        This function will raise a warning if the input image is not binary. The
-        function will be executed, however the resukts may not be corrected.
-    '''
-    _, lab, stats, _ = connected_components_wStats(img)
-    for i,stat in enumerate(stats):
-        for j in stat.query('AREA < {}'.format(str(area + 1))).index:
-            lab[i][lab[i] == j] = 0
-    lab = lab != 0
-    return lab.astype(np.uint8)
-
-
-def select_largest_connected_region_3d(img):
-    '''
-    Select the larger connected regions of the iamge tesor.
-    NOTE: do not consider backgroung as connected region
-
-    Parameters
-    ----------
-
-    img : array-like
-        binary image tensor
-
-    Returns
-    -------
-
-    dst : array-like
-        binary image with only the largest connected region
-
-    if len(np.unique(img)) != 2 :
-        logging.warning('The image is not binary, the connected components may \
-                            not be accurate')
-    '''
-    connected, volumes = connected_components_wVolumes_3d(img)
-    dst = (connected == np.argsort(volumes)[-2])
-    return dst
-
-
-def bit_plane_slices(stack, bits, nbits = 8):
-    '''
-    Convert each voxel GL into its 8-bit binary
-    rapresentation and return as output the stack
-    resulting from the sum of all the bith
-    specified in bits, with them significance.
-
-    Parameters
-    ----------
-
-    stack : array-like
-        image stack. each GL must be an 8-bit unsigned int
-
-    bits: tuple
-        tuple that specify which bit sum
-
-    nbits: int
-        number of bit of the input image, must be 8 or 16
-
-
-    Returns
-    -------
-
-    output : array-like
-        images stack in which each GL depends only to
-        the significance of each specfied bit
-    '''
-    binary = gl2bit(stack, nbits)
-    bit = np.asarray(bits)
-    selection = binary[nbits - bit, ...]
-    significance = np.asarray([2**(i - 1) for i in bit]).reshape(len(bits), 1, 1, 1)
-    return (np.sum(selection * significance, axis=0))
 
 
 def imlabeling(image, centroids, weight = None) :
@@ -287,7 +128,7 @@ def kmeans_on_subsamples(imgs,
 
     Returns
     -------
-    retval : array-like 
+    retval : array-like
          It is vector of the sum of squared distance from each point to their corresponding centers for each subsample
 
     centroids : array-like

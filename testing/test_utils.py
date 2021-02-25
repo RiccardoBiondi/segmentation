@@ -3,39 +3,34 @@ import hypothesis.strategies as st
 from hypothesis import given, settings, example
 from  hypothesis import HealthCheck as HC
 
-
 from CTLungSeg.utils import load_pickle
 from CTLungSeg.utils import save_pickle
 from CTLungSeg.utils import write_volume
 from CTLungSeg.utils import  _read_image
 from CTLungSeg.utils import read_image
 from CTLungSeg.utils import normalize
-from CTLungSeg.utils import rescale
-from CTLungSeg.utils import gl2bit
-from CTLungSeg.utils import hu2gl
 from CTLungSeg.utils import shift_and_crop
 from CTLungSeg.utils import shuffle_and_split
-from CTLungSeg.utils import _imfill
-from CTLungSeg.utils import stats2dataframe
-from CTLungSeg.utils import _std_dev
+from CTLungSeg.utils import deep_copy
 
-import cv2
 import numpy as np
-from numpy.random import randint
-from numpy import ones
+import SimpleITK as sitk
+
 
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
 __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 ################################################################################
-##                          Define Test strategies                            ##
+###                                                                          ###
+###                         Define Test strategies                           ###
+###                                                                          ###
 ################################################################################
 
-unicode_categories = ('Lu','Ll')
-legitimate_chars = st.characters(whitelist_categories=(unicode_categories),
+legitimate_chars = st.characters(whitelist_categories = ('Lu','Ll'),
                                     min_codepoint = 65, max_codepoint = 90)
-filename_strategy = st.text(alphabet=legitimate_chars, min_size=1, max_size=15)
+filename_strategy = st.text(alphabet = legitimate_chars, min_size = 1,
+                            max_size = 15)
 
 medical_image_formats = ['.nii', '.nrrd', '.nhdr']
 
@@ -48,39 +43,43 @@ def rand_stack_strategy(draw) :
     N = draw(st.integers(10, 100))
     return (255 * np.random.rand(N, 512, 512)).astype(np.uint8)
 
-@st.composite
-def gl16_stack_strategy(draw):
-    '''
-    Generate a stack of N 512x512 16 bit images with Gl value in [-4000, 4000]
-    '''
 
-    n_imgs = draw(st.integers(1, 200))
-    stack = randint(-4000, 4000,  (n_imgs, 512, 512), dtype = np.int16)
-
-    return stack
 
 @st.composite
-def voxel_spatial_info_strategy(draw) :
+def sitk_image_strategy(draw) :
     '''
-    Generates spatial information of voxel. the information genrated are :
-    - origin
-    - spacing
-    - direction
+    Generate a SimpleITK image of a gaussian
     '''
-
     origin = draw(st.tuples(*[st.floats(0., 100.)] * 3))
     spacing = draw(st.tuples(*[st.floats(.1, 1.)] * 3))
     direction = tuple([0., 0., 1., 1., 0., 0., 0., 1., 0.])
+    size = (100 , 100, 100)
 
-    return [origin, spacing, direction]
+    filter_ = sitk.GaussianImageSource()
+    filter_.SetSize(size)
+    filter_.SetOrigin(origin)
+    filter_.SetSpacing(spacing)
+    filter_.SetDirection(direction)
+    filter_.SetOutputPixelType(sitk.sitkInt16)
+    filter_.SetScale(2**12)
+    image = filter_.Execute()
+    image = sitk.ShiftScale(image, -2000)
+    return image
 
 
+@st.composite
+def sitk_constant_image(draw) :
+    x_y = draw(st.integers(123, 512))
+    z = draw(st.integers(1, 50))
+    image = sitk.Image(x_y, x_y, z, sitk.sitkInt16)
 
+    return image
 ################################################################################
 ###                                                                          ###
 ###                                 TESTING                                  ###
 ###                                                                          ###
 ################################################################################
+
 
 
 @given(rand_stack_strategy(), filename_strategy)
@@ -104,6 +103,7 @@ def test_save_and_load_pkl(imgs,  filename):
     assert (load == imgs).all()
 
 
+
 @given(filename_strategy, st.sampled_from(medical_image_formats))
 @settings(max_examples = 20,
         deadline = None,
@@ -124,21 +124,21 @@ def test_reader(filename, format) :
     assert reader.GetFileName() == fname
 
 
-@given(gl16_stack_strategy(), voxel_spatial_info_strategy(),
-        filename_strategy, st.sampled_from(medical_image_formats))
+
+@given(sitk_image_strategy(), filename_strategy,
+       st.sampled_from(medical_image_formats))
 @settings(max_examples = 20,
           deadline = None,
           suppress_health_check=(HC.too_slow,))
-def test_read_and_write_image(volume, info, filename, format) :
+def test_read_and_write_image(image, filename, format) :
     '''
     Given :
-        - image 16-GL image tensor
+        - SimpleITK
         - file format supported by SimpleITK
         - filename
-        - spatial information
     So :
 
-        - write the array as image
+        - write image to file
         - read the image
     And :
         - assert that the red image array is equal to the input one
@@ -146,129 +146,82 @@ def test_read_and_write_image(volume, info, filename, format) :
     '''
 
     fname = './testing/images/{}'.format(filename)
-    write_volume(volume, fname, info, format)
-    red, red_info = read_image(fname + format)
+    write_volume(image, fname, format)
+    red  = read_image(fname + format)
 
-    assert (red == volume).all()
-    assert np.isclose(info[0], red_info[0]).all()
-    assert np.isclose(info[1], red_info[1]).all()
-    assert np.isclose(info[2], red_info[2]).all()
+    assert (sitk.GetArrayFromImage(red) == sitk.GetArrayFromImage(image)).all()
+    assert np.isclose(red.GetOrigin(), image.GetOrigin()).all()
+    assert np.isclose(red.GetSize(), image.GetSize()).all()
+    assert np.isclose(red.GetDirection(), image.GetDirection()).all()
+    assert np.isclose(red.GetSpacing(), image.GetSpacing()).all()
 
 
 
-
-@given(rand_stack_strategy())
-@settings(max_examples = 20,
-            deadline = None,
-            suppress_health_check = (HC.too_slow,))
-def test_normalize(stack) :
+@given(filename_strategy, st.sampled_from(medical_image_formats))
+@settings(max_examples = 20, deadline = None,
+          suppress_health_check = (HC.too_slow,))
+def test_reader_raise_file_not_found(path, format) :
     '''
-    Given:
-        - image tensor
-    So :
-        -apply normalization on mean and std
-    Assert that :
-        - The resuting mean is 0
-        - The resulting std is 1
+    Given :
+        - path to a non existing image
+        - image format
+    then :
+        - try to read
+    - assert :
+        - FileNotFoundError is raised
     '''
-    normalized = normalize(stack)
+    fname = './testing/{}{}'.format(path, format)
+    with pytest.raises(FileNotFoundError) :
+        image = read_image(fname)
 
-    assert np.isclose(np.std(normalized), 1)
-    assert np.isclose(np.mean(normalized), 0)
 
 
-@given(rand_stack_strategy())
-@settings(max_examples = 20,
-            deadline = None,
-            suppress_health_check = (HC.too_slow,))
-def test_rescale(img):
+@given(sitk_image_strategy())
+@settings(max_examples = 20, deadline = None,
+          suppress_health_check = (HC.too_slow,))
+def test_deep_copy(image) :
     '''
-    Given:
-        - image tensor
-    So:
-        - rescale ccording to min asn max valaue
+    Given :
+        - SimpleITK image
+    And :
+        - make a copy
+    Assert
+        - copy image equal to input image
+    '''
+    # TODO : Check image after transformation
+    copy = deep_copy(image)
+
+    assert (sitk.GetArrayFromImage(copy) == sitk.GetArrayFromImage(image)).all()
+    assert np.isclose(copy.GetOrigin(), image.GetOrigin()).all()
+    assert np.isclose(copy.GetSize(), image.GetSize()).all()
+    assert np.isclose(copy.GetDirection(), image.GetDirection()).all()
+    assert np.isclose(copy.GetSpacing(), image.GetSpacing()).all()
+
+
+
+@given(sitk_constant_image())
+@settings(max_examples = 20, deadline = None,
+          suppress_health_check = (HC.too_slow,))
+def test_normalize_raise_error(image) :
+    '''
+    Given :
+        - Constant image
+    Then :
+        - try to normalize the image
     Assert :
-        - the maximum value is 1
-        - the minimum value is zero
-    '''
-
-    rescaled = rescale(img, np.amax(img), np.amin(img) )
-    assert np.isclose(rescaled.max(), 1.)
-    assert np.isclose(rescaled.min(), 0.)
-
-
-@given(rand_stack_strategy(), st.integers(1, 20))
-@settings(max_examples = 20,
-            deadline = None,
-            suppress_health_check = (HC.too_slow,))
-def test_rescale_zero_division(image, value) :
-    '''
-    Given
-        - image tensor
-        - rescaling value
-    So :
-        - rescale the image by giving the same value for min and max
-    Check :
         - ZeroDivisionError is raised
     '''
     with pytest.raises(ZeroDivisionError) :
-        assert rescale(image, value, value)
-
-@given(st.integers(1,30))
-@settings(max_examples = 2,
-        deadline = None,
-        suppress_health_check = (HC.too_slow,))
-def test_gl2bit(n_imgs) :
-    '''
-
-    '''
-    input = np.ones((n_imgs, 100, 100), dtype = np.uint8)
-    result = gl2bit(input, 8)
-    assert (np.unique(result) == [0,1]).all()
+        res = normalize(image)
 
 
-@given(rand_stack_strategy(), st.integers(0, 7))
-@settings(max_examples = 20,
-            deadline = None,
-            suppress_health_check = (HC.too_slow,))
-def test_gl2bit_value_error(image, bits) :
-    '''
-    Given :
-        - a not allowed number of bits
-    Check :
-        - a ValueError is raised
-    '''
-    with pytest.raises(ValueError) :
-        assert gl2bit(image, bits)
-
-
-@given(gl16_stack_strategy())
-@settings(max_examples = 20,
-        deadline = None,
-        suppress_health_check = (HC.too_slow,))
-def test_hu2gl(img):
-    '''
-    Given :
-        - 16-bit image tensor
-    So :
-        - convert the tensor to 8-bit GL
-    Assert :
-        - the minimum value is 0
-        - the maximum value is 1
-    '''
-    out = hu2gl(img)
-    assert out.max() < 256
-    assert out.min() == 0
-
-
-@given(gl16_stack_strategy())
-@settings(max_examples = 20,
-        deadline = None,
-        suppress_health_check = (HC.too_slow,))
+@given(sitk_image_strategy())
+@settings(max_examples = 20, deadline = None,
+          suppress_health_check = (HC.too_slow,))
 def test_shift_and_crop(volume) :
     '''
     Given:
-        - 16 bit image tensor
+        - SimpleITK image
     So :
         - shif_and_crop is applied
     Assert that:
@@ -277,10 +230,13 @@ def test_shift_and_crop(volume) :
         - the minimum value is greater than -1
     '''
     res = shift_and_crop(volume)
+    stats = sitk.StatisticsImageFilter()
+    _ = stats.Execute(res)
 
-    assert res.shape == volume.shape
-    assert res.min() > -1
-    assert res.max() < 2049
+    assert res.GetSize() == volume.GetSize()
+    assert stats.GetMinimum() > -1
+    assert stats.GetMaximum() < 2049
+
 
 
 @given(rand_stack_strategy(), st.integers(2, 5))
@@ -301,32 +257,3 @@ def test_shuffle_and_split(sample, n_subsamples):
     subsample = shuffle_and_split(sample, n_subsamples)
 
     assert subsample.shape[0] == n_subsamples
-
-
-def test_imfill():
-    '''
-    Given :
-        - an input image with 3 holes
-    So :
-        - fill the holes
-    Assert :
-        - a white image is returned
-    '''
-    image = cv2.imread('testing/images/test.png', cv2.IMREAD_GRAYSCALE)
-    compare = 255 * ones(image.shape, dtype = np.uint8)
-    filled = _imfill(image)
-    assert (compare == filled.astype(np.uint8)).all()
-
-
-@given(st.integers(2,30), st.integers(2, 30))
-@settings(max_examples = 20, deadline = None)
-def test_stats2dataframe(n_slices, cc):
-    '''
-    Given :
-        -
-
-    '''
-    shape = (cc, 5)
-    input = [np.empty(shape) for i in range(n_slices)]
-    df = stats2dataframe(input)
-    assert len(df) == n_slices

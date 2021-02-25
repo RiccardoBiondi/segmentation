@@ -41,26 +41,26 @@ def parse_args() :
 
 #pre-trainded centroids:
 centroids = {
-                'parenchima': [1.3822415, 2.4269834, 1.1459424, 1.832688 ],
-                'edges'   : [1.6750793, 2.6646569, 3.829929 , 2.1440172],
-                'Bronchi' : [3.4454546, 3.0228717, 1.9430293, 3.3130786],
-                'Noise'   : [6.0392303, 2.7451596, 4.861056 , 5.6319346],
-                'GGO'     : [6.359824 , 6.218402 , 3.42476  , 5.9504952]}
+                'healthy lung': [1.0291475, 1.7986686, 1.3147535, 1.6199226],
+                'lung'   :  [2.4449115, 2.8337748, 1.556249,  2.9394238],
+                'Edges' :  [3.4244044, 2.1809669, 4.172402,  3.652266 ],
+                'GGO'   :  [5.1485806, 5.3843336, 2.7543516, 4.812335 ],
+                'Noise'     : [8.233303,  1.9194404, 6.503928,  6.670035 ]}
 
 
 if __name__ == '__main__':
     start = time()
     args = parse_args()
-    volume, info = read_image(args.input)
+    volume = read_image(args.input)
 
     if args.center != '' :
         center = load_pickle(args.center)
     else :
         center = np.asarray([np.array(v) for _, v in centroids.items()])
 
-    lung = lung_extraction.main(volume, info)
+    lung = lung_extraction.main(volume)
     labels = labeling.main(lung, center)
 
-    write_volume(labels, args.output, info, '.nrrd')
+    write_volume(labels, args.output, '.nrrd')
     stop = time()
     print('Process anded after {} seconds'.format((stop - start)))

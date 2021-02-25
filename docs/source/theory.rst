@@ -5,9 +5,9 @@ The SARS-CoV-2 virus has widely spread all over the world since the beginning of
 This virus affects lung areas and causes respiratory illness. In this scenario is
 highly desirable a method to identify in CT images the lung injuries caused by COVID-19.
 The approach proposed here is based on colour quantization to identify the infection
-regions inside lung(Ground Glass Opacities, Consolidation and Pleural Effusion).
+regions inside the lung(Ground Glass Opacities, Consolidation and Pleural Effusion).
 
-To achieve this purpose we have used colour quantization approach to segment the
+To achieve this purpose we have used the colour quantization approach to segment the
 chest CT scans of patients affected by COVID-19. Use this technique as medical
 image segmentation means to reduce the number of colours in the image to the number
 of anatomical structures and tissue present in the anatomical region; in this
@@ -38,10 +38,10 @@ the number of channels. Grayscale images require only one channel, so each pixel
 has a numeric value whose range may change according to the image format.
 On the other hand colour images requires 3 channels, and the value of each channel
 represent the level of the primary colour stored in this particular channel, so each
-colour is represented by 3 different values, according to Young model.
+colour is represented by 3 different values, according to the Young model.
 In this work, the different channels are used to takes into account different properties,
 exploited by the application of different filters. This allows us to consider also
-neighbouring voxels, that is really suitable for the segmentation since the
+neighbouring voxels, which is really suitable for the segmentation since the
 lesions areas involve many closest voxels, not only a single one. We have also
 used these features to discriminate between other lung regions like bronchi by
 exploit shape information.

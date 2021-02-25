@@ -8,21 +8,20 @@ The full list of prerequisites is the following:
 
 - numpy>=1.17
 - opencv-python
-- pandas>=0.25.3
 - tdqm
 - SimpleITK
 
-The lung extraction is performed by using apre-trained UNet, so plese ensure to
+The lung extraction is performed by using pre-trained UNet, so please ensure to
 have installed the lungmask_ package. For more information about how the network
 is trained, please refers here_
 
 Installation
 ------------
 
-First of all ensure to have the right python version and the package for the
+First of all, ensure to have the right python version and the package for the
 lung extraction correctly installed
 
-To install this package first of all you have to clone the repositories from github :
+To install this package first of all you have to clone the repositories from GitHub:
 
 .. code-block:: bash
 
@@ -30,7 +29,7 @@ To install this package first of all you have to clone the repositories from git
   cd segmentation
 
 The installation is managed by setup.py, which will install also the full dependency.
-So, from segmentation folder simply run
+So, from the segmentation folder simply run
 
 .. code-block:: bash
 
@@ -43,7 +42,7 @@ Testing
 
 Testing routines use pytest_ and hypothesis_ packages. please install
 these packages to perform the test.
-All the full set of test is provided in testing_ directory.
+All the full set of test is provided in the testing_ directory.
 You can run the full list of test with:
 
 .. code-block:: bash
