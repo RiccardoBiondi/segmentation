@@ -7,6 +7,7 @@ from hypothesis import given, settings
 from  hypothesis import HealthCheck as HC
 
 from CTLungSeg.method import median_filter
+from CTLungSeg.method import std_filter
 from CTLungSeg.method import gauss_smooth
 from CTLungSeg.method import threshold
 from CTLungSeg.method import adaptive_histogram_equalization
