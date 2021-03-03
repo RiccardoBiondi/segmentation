@@ -248,8 +248,8 @@ def test_threshold_and_apply_mask(image, lower, upper) :
     _ = stats.Execute(masked)
 
 
-    assert stats.GetMinimum() > lower
-    assert stats.GetMaximum() < upper
+    assert stats.GetMinimum() > lower - 1
+    assert stats.GetMaximum() < upper + 1
 
 
 
