@@ -8,9 +8,6 @@ import argparse
 import numpy as np
 import SimpleITK as sitk
 
-
-import resource
-
 from glob import glob
 from time import time
 from tqdm import tqdm

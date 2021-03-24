@@ -98,7 +98,7 @@ def test_save_and_load_pkl(imgs,  filename):
     and :
         - assert that the input array and the loaded one are equal
     '''
-    save_pickle('./testing/images/{}'.format(filename), imgs)
+    save_pickle('./testing/images/{}.pkl.npy'.format(filename), imgs)
     load = load_pickle('./testing/images/{}.pkl.npy'.format(filename))
     assert (load == imgs).all()
 
@@ -145,9 +145,9 @@ def test_read_and_write_image(image, filename, format) :
         - assert that the red spatial information are aqual to the input one
     '''
 
-    fname = './testing/images/{}'.format(filename)
-    write_volume(image, fname, format)
-    red  = read_image(fname + format)
+    fname = './testing/images/{}.{}'.format(filename, format)
+    write_volume(image, fname)
+    red  = read_image(fname)
 
     assert (sitk.GetArrayFromImage(red) == sitk.GetArrayFromImage(image)).all()
     assert np.isclose(red.GetOrigin(), image.GetOrigin()).all()
