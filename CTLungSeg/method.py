@@ -80,7 +80,7 @@ def std_filter(image, radius) :
 
     std = sitk.NoiseImageFilter()
     std.SetRadius(radius)
-    return std.Execute()
+    return std.Execute(image)
 
 
 
@@ -127,7 +127,7 @@ def adaptive_histogram_equalization(image, radius) :
     ahe.SetBeta(1)
     ahe.SetRadius(radius)
 
-    return ahe.Execute()
+    return ahe.Execute(image)
 
 
 
@@ -150,7 +150,7 @@ def adjust_gamma(image, gamma=1.0, image_type = 'HU'):
     '''
     if gamma == 0 :
         raise Exception('gamma vlaue cannot be zero')
-    if type not in ['HU', 'uint8', 'uint16'] :
+    if image_type not in ['HU', 'uint8', 'uint16'] :
         raise Exception('image type {} not supported'.format(type))
     invGamma = 1.0 / gamma
 

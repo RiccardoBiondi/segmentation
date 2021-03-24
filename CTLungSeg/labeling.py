@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import argparse
@@ -55,7 +55,7 @@ centroids = {
 
 def main(volume, centroids):
 
-    print('Version 2.0.0')
+
     # prepare the image
     weight = sitk.GetArrayFromImage(threshold(volume, 4000, 1))
     equalized = normalize(adaptive_histogram_equalization(volume, 5))

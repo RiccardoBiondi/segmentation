@@ -28,3 +28,7 @@ wheels/
 .installed.cfg
 *.egg
 MANIFEST
+
+# Pipeline Automatization
+
+.snakemake/

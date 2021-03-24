@@ -1,8 +1,9 @@
-#!/usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import argparse
 import numpy as np
+import scipy
 import SimpleITK as sitk
 
 from time import time
@@ -19,7 +20,7 @@ __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 def parse_args():
     description = 'Lung Extraction'
-    parser = argparse.ArgumentParser(description=description)
+    parser = argparse.ArgumentParser(description = description)
 
     parser.add_argument('--input',
                         dest='input',
@@ -39,9 +40,6 @@ def parse_args():
 
 
 def main(image) :
-    print('Version 2.0.0', flush = True)
-
-
 
     # find the lungmask
     mask = apply(image)
@@ -66,7 +64,7 @@ if __name__ == '__main__' :
     args = parse_args()
     volume = read_image(args.input)
     lung = main(volume)
-    write_volume(lung, args.output, '.nii')
+    write_volume(lung, args.output)
 
     stop = time()
     print('Process ended after {} seconds'.format(stop -start))

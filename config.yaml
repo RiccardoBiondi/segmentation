@@ -1,0 +1,53 @@
+
+
+#   ██████  ██████  ███    ██ ███████ ██  ██████
+#  ██      ██    ██ ████   ██ ██      ██ ██
+#  ██      ██    ██ ██ ██  ██ █████   ██ ██   ███
+#  ██      ██    ██ ██  ██ ██ ██      ██ ██    ██
+#   ██████  ██████  ██   ████ ██      ██  ██████
+
+
+# Rule parameters and path, can be override by command line or
+# changed in this file.
+
+input_path : # Path to the folder which will contains al the sample to segment
+  ""
+output_path : # Path to the folder which will contains the results
+  ""
+train_path : # Path to the folder which contains the training scans
+  ""
+
+# If no centroid file is provided, It will be used the default
+# one.
+centroid_path :
+  "centroid.pkl.npy"
+
+# training parameters. See the training documentation for further information.
+n_subsamples : 100
+centroid_initialization : 1
+# specify the centroid initialization technique for the kmeans clustering :
+# - 0 : reandom initialization
+# - 1 : kmeans ++
+
+
+
+# ██████  ███████ ███████  ██████  ██    ██ ██████   ██████ ███████ ███████
+# ██   ██ ██      ██      ██    ██ ██    ██ ██   ██ ██      ██      ██
+# ██████  █████   ███████ ██    ██ ██    ██ ██████  ██      █████   ███████
+# ██   ██ ██           ██ ██    ██ ██    ██ ██   ██ ██      ██           ██
+# ██   ██ ███████ ███████  ██████   ██████  ██   ██  ██████ ███████ ███████
+
+# allows to set the memory useage, the used number of threads for each rule
+
+# Threads
+threads_labelling : 8
+threads_lung_extraction : 8
+threads_prepare_train_samples : 8
+
+# Memory Usage
+memory_labelling : 8
+memory_lung_extraction : 8
+memory_train : 8
+memory_prepare_train_samples : 8
+
+# TODO : add GPU specification

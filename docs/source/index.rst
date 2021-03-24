@@ -89,6 +89,7 @@ as '.nrrd' and run the bash or PowerShell script.
   installation
   theory
   modules
+  snakemake
   script
   references
 

@@ -1,10 +1,15 @@
-#!/usr/bin/env python
+#! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+import os
+import gc
 import cv2
 import argparse
 import numpy as np
 import SimpleITK as sitk
+
+
+import resource
 
 from glob import glob
 from time import time
@@ -51,13 +56,6 @@ def parse_args():
                         action='store',
                         help='centroid initialization technique',
                         default=0)
-    parser.add_argument('--format',
-                        dest='format',
-                        required=False,
-                        type=str,
-                        action='store',
-                        help='centroid initialization technique',
-                        default='.nii')
 
     args = parser.parse_args()
     return args
@@ -76,15 +74,15 @@ def main():
 
     print("I'm Loading...", flush = True)
 
+    files = glob(os.path.join(args.folder, '*.nrrd'))
 
-    files = glob(args.folder + '/*{}'.format(args.format))
     stks = []
     for f in tqdm(files) :
-
         img = read_image(f)
         # create the mask to remove the background
         mask = threshold(img, 4000, 1)
         # filter all the images, normalize and convert to numpy array
+
         he = normalize(adaptive_histogram_equalization(img, 2))
         med = normalize(median_filter(img, 3))
         std = normalize(std_filter(img, 3))
@@ -97,9 +95,21 @@ def main():
         mask = sitk.GetArrayFromImage(mask)
 
         stk = np.stack([he, med, gamma, std, mask], axis = -1)
-        stks.append(stk)
-    imgs = np.concatenate(stks)
 
+        del he
+        del med
+        del gamma
+        del std
+        del mask
+        gc.collect()
+
+        stks.append(stk)
+
+        del stk
+        gc.collect()
+
+
+    imgs = np.concatenate(stks, axis = 0)
     n_imgs = imgs.shape[0]
 
 

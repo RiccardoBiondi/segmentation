@@ -112,7 +112,7 @@ python -m pytest
 ## Usage
 
 
-### Single Patient Case
+### Single Scan
 
 Once you have installed you can directly start to segment the images.
 Input CT scans must be in Hounsfield units(HU), gray-scale images are not allowed.
@@ -128,13 +128,27 @@ command from the bash or PowerShell:
    python -m CTLungSeg --input='/path/to/input/series/'  --output='/path/to/output/file/'
 ```
 
+### Multiple Scans
 
+We have provided a snakemake pipeline and bash(or PowerShell) script to automate the process and make it  easier to segment many scans.
 
-### Train your own centroids set
+#### Snakemake
 
+First of all, you have to creat two folders :
+  - INPUT : contains all and only the CT scans to segment
+  - OUTPUT : mpty folder, will contain the segmented scans as *nrrd*.
 
-Let us consider the case where you have a high number of patient and you. In this case, the two main steps of segmentation are executed separately.
+Now simply execute from command line
+```bash
+  snakemake --cores 1 --config input_path='/path/to/INPUT/'
+  --output_path='/path/to/OUTPUT/'
+```
 
+**Note**: It will create a folder named **LUNG** inside the INPUT, which contains the results of the lung extraction step.
+
+#### Bash and Powershell script
+
+It is possible to achieve the same results as before.
 First of all, you have to create three folders :
 
 - input folder: contains all and only the CT scans to segment
@@ -163,6 +177,49 @@ Or its corresponding bash version:
 ```bash
 $ ./labeling.sh path/to/temporary/folder/ p /path/to/output/folder/
 ```
+
+
+
+
+
+### Train your own centroids set
+
+It is possible to train your centroid set instead of using the pre-trained one. To do that, you can use a snakemake or a bash or PowerShell script.
+
+
+#### Snakemake
+
+Prepare three folders :
+  - INPUT: will contains all the scans to segment
+  - OUTPUT: will contain the segmented scans
+  - TRAIN: will contain all the scans of the training set. (**NOTE** Cannot be the INPUT folder)
+
+Now run Snakemake with the following configuration parameters :
+
+```bash
+  snakemake --cores 1 --config input_path='/path/to/INPUT/'
+  --output_path='/path/to/OUTPUT/' --train_path='/path/to/TRAIN/' --centroid_path='/path/to/save/your/centorid/set.pkl.npy'
+```
+
+#### Bash and PowerShell scirpt
+
+In this case you have to prepare two folder :
+  - TRAIN : will contain the scans in the training set
+  - LUNG : will stores the scans after lung extraction
+
+First of all, you have to perform the lung extraction on the train scans, as before run :
+
+```bash
+  $ ./lung_extraction.sh path/to/TRAIN/ path/to/LUNG/
+```
+
+or its corresponding PowerShell version. Now, to estimate the centroid set, run :
+
+```bash
+  $ ./train.sh path/to/LUNG/ path/to/centroid.pkl.npy
+```
+
+or its corresponding PowerShell version.
 
 ## License
 

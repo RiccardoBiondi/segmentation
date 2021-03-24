@@ -126,7 +126,7 @@ def read_image(filename):
     return image
 
 
-def write_volume(image, output_filename, format_ = '.nrrd') :
+def write_volume(image, output_filename) :
     '''
     Write the image volume in a specified format. Each format supported by
     SimpleITK is supported.
@@ -157,7 +157,6 @@ def write_volume(image, output_filename, format_ = '.nrrd') :
     >>> # write the image also as nifti
     >>> write_volume(image, output_name, '.nii')
     '''
-    output_filename = output_filename + format_
     writer = sitk.ImageFileWriter()
     writer.SetFileName(output_filename )
     writer.Execute(image)
@@ -176,7 +175,7 @@ def save_pickle(filename, data):
         image or stack to save
 
     '''
-    with open('{}.pkl.npy'.format(filename), 'wb') as fp:
+    with open(filename, 'wb') as fp:
         pickle.dump(data, fp)
 
 
@@ -233,7 +232,7 @@ def shift_and_crop(image) :
 
 
 
-def shuffle_and_split(data, n_sub): #TODO: change name
+def shuffle_and_split(data, n_sub):
     '''
     Shuffle the input array and divie it into n_sub sub-arrays
 
