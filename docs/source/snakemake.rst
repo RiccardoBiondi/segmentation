@@ -15,9 +15,11 @@ First of all, you have to creat two folders :
   - OUTPUT : mpty folder, will contain the segmented scans as *nrrd*.
 
 Now simply execute from command line
-```bash
+
+.. code-block:: bash
+
   snakemake --cores 1 --config input_path='/path/to/INPUT/' --output_path='/path/to/OUTPUT/'
-```
+
 
 **Note**: It will create a folder named **LUNG** inside the INPUT, which contains the results of the lung extraction step.
 
@@ -32,9 +34,10 @@ Prepare three folders :
 
 Now run Snakemake with the following configuration parameters :
 
-```bash
+.. code-block:: bash
+
   snakemake --cores 1 --config input_path='/path/to/INPUT/' --output_path='/path/to/OUTPUT/' --train_path='/path/to/TRAIN/' --centroid_path='/path/to/save/your/centorid/set.pkl.npy'
-```
+
 This will train the centroid set and use them to segment the input scans.
 
 **Note** : This will create a folder named LUNG inside INPUT and TRAIN which
