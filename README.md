@@ -61,6 +61,9 @@ expert radiologist. The goodness of the segmentation was estimated using
 Dice(0.67 ± 0.12), Sensitivity(0.666 ± 0.15), Specificity(0.9993 ± 0.0005) and
 Precision(0.75± 0.20  scores.
 
+These results make the pipeline suitable as initialization for more accurate
+methods
+
 ## Contents
 
 COVID-19 Lung segmentation is composed of scripts and modules:
@@ -259,6 +262,8 @@ See [here](https://github.com/RiccardoBiondi/segmentation/blob/master/CONTRIBUTI
 * <img src="https://avatars0.githubusercontent.com/u/24650975?s=400&v=4" width="25px"> **Nico Curti** [git](https://github.com/Nico-Curti), [unibo](https://www.unibo.it/sitoweb/nico.curti2)
 
 * <img src="https://avatars2.githubusercontent.com/u/1419337?s=400&v=4" width="25px;"/> **Enrico Giampieri** [git](https://github.com/EnricoGiampieri), [unibo](https://www.unibo.it/sitoweb/enrico.giampieri)
+
+* <img src="https://www.unibo.it/uniboweb/utils/UserImage.aspx?IdAnagrafica=236217&IdFoto=bf094429" width="25px;"/> **Gastone Castellani** [unibo](https://www.unibo.it/sitoweb/gastone.castellani)
 
 See also the list of [contributors](https://github.com/RiccardoBiondi/segmentation/contributors) [![GitHub contributors](https://img.shields.io/github/contributors/RiccardoBiondi/segmentation.svg?style=plastic)](https://github.com/RiccardoBiondi/segmentation/graphs/contributors/) who participated to this project.
 
