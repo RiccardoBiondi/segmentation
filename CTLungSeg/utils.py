@@ -239,7 +239,7 @@ def shuffle_and_split(data, number_of_subarrays):
         list of random subsamples
     '''
     np.random.shuffle(data)
-    img = np.array_split(data, n_sub)
+    img = np.array_split(data, number_of_subarrays)
     return np.array(img, dtype = np.ndarray)
 
 
