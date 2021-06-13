@@ -49,7 +49,7 @@ The used image features are displayed in the figure below:
 
 .. image:: images/Multi_Channel.png
    :height: 500px
-   :width: 500 px
+   :width: 500px
    :scale: 100 %
    :alt:
    :align: left

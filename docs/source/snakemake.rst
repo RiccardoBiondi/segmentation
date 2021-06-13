@@ -2,17 +2,17 @@ Snakemake
 =========
 
 Since the segmentation of several patients is time-consuming, we have provided a
-snakemake pipeline to automate the process. These pipeline also allows to train
-other set of centroids and use it for the segmentation. This file allows also
-to set the usage of the hardware resources, like the number of threads and the
+snakemake pipeline to automate the process. This pipeline also allows to train
+other set of centroids and use it for the segmentation. This file allows to
+customize the usage of the hardware resources, like the number of threads and the
 amount of memory.
 
 Segment Multiple Scan
 ---------------------
 
-First of all, you have to creat two folders :
+First of all, you have to create two folders :
   - INPUT : contains all and only the CT scans to segment
-  - OUTPUT : mpty folder, will contain the segmented scans as *nrrd*.
+  - OUTPUT : empty folder, will contain the segmented scans as *nrrd*.
 
 Now simply execute from command line
 
@@ -20,9 +20,8 @@ Now simply execute from command line
 
   snakemake --cores 1 --config input_path='/path/to/INPUT/' --output_path='/path/to/OUTPUT/'
 
-
-**Note**: It will create a folder named **LUNG** inside the INPUT, which contains the results of the lung extraction step.
-
+**Note**: It will create a folder named **LUNG** inside the INPUT, which
+contains the results of the lung extraction step.
 
 Train a Centroid Set
 --------------------
@@ -36,7 +35,8 @@ Now run Snakemake with the following configuration parameters :
 
 .. code-block:: bash
 
-  snakemake --cores 1 --config input_path='/path/to/INPUT/' --output_path='/path/to/OUTPUT/' --train_path='/path/to/TRAIN/' --centroid_path='/path/to/save/your/centorid/set.pkl.npy'
+  snakemake --cores 1 --config input_path='/path/to/INPUT/' --output_path='/path/to/OUTPUT/'
+  --train_path='/path/to/TRAIN/' --centroid_path='/path/to/save/your/centorid/set.pkl.npy'
 
 This will train the centroid set and use them to segment the input scans.
 
@@ -55,7 +55,7 @@ resources and the path, which we usually provide from command-line.
 
   - *threads_lung_extraction* : Set the number of threads to use for the lung_extraction (default = 8);
 
-  - *threads_train* : Set the numebr of threads to use for the training porcess (defautl = 8).
+  - *threads_train* : Set the number of threads to use for the training process (default = 8).
 
 **Memory**
 
@@ -67,4 +67,4 @@ resources and the path, which we usually provide from command-line.
 
 It is possible to specify the parameters for the training step:
    - n_subsamples : number of subsamples in which the slice of the training set  will be divided during the training;
-   - centroid_initialization : techinique to use for the initialization of the centroids during k-means (0 for random initialization, 1 for kmeans++)
+   - centroid_initialization : technique to use for the initialization of the centroids during k-means (0 for random initialization, 1 for k-means++)

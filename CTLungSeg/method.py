@@ -19,7 +19,7 @@ image_types = {
 
 def median_filter(img, radius):
     '''
-    Apply median blurring filter on an image or stack of images.
+    Apply median blurring filter on the specified image.
 
     Parameters
     ----------
@@ -39,7 +39,7 @@ def median_filter(img, radius):
     --------
     >>> from CTLungSeg.utils import read_image
     >>> from CTLungSeg.method import median_filter
-    >>> # load the image series
+    >>> # load the DICOM series
     >>> seriesname = 'path/to/input/series/'
     >>> volume = read_image(seriesname)
     >>> # define the kernel size and apply the median filter
@@ -57,14 +57,14 @@ def median_filter(img, radius):
 
 def std_filter(image, radius) :
     '''
-    Replace each pixel value with the standard deviation computed on its
-    neighborhood.
+    Replace each pixel value with the standard deviation computed on a circular
+    neighbourhood with specified radius
 
     Parameters
     ----------
 
     image : SimpleITK image
-        image or stack of images to filter
+        image to filter
 
     radius: int
         radius of the neighborhood
@@ -86,7 +86,7 @@ def std_filter(image, radius) :
 
 def gauss_smooth(image, sigma = 1.):
     '''
-    Apply a gaussian smooth to the input image
+    Apply a gaussian smoothing to the input image
 
     Parameters
     ----------
@@ -131,8 +131,9 @@ def adaptive_histogram_equalization(image, radius) :
 
 
 
-def adjust_gamma(image, gamma=1.0, image_type = 'HU'):
+def adjust_gamma(image, gamma=1.0, image_type='HU'):
     '''
+    Apply a gamma correction on the input image: $GL_{out} = GL_{in}^{\gamma}$
 
     Parameters
     ----------
@@ -167,7 +168,7 @@ def adjust_gamma(image, gamma=1.0, image_type = 'HU'):
 
 
 
-def apply_mask(image, mask, masking_value = 0, outside_value = -1500) :
+def apply_mask(image, mask, masking_value=0, outside_value=-1500) :
     '''
     Apply a mask to image
 
@@ -221,8 +222,10 @@ def threshold(image, upper, lower, inside = 1, outside = 0) :
     lower : int
         lower threshold value
     inside : int
+        value to assign to the voxels with GL in [lower, upper]
 
     outside : int
+        value to assign to the voxels with GL outside [lower, upper]
 
     Returns
     -------
@@ -241,7 +244,7 @@ def threshold(image, upper, lower, inside = 1, outside = 0) :
 
 def cast_image(image, new_pixel_type) :
     '''
-    Cast image Pixels to pixel_type
+    Cast image pixels type to new_pixel_type
 
     Parameters
     ----------

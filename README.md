@@ -14,24 +14,39 @@
 
 # COVID-19 Lung Segmentation
 
-This package provides a fast way to isolate the lung region and identify ground glass lesions on CT images of patients affected by COVID-19. The segmentation approach is based on colour quantization, performed by K-means clustering. This package provides a series of scripts to isolate lung regions, pre-process the images, estimate K-means centroids and labels the lung regions.
+This package allows to isolate the lung region and identify ground glass lesions on CT images of patients affected by COVID-19. The segmentation approach
+based on color quantization, performed by K-means clustering. This package
+provides a series of scripts to isolate lung regions, pre-process the images,
+estimate K-means centroids and labels the lung regions.
+
 1. [Overview](#Overview)
 2. [Contents](#Contents)
-3. [Prerequisites](#prerequisites)
+3. [Prerequisites](#Prerequisites)
 4. [Installation](#Installation)
-5. [Usage](#usage)
-6. [License](#license)
-7. [Contribution](#contribution)
-8. [Authors](#authors)
-9. [Acknowledgments](#acknowledgments)
-10. [Citation](#citation)
+5. [Usage](#Usage)
+6. [License](#License)
+7. [Contribution](#Contribution)
+8. [Authors](#Authors)
+9. [Acknowledgments](#Acknowledgments)
+10. [Citation](#Citation)
 
 ## Overview
 
-This package provides an automatic pipeline for the segmentation of ground glass opacities and consolidation areas on CT chest scans of patient affected by COVID-19.
+COronaVirus Disease (COVID-19) has widely spread all over the world since the
+beginning of 2020. It is acute, highly contagious, viral infection mainly
+involving the respiratory system. Chest CT scans of patients affected by this
+condition have shown peculiar patterns of Ground Glass Opacities (GGO) and Consolidation (CS) related to the severity and the stage of the disease.
 
-The segmentation is achieved by colour quantization: each voxel is grouped by colour similarity:
-The characteristic colour of each tissue was fond, and the voxel is classified to the nearest tissue.
+In this scenario, the correct and fast identification of these patterns is a
+fundamental task. Up to now this task is performed mainly using manual or
+semi-automatic techniques, which are time-consuming (hours or days) and
+subjected to the operator expertise.
+
+This project provides an automatic pipeline for the segmentation of
+ground glass opacities(GGO) areas on chest CT scans of patient affected
+by COVID-19. The segmentation is achieved with a colour texture, using k-means
+clustering, grouping the voxel by colour and texture similarity, and
+identifying the tissue corresponding to each cluster.
 
 **Example of segmentation**. **Left:** Original image: **Right** original image with identified ground-glass areas.
 
@@ -41,6 +56,10 @@ The characteristic colour of each tissue was fond, and the voxel is classified t
   </div>
 </a>
 
+The pipeline was tested on 15 labeled chest CT scans, manually segmented by
+expert radiologist. The goodness of the segmentation was estimated using
+Dice(0.67 ± 0.12), Sensitivity(0.666 ± 0.15), Specificity(0.9993 ± 0.0005) and
+Precision(0.75± 0.20  scores.
 
 ## Contents
 
@@ -64,7 +83,9 @@ To refer to modules documentation:
 | [method](./docs/CTLungSeg/method.md) | method to filter the image tensor |
 | [segmentation](./docs/CTLungSeg/segmentation.md) | contains useful function to segment stack of images and select ROI																										|
 
-For each script described below, there are a PowerShell and a shell script that allows executing the script on multiple patients scans.
+For each script described below, there are a PowerShell and a shell script that
+allows their execution on multiple patients scans. Moreover it also provide a
+snekemake pipeline.
 
 ## Prerequisites
 
@@ -98,7 +119,7 @@ Now in ```segmentation``` directory execute:
 python setup.py install
 ```
 
-### testing
+### Testing
 
 Testing routines use ```PyTest``` and ```Hypothesis``` packages. please install
 these packages to perform the test.
@@ -111,18 +132,15 @@ python -m pytest
 
 ## Usage
 
-
 ### Single Scan
 
-Once you have installed you can directly start to segment the images.
-Input CT scans must be in Hounsfield units(HU), gray-scale images are not allowed.
-The input allowed formats are the ones supported by SimpleITK. If the input is a Dicom series, simply pass the path to the directory which contains
-the series files, please ensure that in the folder there is only one series.
-This will return the GGO and CS labels is as '.nrrd'.
+Once you have installed it, you can directly start to segment the images.
+Input CT scans must be in Hounsfield units(HU) since grey-scale images are not allowed.
+The input allowed formats are the ones supported by SimpleITK. If the input is a DICOM series, pass the path to the directory containing
+the series files. Please ensure that the folder contains only one series.
+As output will save the segmentation as *nrrd*.
 
-
-To segment a single CT scan, simply run the following
-command from the bash or PowerShell:
+To segment a single CT scan run the following from the bash or PowerShell:
 
 ```bash
    python -m CTLungSeg --input='/path/to/input/series/'  --output='/path/to/output/file/'
@@ -130,15 +148,16 @@ command from the bash or PowerShell:
 
 ### Multiple Scans
 
-We have provided a snakemake pipeline and bash(or PowerShell) script to automate the process and make it  easier to segment many scans.
+We have provided a snakemake pipeline and bash(or PowerShell) scripts to
+automate the process and make it  easier to segment many scans.
 
 #### Snakemake
 
-First of all, you have to creat two folders :
+First of all, you have to create two folders :
   - INPUT : contains all and only the CT scans to segment
-  - OUTPUT : mpty folder, will contain the segmented scans as *nrrd*.
+  - OUTPUT : empty folder, will contain the segmented scans as *nrrd*.
 
-Now simply execute from command line
+Execute from command line
 ```bash
   snakemake --cores 1 --config input_path='/path/to/INPUT/'
   --output_path='/path/to/OUTPUT/'
@@ -156,21 +175,23 @@ First of all, you have to create three folders :
 - output folder: empty folder, will contain the labels files.
 
 Now you can proceed with the lung segmentation. To achieve this purpose simply run
-from PowerShell the  script .:
+from PowerShell the  script:
+
  ```PowerShell
-PS \> ./lung_extraction.ps1 path/to/input/folder/ path/to/temporary/folder/
+  PS \> ./lung_extraction.ps1 path/to/input/folder/ path/to/temporary/folder/
  ```
 
- Or its equivalent bash version:
+Or its equivalent bash version:
 
-  ```bash
-    $ ./lung_extraction.sh path/to/input/folder/ path/to/temporary/folder/
-  ```
+```bash
+  $ ./lung_extraction.sh path/to/input/folder/ path/to/temporary/folder/
+```
 
- Once you have successfully isolated the lung, you are ready to perform the actual segmentation. Simply run the labelling scrip from PowerShell :
+ Once you have successfully isolated the lung, you are ready to perform the GGO
+ segmentation. Run the labelling scrip from PowerShell :
 
 ```PowerShell
-PS /> ./labeling.ps1 path/to/temporary/folder/ p /path/to/output/folder/
+  PS /> ./labeling.ps1 path/to/temporary/folder/ p /path/to/output/folder/
 ```
 
 Or its corresponding bash version:
@@ -184,8 +205,8 @@ $ ./labeling.sh path/to/temporary/folder/ p /path/to/output/folder/
 
 ### Train your own centroids set
 
-It is possible to train your centroid set instead of using the pre-trained one. To do that, you can use a snakemake or a bash or PowerShell script.
-
+It is possible to train your centroid set instead of using the pre-trained one.
+To do that, you can use a snakemake or a bash or PowerShell script.
 
 #### Snakemake
 
@@ -201,7 +222,7 @@ Now run Snakemake with the following configuration parameters :
   --output_path='/path/to/OUTPUT/' --train_path='/path/to/TRAIN/' --centroid_path='/path/to/save/your/centorid/set.pkl.npy'
 ```
 
-#### Bash and PowerShell scirpt
+#### Bash and PowerShell scrirpt
 
 In this case you have to prepare two folder :
   - TRAIN : will contain the scans in the training set
@@ -252,5 +273,22 @@ If you have found `COVID-19 Lung Segmentation` helpful in your research, please 
   year = {2020},
   publisher = {GitHub},
   howpublished = {\url{https://github.com/RiccardoBiondi/segmentation}},
+}
+```
+
+or the paper
+
+```tex
+@Article{app11125438,
+AUTHOR = {Biondi, Riccardo and Curti, Nico and Coppola, Francesca and Giampieri, Enrico and Vara, Giulio and Bartoletti, Michele and Cattabriga, Arrigo and Cocozza, Maria Adriana and Ciccarese, Federica and De Benedittis, Caterina and Cercenelli, Laura and Bortolani, Barbara and Marcelli, Emanuela and Pierotti, Luisa and Strigari, Lidia and Viale, Pierluigi and Golfieri, Rita and Castellani, Gastone},
+TITLE = {Classification Performance for COVID Patient Prognosis from Automatic AI Segmentation—A Single-Center Study},
+JOURNAL = {Applied Sciences},
+VOLUME = {11},
+YEAR = {2021},
+NUMBER = {12},
+ARTICLE-NUMBER = {5438},
+URL = {https://www.mdpi.com/2076-3417/11/12/5438},
+ISSN = {2076-3417},
+DOI = {10.3390/app11125438}
 }
 ```

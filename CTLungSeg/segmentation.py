@@ -20,7 +20,7 @@ __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 def remove_vessels(image, sigma = 2., thr = 8) :
     '''
     Remove vessels by applying a fixed threshold to the vesselness map.
-    Before computing the vesselness a gaussian smoothing is applied.
+    Before computing the vesselness a Gaussian smoothing is applied.
 
     Parameters
     ----------
@@ -104,10 +104,10 @@ def kmeans_on_subsamples(imgs,
                          centr_init,
                          weight = False) :
     '''
-    Apply the kmenas clustering on each stack of images in subsample.
+    Apply the k-means clustering on each stack of images in the subsample.
     Allow also to choose if consider or not some voxel during the segmentation.
-    To allow these feature simply raise the flag 'weight' and provide as last
-    channel a binary mask with 0 on each voxel you want to exclude
+    To allow these features raise the flag 'weight' and provide as the
+    last channel a binary mask with 0 on each voxel you want to exclude
 
     Parameters
     ----------
@@ -118,7 +118,7 @@ def kmeans_on_subsamples(imgs,
         number of centroids to find
     stopping_criteria :
         It is the iteration termination criteria. When this criteria
-        is satisfied, algorithm iteration stops.
+        are satisfied, algorithm iteration stops.
     center_init :
         centroid initialization technique; can be
         cv2.KMEANS_RANDOM_CENTERS or cv2.KMEANS_PP_CENTERS.
@@ -128,11 +128,11 @@ def kmeans_on_subsamples(imgs,
     Returns
     -------
     retval : array-like
-         It is vector of the sum of squared distance from each point to their corresponding centers for each subsample
+        It is vector of the sum of squared distance from each point to their
+        corresponding centers for each subsample
 
     centroids : array-like
-        array that contains the n_centroids estimated for each
-        subsample
+        array that contains the n_centroids estimated for each subsample
 
     Examples
     --------

@@ -20,7 +20,7 @@ format like '.nrrd' or '.nifti'. All the formats supported by SimpleITK_ are all
    :members:
    :undoc-members:
    :show-inheritance:
-   :private-members: _read_dicom_series, _read_image, _imfill, _std_dev
+   :private-members: _read_dicom_series, _read_image
    :special-members:
 
 Method

@@ -12,7 +12,7 @@ scans of COVID-19 affected patients.
 This package provides a fast way to isolate the lung region and identify ground glass
 lesions on CT images of patients affected by COVID-19.
 The segmentation approach is based on colour quantization,
-performed by K-means clustering. This package provides a series of scripts to
+performed using K-means clustering. This package provides a series of scripts to
 isolate lung regions, pre-process the images, estimate K-means centroids and
 labels the lung regions; together with methods to perform thresholding,
 morphological and statistical operations on image series.

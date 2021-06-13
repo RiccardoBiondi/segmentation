@@ -11,6 +11,7 @@ except ImportError:
 __author__  = ['Riccardo Biondi', 'Nico Curti']
 __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
+
 def get_requires (requirements_filename):
   '''
   What packages are required for this module to be executed?
@@ -110,7 +111,7 @@ setup(
         'console_scripts': [
         'lung_extraction = CTLungSeg.lung_extraction:main',
         'labeling = CTLungSeg.labeling:main',
-        'train = CTLungSeg.tain:main'
+        'train = CTLungSeg.train:main'
         'CTLungSeg = CTLungSeg.__main__:main'
     ]},
 
