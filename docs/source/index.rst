@@ -19,7 +19,6 @@ morphological and statistical operations on image series.
 
 .. image :: ../../images/results.png
 
-
 Usage Example
 =============
 
@@ -42,9 +41,6 @@ input is a Dicom series, simply pass the path to the directory which contains
 the series files, please ensure that in the folder there is only one series.
 
 The output label will be saved as '.nrrd'.
-
-
-
 
 Multiple Patient Example
 ------------------------

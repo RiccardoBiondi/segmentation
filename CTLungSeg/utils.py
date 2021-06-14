@@ -29,7 +29,7 @@ def load_pickle(filename):
         array loaded from the given file
     '''
     with open(filename, 'rb') as fp:
-        data = np.load(fp, allow_pickle = True)
+        data = np.load(fp, allow_pickle=True)
     return data
 
 
@@ -55,7 +55,7 @@ def _read_dicom_series(filedir):
     return reader
 
 
-def _read_image(filename) :
+def _read_image(filename):
     '''
     Define and initialize the SimpleITK image reader
 
@@ -119,7 +119,7 @@ def read_image(filename):
 
 
 
-def write_volume(image, output_filename) :
+def write_volume(image, output_filename):
     '''
     Write the image volume in a specified format. Each format supported by
     SimpleITK is supported.
@@ -148,7 +148,7 @@ def write_volume(image, output_filename) :
     >>> write_volume(image, output_name)
     '''
     writer = sitk.ImageFileWriter()
-    writer.SetFileName(output_filename )
+    writer.SetFileName(output_filename)
     writer.Execute(image)
 
 
@@ -172,8 +172,7 @@ def save_pickle(filename, data):
 def normalize(image) :
     '''
     Rescale each GL according to the mean and std of the whole image
-    .. note:
-        Will raise ZeroDivisionError if the provided image has constant pixel GL.
+    Will raise ZeroDivisionError if the provided image has constant pixel GL.
 
     Parameters
     ----------

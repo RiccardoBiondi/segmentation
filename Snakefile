@@ -1,4 +1,9 @@
-# This is the snakefile that implements the segmentation workflows.
+# snakemake --force clear               # to force rule
+# snakemake --dryrun --forceall         # check workflow
+# REMEMBER REMEMBER : pipe in powershell wraps the object into utf-16 char set (avoid it...evil!)
+# WIN32 :=  cmd /C "snakemake --dag | dot -Tpdf > workflow.pdf"
+# UNIX  :=  snakemake --dag | dot -Tpdf > workflow.pdf
+
 # It is divided into two sections :
 #   - INIT : here will be initialized the configuration file,
 #            taken the filename to process and the LUNG folder, which stores

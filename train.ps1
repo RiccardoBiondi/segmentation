@@ -1,7 +1,12 @@
 #!/usr/bin/env pwsh
 
-$input_dir = $args[0]
-$output_dir = $args[1]
+[CmdletBinding()]
+Param
+(
+  [parameter(mandatory=$true, position=0)][string]$input_dir,
+  [parameter(mandatory=$true, position=1)][string]$output_dir
+)
+
 
 If ( $null -eq $input_dir)
 {

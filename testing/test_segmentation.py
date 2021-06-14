@@ -29,7 +29,7 @@ def integer_stack_strategy(draw) :
     '''
     gl_max = draw(st.integers(3, 10))
     n_imgs = draw(st.integers(20, 70))
-    stack = randint(0, gl_max, (n_imgs, 512, 512), dtype = np.uint8)
+    stack = randint(0, gl_max, (n_imgs, 512, 512), dtype=np.uint8)
     return stack.reshape(n_imgs, 512, 512), gl_max
 
 ################################################################################
@@ -41,8 +41,8 @@ def integer_stack_strategy(draw) :
 
 
 @given(integer_stack_strategy(), st.integers(1, 6))
-@settings(max_examples  = 4, deadline=None)
-def test_imlabeling(stack, channels) :
+@settings(max_examples =4, deadline=None)
+def test_imlabeling(stack, channels):
     '''
     Given :
         - image tensor with GL in [0, 7]
@@ -53,8 +53,8 @@ def test_imlabeling(stack, channels) :
     Assert:
         - each voxel is assigned to the correct cluster
     '''
-    mc = np.stack([stack[0] for i in range(channels)], axis = -1)
-    centroids = np.stack([np.arange(stack[1]) for _ in range(channels)],axis=-1)
+    mc = np.stack([stack[0] for i in range(channels)], axis=-1)
+    centroids = np.stack([np.arange(stack[1]) for _ in range(channels)], axis=-1)
 
     labeled = imlabeling(mc, centroids)
 
@@ -63,8 +63,8 @@ def test_imlabeling(stack, channels) :
 
 
 @given(integer_stack_strategy(), st.integers(1, 4))
-@settings(max_examples  = 4, deadline=None)
-def test_imlabeling_wWeigth(stack, channels) :
+@settings(max_examples =4, deadline=None)
+def test_imlabeling_wWeigth(stack, channels):
     '''
     Given :
         - image tensor with GL in [0, 7]
@@ -81,8 +81,8 @@ def test_imlabeling_wWeigth(stack, channels) :
     gt[gt != 0] = gt[gt != 0] - 1
 
     w = (stack[0] != 0).astype(np.uint8)
-    mc = np.stack([stack[0] for i in range(channels)], axis = -1)
-    centroids = np.stack([np.arange(stack[1]) for _ in range(channels)],axis=-1)
+    mc = np.stack([stack[0] for i in range(channels)], axis= 1)
+    centroids = np.stack([np.arange(stack[1]) for _ in range(channels)], axis=-1)
 
     labeled = imlabeling(mc, centroids, w)
 
@@ -91,8 +91,8 @@ def test_imlabeling_wWeigth(stack, channels) :
 
 
 @given(integer_stack_strategy(), st.integers(100, 200))
-@settings(max_examples  = 4, deadline=None)
-def test_imlabeling_raise_weight_exception(stack, dim) :
+@settings(max_examples=4, deadline=None)
+def test_imlabeling_raise_weight_exception(stack, dim):
     '''
     Given :
         - image tensor
@@ -101,8 +101,8 @@ def test_imlabeling_raise_weight_exception(stack, dim) :
         - Exception is raised
     '''
     mc = np.stack(stack for _ in range(3))
-    centroids = ones((5, 3), dtype = np.uint8)
-    weight = ones((dim, dim, dim), dtype = np.uint8)
+    centroids = ones((5, 3), dtype=np.uint8)
+    weight = ones((dim, dim, dim), dtype=np.uint8)
     with pytest.raises(Exception) as exc:
         labels  =  imlabeling(mc, centroids, weight )
         assert exc == 'Weight shape doesn t match image one : {} != {}\
@@ -110,7 +110,7 @@ def test_imlabeling_raise_weight_exception(stack, dim) :
 
 
 @given(integer_stack_strategy())
-@settings(max_examples  = 4, deadline=None)
+@settings(max_examples=4, deadline=None)
 def test_imlabeling_raise_centroids_exception(stack) :
     '''
     Given :
@@ -126,8 +126,8 @@ def test_imlabeling_raise_centroids_exception(stack) :
         assert imlabeling(mc, centroids)
 
 
-@given(integer_stack_strategy(), st.integers(1, 4),st.integers(1, 5))
-@settings(max_examples = 1, deadline = None)
+@given(integer_stack_strategy(), st.integers(1, 4), st.integers(1, 5))
+@settings(max_examples = 1, deadline=None)
 def test_kmeans_on_subsamples(stack, n_features, n_subsamples) :
     '''
     Given :
@@ -146,23 +146,23 @@ def test_kmeans_on_subsamples(stack, n_features, n_subsamples) :
     '''
     stopping_criteria =  (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
                           10, 1.0)
-    mc = np.stack([stack[0] for _ in range(n_features) ], axis = -1)
+    mc = np.stack([stack[0] for _ in range(n_features) ], axis=-1)
     mc = shuffle_and_split(mc, n_subsamples)
     _, centr = kmeans_on_subsamples(mc,
-                                 stack[1],
-                                 stopping_criteria,
-                                 cv2.KMEANS_RANDOM_CENTERS)
+                                    stack[1],
+                                    stopping_criteria,
+                                    cv2.KMEANS_RANDOM_CENTERS)
 
     #true value for each centroid
-    gt = np.repeat(np.arange(stack[1]), n_subsamples * n_features, axis = -1)
+    gt = np.repeat(np.arange(stack[1]), n_subsamples * n_features, axis=-1)
 
     assert centr.size == n_subsamples * stack[1] * n_features
     assert np.isclose(np.sort(centr.reshape((-1,))), gt).all()
 
 
 @given(integer_stack_strategy(), st.integers(2,10))
-@settings(max_examples = 1, deadline = None)
-def test_kmeans_on_subsamples_wobkg(stack, n_subsamples) :
+@settings(max_examples=1, deadline=None)
+def test_kmeans_on_subsamples_wobkg(stack, n_subsamples):
     '''
         Given :
             - image tensor with GL in [0, 7]
@@ -191,16 +191,16 @@ def test_kmeans_on_subsamples_wobkg(stack, n_subsamples) :
     stopping_criteria =  (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER,
                           10, 1.0)
     mc = np.stack([stack[0], stack[0], (stack[0] != 0).astype(np.uint8)],
-                    axis = -1)
+                    axis=-1)
     mc = shuffle_and_split(mc, n_subsamples)
     _, centr = kmeans_on_subsamples(mc,
-                                 stack[1] - 1,
-                                 stopping_criteria,
-                                 cv2.KMEANS_RANDOM_CENTERS,
-                                 True)
+                                    stack[1] - 1,
+                                    stopping_criteria,
+                                    cv2.KMEANS_RANDOM_CENTERS,
+                                    True)
 
     # true value for each centroid
-    gt = np.repeat(np.arange(1, stack[1], 1), n_subsamples * 2, axis = -1)
+    gt = np.repeat(np.arange(1, stack[1], 1), n_subsamples * 2, axis=-1)
 
     assert centr.size == n_subsamples * (stack[1] - 1)* 2
     assert np.isclose(np.sort(centr.reshape((-1,))), gt).all()

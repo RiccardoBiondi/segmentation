@@ -38,8 +38,6 @@ For lung extraction, a pre-trained UNet model was used. The model and the
 code used to apply it belong to this_ repository. For more details, please
 refers here_.
 
-
-
 Labeling
 --------
 
@@ -48,7 +46,6 @@ lung extraction, simply arrange all the results of the previous script into an
 input folder; as before creating an empty folder in which the resulting labels
 will be saved in '.nrrd' format.
 Simply run the bash script:
-
 
 .. code-block:: bash
 
@@ -63,7 +60,6 @@ or its equivalent for powershell
 This will run the segmentation by using the already estimated centroids. If you
 want to use another set of centroids, simply provide as third arguments the path
 of the file in which the set of centroids is saved
-
 
 Train
 -----
@@ -93,28 +89,23 @@ displayed :
   I'm saving...
   [DONE]
 
-
 All the images will be divided into N subsamples, and a K-means clustering is
 performed for each subsample, after that a second clustering is performed in order
 to refine the clustering and provide the set of centroids.
 To control the parameters simply provides the following arguments when the script
 is execute:
 
---init : centroid initialization algorithm: if 0 the centroids will be initialized
+* init : centroid initialization algorithm: if 0 the centroids will be initialized
             randomly, if 1 the K-means++ center will be used.
 
---n : number of subsamples, as default as 100.
+* n : number of subsamples, as default as 100.
 
-
-
-Once the training is complete, the centroid file will be stored in '.pkl.npy'
+Once the training is complete, the centroid file will be stored in `.pkl.npy`
 format.
 
 .. note::
 
   please notice that this process may be time consuming and computational expansive
-
-
 
 .. _SimpleITK: https://simpleitk.readthedocs.io/en/master/IO.html
 .. _this: https://github.com/JoHof/lungmask

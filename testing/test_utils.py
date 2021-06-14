@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 import pytest
 import hypothesis.strategies as st
 from hypothesis import given, settings, example
@@ -27,16 +30,16 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 ###                                                                          ###
 ################################################################################
 
-legitimate_chars = st.characters(whitelist_categories = ('Lu','Ll'),
-                                    min_codepoint = 65, max_codepoint = 90)
-filename_strategy = st.text(alphabet = legitimate_chars, min_size = 1,
-                            max_size = 15)
+legitimate_chars = st.characters(whitelist_categories=('Lu','Ll'),
+                                    min_codepoint=65, max_codepoint=90)
+filename_strategy = st.text(alphabet=legitimate_chars, min_size=1,
+                            max_size=15)
 
 medical_image_formats = ['.nii', '.nrrd', '.nhdr']
 
 
 @st.composite
-def rand_stack_strategy(draw) :
+def rand_stack_strategy(draw):
     '''
     Generates a stack of N 512x512 white noise 8-bit GL images
     '''
@@ -46,7 +49,7 @@ def rand_stack_strategy(draw) :
 
 
 @st.composite
-def sitk_image_strategy(draw) :
+def sitk_image_strategy(draw):
     '''
     Generate a SimpleITK image of a gaussian
     '''
@@ -83,9 +86,9 @@ def sitk_constant_image(draw) :
 
 
 @given(rand_stack_strategy(), filename_strategy)
-@settings(max_examples = 20,
-        deadline = None,
-        suppress_health_check = (HC.too_slow,))
+@settings(max_examples=20,
+        deadline=None,
+        suppress_health_check=(HC.too_slow,))
 def test_save_and_load_pkl(imgs,  filename):
     '''
     Given:
@@ -105,10 +108,10 @@ def test_save_and_load_pkl(imgs,  filename):
 
 
 @given(filename_strategy, st.sampled_from(medical_image_formats))
-@settings(max_examples = 20,
-        deadline = None,
-        suppress_health_check = (HC.too_slow,))
-def test_reader(filename, format) :
+@settings(max_examples=20,
+        deadline=None,
+        suppress_health_check=(HC.too_slow,))
+def test_reader(filename, format):
     '''
     Taking as input:
         - image tensor
@@ -127,10 +130,10 @@ def test_reader(filename, format) :
 
 @given(sitk_image_strategy(), filename_strategy,
        st.sampled_from(medical_image_formats))
-@settings(max_examples = 20,
-          deadline = None,
+@settings(max_examples=20,
+          deadline=None,
           suppress_health_check=(HC.too_slow,))
-def test_read_and_write_image(image, filename, format) :
+def test_read_and_write_image(image, filename, format):
     '''
     Given :
         - SimpleITK
@@ -158,9 +161,9 @@ def test_read_and_write_image(image, filename, format) :
 
 
 @given(filename_strategy, st.sampled_from(medical_image_formats))
-@settings(max_examples = 20, deadline = None,
-          suppress_health_check = (HC.too_slow,))
-def test_reader_raise_file_not_found(path, format) :
+@settings(max_examples=20, deadline=None,
+          suppress_health_check=(HC.too_slow,))
+def test_reader_raise_file_not_found(path, format):
     '''
     Given :
         - path to a non existing image
@@ -171,15 +174,15 @@ def test_reader_raise_file_not_found(path, format) :
         - FileNotFoundError is raised
     '''
     fname = './testing/{}{}'.format(path, format)
-    with pytest.raises(FileNotFoundError) :
+    with pytest.raises(FileNotFoundError):
         image = read_image(fname)
 
 
 
 @given(sitk_image_strategy())
-@settings(max_examples = 20, deadline = None,
-          suppress_health_check = (HC.too_slow,))
-def test_deep_copy(image) :
+@settings(max_examples=20, deadline=None,
+          suppress_health_check=(HC.too_slow,))
+def test_deep_copy(image):
     '''
     Given :
         - SimpleITK image
@@ -200,9 +203,9 @@ def test_deep_copy(image) :
 
 
 @given(sitk_constant_image())
-@settings(max_examples = 20, deadline = None,
-          suppress_health_check = (HC.too_slow,))
-def test_normalize_raise_error(image) :
+@settings(max_examples=20, deadline=None,
+          suppress_health_check=(HC.too_slow,))
+def test_normalize_raise_error(image):
     '''
     Given :
         - Constant image
@@ -211,14 +214,14 @@ def test_normalize_raise_error(image) :
     Assert :
         - ZeroDivisionError is raised
     '''
-    with pytest.raises(ZeroDivisionError) :
+    with pytest.raises(ZeroDivisionError):
         res = normalize(image)
 
 
 @given(sitk_image_strategy())
-@settings(max_examples = 20, deadline = None,
-          suppress_health_check = (HC.too_slow,))
-def test_shift_and_crop(volume) :
+@settings(max_examples=20, deadline=None,
+          suppress_health_check=(HC.too_slow,))
+def test_shift_and_crop(volume):
     '''
     Given:
         - SimpleITK image
@@ -240,9 +243,9 @@ def test_shift_and_crop(volume) :
 
 
 @given(rand_stack_strategy(), st.integers(2, 5))
-@settings(max_examples  = 20,
-            deadline = None,
-            suppress_health_check = (HC.too_slow,))
+@settings(max_examples=20,
+            deadline=None,
+            suppress_health_check=(HC.too_slow,))
 def test_shuffle_and_split(sample, n_subsamples):
     '''
     Given :

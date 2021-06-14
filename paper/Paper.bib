@@ -1,54 +1,76 @@
-@dataset{DATA:ZENODO,
-  author       = {Ma Jun and
-                  Ge Cheng and
-                  Wang Yixin and
-                  An Xingle and
-                  Gao Jiantao and
-                  Yu Ziqi and
-                  Zhang Minqing and
-                  Liu Xin and
-                  Deng Xueyuan and
-                  Cao Shucheng and
-                  Wei Hao and
-                  Mei Sen and
-                  Yang Xiaoyu and
-                  Nie Ziwei and
-                  Li Chen and
-                  Tian Lu and
-                  Zhu Yuntao and
-                  Zhu Qiongjie and
-                  Dong Guoqiang and
-                  He Jian},
-  title        = {{COVID-19 CT Lung and Infection Segmentation
-                   Dataset}},
-  month        = apr,
-  year         = 2020,
-  publisher    = {Zenodo},
-  version      = {Verson 1.0},
-  doi          = {10.5281/zenodo.3757476},
-  url          = {https://doi.org/10.5281/zenodo.3757476}
+@dataset{zenodo,
+  author = {Ma Jun and Ge Cheng and Wang Yixin and An Xingle and Gao Jiantao and Yu Ziqi and Zhang Minqing and Liu Xin and Deng Xueyuan and Cao Shucheng and Wei Hao and Mei Sen and Yang Xiaoyu and Nie Ziwei and Li Chen and Tian Lu and Zhu Yuntao and Zhu Qiongjie and Dong Guoqiang and He Jian},
+  title = {COVID-19 CT Lung and Infection Segmentation Dataset},
+  month = {Apr},
+  year = {2020},
+  publisher = {Zenodo},
+  version = {Verson 1.0},
+  doi = {10.5281/zenodo.3757476},
+  url = {https://doi.org/10.5281/zenodo.3757476}
 }
 
-@article{ART:Johannes,
-  author    = {Hofmanninger,Johannes
-                Prayer Forian
-                Pan Jeanny
-                Röhrich Sebastian
-                Prosch Helmut
-                Langs Georg},
-  title     = {Automatic lung segmentation in routine imaging is primarily a data diversity problem, not a methodology problem},
-  journal   = {European Radiology Experimental},
-  volume    = {4},
-  year      = {2020},
-  issn = {1},
+@article{Hofmanninger2020,
+  author = {Hofmanninger, Johannes and Prayer, Forian and Pan, Jeanny and R{\"o}hrich, Sebastian and Prosch, Helmut and Langs, Georg},
+  title = {Automatic lung segmentation in routine imaging is primarily a data diversity problem, not a methodology problem},
+  journal = {European radiology experimental},
+  year = {2020},
+  month = {Aug},
+  day = {20},
+  publisher = {Springer International Publishing},
+  volume = {4},
+  number = {1},
+  pages = {50-50},
+  keywords = {*Algorithms; *Deep learning; *Lung; *Reproducibility of results; *Tomography (x-ray computed)},
+  abstract = {BACKGROUND: Automated segmentation of anatomical structures is a crucial step in image analysis. For lung segmentation in computed tomography, a variety of approaches exists, involving sophisticated pipelines trained and validated on different datasets. However, the clinical applicability of these approaches across diseases remains limited. METHODS: We compared four generic deep learning approaches trained on various datasets and two readily available lung segmentation algorithms. We performed evaluation on routine imaging data with more than six different disease patterns and three published data sets. RESULTS: Using different deep learning approaches, mean Dice similarity coefficients (DSCs) on test datasets varied not over 0.02. When trained on a diverse routine dataset (n = 36), a standard approach (U-net) yields a higher DSC (0.97 {\textpm} 0.05) compared to training on public datasets such as the Lung Tissue Research Consortium (0.94 {\textpm} 0.13, p = 0.024) or Anatomy 3 (0.92 {\textpm} 0.15, p = 0.001). Trained on routine data (n = 231) covering multiple diseases, U-net compared to reference methods yields a DSC of 0.98 {\textpm} 0.03 versus 0.94 {\textpm} 0.12 (p = 0.024). CONCLUSIONS: The accuracy and reliability of lung segmentation algorithms on demanding cases primarily relies on the diversity of the training data, highlighting the importance of data diversity compared to model choice. Efforts in developing new datasets and providing trained models to the public are critical. By releasing the trained model under General Public License 3.0, we aim to foster research on lung diseases by providing a readily available tool for segmentation of pathological lungs.},
+  note = {32814998[pmid]},
+  note = {PMC7438418[pmcid]},
+  issn = {2509-9280},
   doi = {10.1186/s41747-020-00173-2},
-  url       = {https://doi.org/10.1186/s41747-020-00173-2}
+  url = {https://pubmed.ncbi.nlm.nih.gov/32814998},
+  url = {https://doi.org/10.1186/s41747-020-00173-2},
+  language = {eng}
 }
 
-@misc{REP:lungmask,
+@misc{lungmask,
   author = {Johannes Hofmanninger, Hoa Nguyen},
   title = {Automated lung segmentation in CT under presence of severe pathologies},
   year = {2020},
   publisher = {GitHub},
   howpublished = {\url{https://github.com/JoHof/lungmask}},
+}
+
+@article{app11125438,
+  author = {Biondi, Riccardo and Curti, Nico and Coppola, Francesca and Giampieri, Enrico and Vara, Giulio and Bartoletti, Michele and Cattabriga, Arrigo and Cocozza, Maria Adriana and Ciccarese, Federica and De Benedittis, Caterina and Cercenelli, Laura and Bortolani, Barbara and Marcelli, Emanuela and Pierotti, Luisa and Strigari, Lidia and Viale, Pierluigi and Golfieri, Rita and Castellani, Gastone},
+  title = {Classification Performance for COVID Patient Prognosis from Automatic AI Segmentation—A Single-Center Study},
+  journal = {Applied Sciences},
+  volume = {11},
+  year = {2021},
+  number = {12},
+  url = {https://www.mdpi.com/2076-3417/11/12/5438},
+  issn = {2076-3417},
+  abstract = {Background: COVID assessment can be performed using the recently developed individual risk score (prediction of severe respiratory failure in hospitalized patients with SARS-COV2 infection, PREDI-CO score) based on High Resolution Computed Tomography. In this study, we evaluated the possibility of automatizing this estimation using semi-supervised AI-based Radiomics, leveraging the possibility of performing non-supervised segmentation of ground-glass areas. Methods: We collected 92 from patients treated in the IRCCS Sant’Orsola-Malpighi Policlinic and public databases; each lung was segmented using a pre-trained AI method; ground-glass opacity was identified using a novel, non-supervised approach; radiomic measurements were collected and used to predict clinically relevant scores, with particular focus on mortality and the PREDI-CO score. We compared the prediction obtained through different machine learning approaches. Results: All the methods obtained a well-balanced accuracy (70%) on the PREDI-CO score but did not obtain satisfying results on other clinical characteristics due to unbalance between the classes. Conclusions: Semi-supervised segmentation, implemented using a combination of non-supervised segmentation and feature extraction, seems to be a viable approach for patient stratification and could be leveraged to train more complex models. This would be useful in a high-demand situation similar to the current pandemic to support gold-standard segmentation for AI training.},
+  doi = {10.3390/app11125438}
+}
+
+@article{Bartoletti2020,
+  author = {Bartoletti, Michele and Giannella, Maddalena and Scudeller, Luigia and Tedeschi, Sara and Rinaldi, Matteo and Bussini, Linda and Fornaro, Giacomo and Pascale, Renato and Pancaldi, Livia and Pasquini, Zeno and Trapani, Filippo and Badia, Lorenzo and Campoli, Caterina and Tadolini, Marina and Attard, Luciano and Puoti, Massimo and Merli, Marco and Mussini, Cristina and Menozzi, Marianna and Meschiari, Marianna and Codeluppi, Mauro and Barchiesi, Francesco and Cristini, Francesco and Saracino, Annalisa and Licci, Alberto and Rapuano, Silvia and Tonetti, Tommaso and Gaibani, Paolo and Ranieri, Vito M. and Viale, Pierluigi and group, PREDICO study},
+  title = {Development and validation of a prediction model for severe respiratory failure in hospitalized patients with SARS-CoV-2 infection: a multicentre cohort study (PREDI-CO study)},
+  journal = {Clinical microbiology and infection : the official publication of the European Society of Clinical Microbiology and Infectious Diseases},
+  year = {2020},
+  month = {Nov},
+  edition = {2020/08/08},
+  publisher = {European Society of Clinical Microbiology and Infectious Diseases. Published by Elsevier Ltd.},
+  volume = {26},
+  number = {11},
+  pages = {1545-1553},
+  keywords = {Age; C-reactive proteine; Coronavirus disease 2019; Lactate dehydrogenase; Obesity; Prognostic tool; Severe acute respiratory syndrome coronavirus 2; Severe respiratory failure; Adolescent; Adult; Aged; Aged, 80 and over; Betacoronavirus; COVID-19; Child; Child, Preschool; Coronavirus Infections/*diagnosis/epidemiology; Female; Hospitalization; Humans; Italy/epidemiology; *Logistic Models; Male; Middle Aged; Multivariate Analysis; Pandemics; Pneumonia, Viral/*diagnosis/epidemiology; Prognosis; Reproducibility of Results; Respiratory Insufficiency/*diagnosis/epidemiology; Retrospective Studies; Risk Assessment; Risk Factors; SARS-CoV-2; Sensitivity and Specificity; Young Adult},
+  abstract = {OBJECTIVES: We aimed to develop and validate a risk score to predict severe respiratory failure (SRF) among patients hospitalized with coronavirus disease-2019 (COVID-19). METHODS: We performed a multicentre cohort study among hospitalized (>24 hours) patients diagnosed with COVID-19 from 22 February to 3 April 2020, at 11 Italian hospitals. Patients were divided into derivation and validation cohorts according to random sorting of hospitals. SRF was assessed from admission to hospital discharge and was defined as: Spo(2) <93{\%} with 100{\%} Fio(2), respiratory rate >30 breaths/min or respiratory distress. Multivariable logistic regression models were built to identify predictors of SRF, $\beta$-coefficients were used to develop a risk score. Trial Registration NCT04316949. RESULTS: We analysed 1113 patients (644 derivation, 469 validation cohort). Mean ({\textpm}SD) age was 65.7 ({\textpm}15) years, 704 (63.3{\%}) were male. SRF occurred in 189/644 (29{\%}) and 187/469 (40{\%}) patients in the derivation and validation cohorts, respectively. At multivariate analysis, risk factors for SRF in the derivation cohort assessed at hospitalization were age ≥70 years (OR 2.74; 95{\%} CI 1.66-4.50), obesity (OR 4.62; 95{\%} CI 2.78-7.70), body temperature ≥38{\textdegree}C (OR 1.73; 95{\%} CI 1.30-2.29), respiratory rate ≥22 breaths/min (OR 3.75; 95{\%} CI 2.01-7.01), lymphocytes ≤900 cells/mm(3) (OR 2.69; 95{\%} CI 1.60-4.51), creatinine ≥1 mg/dL (OR 2.38; 95{\%} CI 1.59-3.56), C-reactive protein ≥10 mg/dL (OR 5.91; 95{\%} CI 4.88-7.17) and lactate dehydrogenase ≥350 IU/L (OR 2.39; 95{\%} CI 1.11-5.11). Assigning points to each variable, an individual risk score (PREDI-CO score) was obtained. Area under the receiver-operator curve was 0.89 (0.86-0.92). At a score of >3, sensitivity, specificity, and positive and negative predictive values were 71.6{\%} (65{\%}-79{\%}), 89.1{\%} (86{\%}-92{\%}), 74{\%} (67{\%}-80{\%}) and 89{\%} (85{\%}-91{\%}), respectively. PREDI-CO score showed similar prognostic ability in the validation cohort: area under the receiver-operator curve 0.85 (0.81-0.88). At a score of >3, sensitivity, specificity, and positive and negative predictive values were 80{\%} (73{\%}-85{\%}), 76{\%} (70{\%}-81{\%}), 69{\%} (60{\%}-74{\%}) and 85{\%} (80{\%}-89{\%}), respectively. CONCLUSION: PREDI-CO score can be useful to allocate resources and prioritize treatments during the COVID-19 pandemic.},
+  note = {32781244[pmid]},
+  note = {PMC7414420[pmcid]},
+  note = {S1198-743X(20)30479-1[PII]},
+  issn = {1469-0691},
+  doi = {10.1016/j.cmi.2020.08.003},
+  url = {https://pubmed.ncbi.nlm.nih.gov/32781244},
+  url = {https://doi.org/10.1016/j.cmi.2020.08.003},
+  language = {eng}
 }

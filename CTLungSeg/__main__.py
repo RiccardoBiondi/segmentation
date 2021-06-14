@@ -51,16 +51,17 @@ centroids = {
 if __name__ == '__main__':
     start = time()
     args = parse_args()
-    volume = read_image(args.input)
+    volume = read_image(filename=args.input)
 
     if args.center != '' :
-        center = load_pickle(args.center)
+        center = load_pickle(filename=args.center)
     else :
         center = np.asarray([np.array(v) for _, v in centroids.items()])
 
     lung = lung_extraction.main(volume)
     labels = labeling.main(lung, center)
 
-    write_volume(labels, args.output, '.nrrd')
+
+    write_volume(image=labels, output_filename=args.output)
     stop = time()
-    print('Process anded after {} seconds'.format((stop - start)))
+    print('Process anded after {0:.3} seconds'.format((stop - start)))

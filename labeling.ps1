@@ -1,8 +1,12 @@
 #!/usr/bin/env pwsh
 
-$input_dir = $args[0]
-$label_dir = $args[1]
-$centroids = $args[2]
+[CmdletBinding()]
+Param
+(
+  [parameter(mandatory=$true, position=0)][string]$input_dir,
+  [parameter(mandatory=$true, position=1)][string]$label_dir,
+  [parameter(mandatory=$false, position=2)][string]$centroids
+)
 
 
 

@@ -54,7 +54,6 @@ The used image features are displayed in the figure below:
    :alt:
    :align: left
 
-
 Once we have built the colour space, we have to found the characteristic colour of
 each tissue under study, which is represented by centroids in the colour space.
 To perform this task and achieve the centroids estimation a simple -means

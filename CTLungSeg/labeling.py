@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import argparse
@@ -14,7 +14,7 @@ from CTLungSeg.method import adaptive_histogram_equalization, adjust_gamma
 from CTLungSeg.segmentation import imlabeling
 
 __author__ = ['Riccado Biondi', 'Nico Curti']
-__email__  = ['riccardo.biondi4@tudio.unibo.it', 'nico.curti2@unibo.it']
+__email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 def parse_args():
@@ -45,23 +45,22 @@ def parse_args():
     return args
 
 #pre-trained centroids
-centroids = {
-                'healthy lung': [1.0291475, 1.7986686, 1.3147535, 1.6199226],
-                'lung'   :  [2.4449115, 2.8337748, 1.556249,  2.9394238],
-                'Edges' :  [3.4244044, 2.1809669, 4.172402,  3.652266 ],
-                'GGO'   :  [5.1485806, 5.3843336, 2.7543516, 4.812335 ],
-                'Noise'     : [8.233303,  1.9194404, 6.503928,  6.670035 ]}
+centroids = {'healthy lung': [1.0291475, 1.7986686, 1.3147535, 1.6199226],
+            'lung'   :  [2.4449115, 2.8337748, 1.556249,  2.9394238],
+            'Edges' :  [3.4244044, 2.1809669, 4.172402,  3.652266],
+            'GGO'   :  [5.1485806, 5.3843336, 2.7543516, 4.812335],
+            'Noise'     : [8.233303,  1.9194404, 6.503928,  6.670035]}
 
 
 def main(volume, centroids):
 
 
     # prepare the image
-    weight = sitk.GetArrayFromImage(threshold(volume, 4000, 1))
-    equalized = normalize(adaptive_histogram_equalization(volume, 5))
-    median = normalize(median_filter(volume, 3))
-    std = normalize(std_filter(volume, 3))
-    gamma = normalize(adjust_gamma(volume, 1.5))
+    weight = sitk.GetArrayFromImage(threshold(image=volume, upper=4000, lower=1))
+    equalized = normalize(adaptive_histogram_equalization(image=volume, radius=5))
+    median = normalize(median_filter(img=volume, radius=3))
+    std = normalize(std_filter(image=volume, radius=3))
+    gamma = normalize(adjust_gamma(image=volume, gamma=1.5))
 
     mc = np.stack([sitk.GetArrayFromImage(equalized),
                    sitk.GetArrayFromImage(median),
@@ -69,11 +68,11 @@ def main(volume, centroids):
                    sitk.GetArrayFromImage(std)], axis = -1)
 
 
-    labels = imlabeling(mc, centroids, weight)
+    labels = imlabeling(image=mc, centroids=centroids, weight=weight)
     labels = (labels == 3).astype(np.uint8)
     labels = sitk.GetImageFromArray(labels)
     labels.CopyInformation(volume)
-    labels = median_filter(labels, 3)
+    labels = median_filter(img=labels, radius=3)
 
     return labels
 
@@ -83,15 +82,15 @@ if __name__ == '__main__' :
     start = time()
     #load parameters
     args = parse_args()
-    volume = read_image(args.filename)
+    volume = read_image(filename=args.filename)
     if args.centroids != '' :
-        center = load_pickle(args.centroids)
+        center = load_pickle(filename=args.centroids)
     else :
         center =np.asarray([np.array(v) for _, v in centroids.items()])
 
     labels = main(volume, center)
 
-    write_volume(labels, args.output)
+    write_volume(image=labels, output_filename=args.output)
 
     stop = time()
-    print('Process ended after {:f} seconds'.format(stop- start))
+    print('Process ended after {0:.3f} seconds'.format(stop - start))

@@ -6,13 +6,11 @@ contains a series of functions for image processing which are used during the
 script developing. The modules are the following, each of them provides a different
 kind of functions.
 
-
 Utils
 -----
 
 This modules provides all the functions to read and write images in a medical image
 format like '.nrrd' or '.nifti'. All the formats supported by SimpleITK_ are allowed.
-
 
 .. _SimpleITK: https://simpleitk.readthedocs.io/en/master/IO.html
 
@@ -30,7 +28,6 @@ This module contains the implementation of all the filter used for the
 processing of images inside the script. The functions are based on SimpleITK_
 methods
 
-
 .. _OpenCV: https://opencv.org/
 
 .. automodule:: method
@@ -42,7 +39,6 @@ methods
 
 segmentation
 ------------
-
 
 This module contains the implementation of the functions used to perform the
 tasks on each script.

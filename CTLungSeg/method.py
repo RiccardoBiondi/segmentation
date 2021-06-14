@@ -10,10 +10,9 @@ __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 bounding_values = {'uint8' : [0, 255],
                    'uint16': [0, 2**16],
                    'HU' : [0, 2**12]}
-image_types = {
-              'uint8' : sitk.sitkUInt8,
-              'uint16': sitk.sitkUInt16,
-              'HU' : sitk.sitkUInt16 }
+image_types = {'uint8' : sitk.sitkUInt8,
+            'uint16': sitk.sitkUInt16,
+            'HU' : sitk.sitkUInt16 }
 
 
 
@@ -55,7 +54,7 @@ def median_filter(img, radius):
 
 
 
-def std_filter(image, radius) :
+def std_filter(image, radius):
     '''
     Replace each pixel value with the standard deviation computed on a circular
     neighbourhood with specified radius
@@ -106,7 +105,7 @@ def gauss_smooth(image, sigma = 1.):
 
 
 
-def adaptive_histogram_equalization(image, radius) :
+def adaptive_histogram_equalization(image, radius):
     '''
     Apply the histogram equalization in a neighbourhood of each voxel.
 
@@ -168,7 +167,7 @@ def adjust_gamma(image, gamma=1.0, image_type='HU'):
 
 
 
-def apply_mask(image, mask, masking_value=0, outside_value=-1500) :
+def apply_mask(image, mask, masking_value=0, outside_value=-1500):
     '''
     Apply a mask to image
 
@@ -190,7 +189,7 @@ def apply_mask(image, mask, masking_value=0, outside_value=-1500) :
 
 
 
-def vesselness(image) :
+def vesselness(image):
     '''
     Apply Frangi filter to find the likelihood of image regions to contains
     vessels (tubular structures)
@@ -209,7 +208,7 @@ def vesselness(image) :
 
 
 
-def threshold(image, upper, lower, inside = 1, outside = 0) :
+def threshold(image, upper, lower, inside=1, outside=0):
     '''
     Apply an interval threshold to the image
 
@@ -242,7 +241,7 @@ def threshold(image, upper, lower, inside = 1, outside = 0) :
 
 
 
-def cast_image(image, new_pixel_type) :
+def cast_image(image, new_pixel_type):
     '''
     Cast image pixels type to new_pixel_type
 

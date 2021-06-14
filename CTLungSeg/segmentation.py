@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import cv2
@@ -17,7 +17,7 @@ __email__   = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 
-def remove_vessels(image, sigma = 2., thr = 8) :
+def remove_vessels(image, sigma=2., thr=8) :
     '''
     Remove vessels by applying a fixed threshold to the vesselness map.
     Before computing the vesselness a Gaussian smoothing is applied.
@@ -38,11 +38,11 @@ def remove_vessels(image, sigma = 2., thr = 8) :
     smooth = gauss_smooth(image, sigma)
     vessel = vesselness(smooth)
     mask = threshold(vessel, 4000, thr, 0, 1)
-    return apply_mask(image, mask, outside_value = -1000)
+    return apply_mask(image, mask, outside_value=-1000)
 
 
 
-def imlabeling(image, centroids, weight = None) :
+def imlabeling(image, centroids, weight=None) :
     '''
     Label an input stack of multichannel images according to the provided
     centroids and weight.
@@ -88,11 +88,11 @@ def imlabeling(image, centroids, weight = None) :
             raise Exception('Weight shape doesn t match image one : {} != {}\
                                 '.format( weight.shape, image.shape[:-1]))
         distances = np.asarray([np.linalg.norm(image[weight != 0] -c, axis = 1) for c in centroids])
-        weight[weight != 0] = np.argmin(distances, axis = 0)
+        weight[weight != 0] = np.argmin(distances, axis=0)
         return weight
     else :
-        distances = np.asarray([np.linalg.norm(image -c, axis = 3) for c in centroids])
-        labels = np.argmin(distances, axis = 0)
+        distances = np.asarray([np.linalg.norm(image - c, axis=3) for c in centroids])
+        labels = np.argmin(distances, axis=0)
         return labels
 
 
@@ -102,7 +102,7 @@ def kmeans_on_subsamples(imgs,
                          n_centroids,
                          stopping_criteria,
                          centr_init,
-                         weight = False) :
+                         weight=False) :
     '''
     Apply the k-means clustering on each stack of images in the subsample.
     Allow also to choose if consider or not some voxel during the segmentation.
@@ -158,7 +158,7 @@ def kmeans_on_subsamples(imgs,
     ns = imgs[0].shape[-1]
     if weight :
         vector = np.asarray([el[:, :, :, :- 1][el[: , :, :, - 1] != 0] for el in imgs],
-                                dtype = np.ndarray)
+                                dtype=np.ndarray)
     else :
         vector = np.asarray([el.reshape((-1, ns)) for el in imgs],
                             dtype=np.ndarray)
@@ -175,4 +175,4 @@ def kmeans_on_subsamples(imgs,
                                  centr_init)
         centroids.append(centr)
         ret.append(r)
-    return [np.asarray(ret, dtype = np.float32), np.asarray(centroids, dtype= np.float32)]
+    return [np.asarray(ret, dtype=np.float32), np.asarray(centroids, dtype=np.float32)]

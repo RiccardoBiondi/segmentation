@@ -33,11 +33,11 @@ __email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 ################################################################################
 
 
-legitimate_chars = st.characters(whitelist_categories = ('Lu','Ll'),
-                                    min_codepoint = 65, max_codepoint = 90)
+legitimate_chars = st.characters(whitelist_categories=('Lu','Ll'),
+                                    min_codepoint=65, max_codepoint=90)
 
-text_strategy = st.text(alphabet = legitimate_chars, min_size = 1,
-                            max_size = 15)
+text_strategy = st.text(alphabet=legitimate_chars, min_size=1,
+                            max_size=15)
 
 sitk_types = [sitk.sitkInt16, sitk.sitkFloat32, sitk.sitkUInt32, sitk.sitkUInt64,
              sitk.sitkFloat64, sitk.sitkUInt16]
@@ -53,7 +53,7 @@ type_as_string = {
 
 
 @st.composite
-def gauss_noise_strategy(draw) :
+def gauss_noise_strategy(draw):
     origin = draw(st.tuples(*[st.floats(0., 100.)] * 3))
     spacing = draw(st.tuples(*[st.floats(.1, 1.)] * 3))
     direction = tuple([0., 0., 1., 1., 0., 0., 0., 1., 0.])
@@ -69,7 +69,7 @@ def gauss_noise_strategy(draw) :
 
 
 @st.composite
-def median_noise_strategy(draw) :
+def median_noise_strategy(draw):
     '''
     Generates a black image with salt and pepper noise
     '''
@@ -98,9 +98,9 @@ def median_noise_strategy(draw) :
 
 
 @given(median_noise_strategy(), st.integers(1, 13))
-@settings(max_examples = 20,
-        deadline = None,
-        suppress_health_check = (HC.too_slow,))
+@settings(max_examples=20,
+        deadline=None,
+        suppress_health_check=(HC.too_slow,))
 def test_median_filter (image, radius) :
     '''
     Given :
@@ -122,9 +122,9 @@ def test_median_filter (image, radius) :
 
 
 @given(median_noise_strategy())
-@settings(max_examples = 20,
-        deadline = None,
-        suppress_health_check = (HC.too_slow,))
+@settings(max_examples=20,
+        deadline=None,
+        suppress_health_check=(HC.too_slow,))
 def test_median_filter_raise_value_error(image) :
     '''
     Given :
@@ -135,15 +135,15 @@ def test_median_filter_raise_value_error(image) :
     Assert :
         - value error is raised
     '''
-    with pytest.raises(ValueError) :
+    with pytest.raises(ValueError):
         image = median_filter(image, 0)
 
 
 @given(gauss_noise_strategy(), st.floats(1., 4.))
-@settings(max_examples = 20,
-        deadline = None,
-        suppress_health_check = (HC.too_slow,))
-def test_gauss_smooth (image, sigma ) :
+@settings(max_examples=20,
+        deadline=None,
+        suppress_health_check=(HC.too_slow,))
+def test_gauss_smooth (image, sigma):
     '''
     Given :
         - Random Gaussian Noise Image
@@ -166,10 +166,10 @@ def test_gauss_smooth (image, sigma ) :
 
 
 @given(gauss_noise_strategy())
-@settings(max_examples = 20,
-            deadline = None,
+@settings(max_examples=20,
+            deadline=None,
             suppress_health_check=(HC.too_slow,))
-def tast_adjust_gamma_exception(image) :
+def tast_adjust_gamma_exception(image):
     '''
     Given:
         - image tensor
@@ -179,7 +179,7 @@ def tast_adjust_gamma_exception(image) :
         exception is raised
     '''
 
-    with pytest.raises(Exception) as excinfo :
+    with pytest.raises(Exception) as excinfo:
 
         gamma_stack = adjust_gamma(image, 0)
         assert excinfo == 'gamma vlaue cannot be zero'
@@ -187,9 +187,9 @@ def tast_adjust_gamma_exception(image) :
 
 
 @given(gauss_noise_strategy(), text_strategy)
-@settings(max_examples = 20,
-            deadline = None,
-            suppress_health_check = (HC.too_slow,))
+@settings(max_examples=20,
+            deadline=None,
+            suppress_health_check=(HC.too_slow,))
 def test_adjust_gamma_raise_image_type_exception(image, image_type):
     '''
     Given :
@@ -200,16 +200,15 @@ def test_adjust_gamma_raise_image_type_exception(image, image_type):
     Assert :
         - Exception is raised
     '''
-    with pytest.raises(Exception) as excinfo :
-
+    with pytest.raises(Exception) as excinfo:
         gamma_stack = adjust_gamma(image, 3, image_type)
 
 
 @given(gauss_noise_strategy())
-@settings(max_examples = 20,
-          deadline = None,
-          suppress_health_check = (HC.too_slow,))
-def test_std_filter_raise_value_error(image) :
+@settings(max_examples=20,
+          deadline=None,
+          suppress_health_check=(HC.too_slow,))
+def test_std_filter_raise_value_error(image):
     '''
     Given :
         - Image
@@ -219,16 +218,16 @@ def test_std_filter_raise_value_error(image) :
     assert :
         - ValueError is raised
     '''
-    with pytest.raises(Exception) as excinfo :
+    with pytest.raises(Exception) as excinfo:
         image = std_filter(image, 0)
 
 
 
 @given(gauss_noise_strategy(), st.integers(10, 100), st.integers(150, 250))
-@settings(max_examples = 20,
-          deadline = None,
-          suppress_health_check = (HC.too_slow,))
-def test_threshold_and_apply_mask(image, lower, upper) :
+@settings(max_examples=20,
+          deadline=None,
+          suppress_health_check=(HC.too_slow,))
+def test_threshold_and_apply_mask(image, lower, upper):
     '''
     Given :
         - Image
@@ -254,9 +253,9 @@ def test_threshold_and_apply_mask(image, lower, upper) :
 
 
 @given(gauss_noise_strategy(), st.sampled_from(sitk_types))
-@settings(max_examples = 20,
-          deadline = None,
-          suppress_health_check = (HC.too_slow,))
+@settings(max_examples=20,
+          deadline=None,
+          suppress_health_check=(HC.too_slow,))
 def test_cast_image(image, new_type) :
     '''
     Given :

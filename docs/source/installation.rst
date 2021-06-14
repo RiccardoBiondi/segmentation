@@ -36,7 +36,6 @@ So, from the segmentation folder simply run
   pip install -r requirements.txt
   python setup.py install
 
-
 Testing
 -------
 

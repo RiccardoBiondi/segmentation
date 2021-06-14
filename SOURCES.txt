@@ -1,9 +1,10 @@
 setup.py
 CTLungSeg/__init__.py
+CTLungSeg/__main__.py
 CTLungSeg/__version__.py
 CTLungSeg/labeling.py
 CTLungSeg/lung_extraction.py
 CTLungSeg/method.py
+CTLungSeg/segmentation.py
 CTLungSeg/train.py
 CTLungSeg/utils.py
-CTLungSeg/segmentation.py

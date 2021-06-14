@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
 import os
@@ -20,7 +20,7 @@ from CTLungSeg.segmentation import kmeans_on_subsamples
 
 
 __author__ = ['Riccardo Biondi', 'Nico Curti']
-__email__  = ['riccardo.biondi4@studio.unibo.it']
+__email__  = ['riccardo.biondi4@studio.unibo.it', 'nico.curti2@unibo.it']
 
 
 def parse_args():
@@ -63,13 +63,13 @@ def main():
     # kmeans clustering aguments :
     # - initalization technique -> choose between random or kmeans++
     # - stop_criteria : criteria used to stop the kmeans algorithm
-    init = [ "KMEANS_RANDOM_CENTERS", "KMEANS_PP_CENTERS"]
-    centroid_init =  [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
+    init = ["KMEANS_RANDOM_CENTERS", "KMEANS_PP_CENTERS"]
+    centroid_init = [cv2.KMEANS_RANDOM_CENTERS, cv2.KMEANS_PP_CENTERS]
     stop_criteria = (cv2.TERM_CRITERIA_EPS
-                     + cv2.TERM_CRITERIA_MAX_ITER, 10, .001)
+                    + cv2.TERM_CRITERIA_MAX_ITER, 10, .001)
     args = parse_args()
 
-    print("I'm Loading...", flush = True)
+    print("I'm Loading...", flush=True)
 
     files = glob(os.path.join(args.folder, '*.nrrd'))
 
@@ -91,7 +91,7 @@ def main():
         gamma = sitk.GetArrayFromImage(gamma)
         mask = sitk.GetArrayFromImage(mask)
 
-        stk = np.stack([he, med, gamma, std, mask], axis = -1)
+        stk = np.stack([he, med, gamma, std, mask], axis=-1)
 
         del he
         del med
@@ -106,7 +106,7 @@ def main():
         gc.collect()
 
 
-    imgs = np.concatenate(stks, axis = 0)
+    imgs = np.concatenate(stks, axis=0)
     n_imgs = imgs.shape[0]
 
 
@@ -139,4 +139,4 @@ if __name__ == '__main__' :
     start = time()
     main()
     stop = time()
-    print('[DONE] Total time: {:f} seconds'.format((stop - start)))
+    print('[DONE] Total time: {0:.3f} seconds'.format((stop - start)))
