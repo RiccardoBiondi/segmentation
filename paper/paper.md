@@ -28,7 +28,7 @@ affiliations:
   - name: eDIMESLab, Department of Experimental, Diagnostic and Specialty Medicine of Bologna University
     index: 2
 date: 16/06/2021
-bibliography: Paper.bib
+bibliography: paper.bib
 ---
 
 # Summary
