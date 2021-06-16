@@ -63,15 +63,16 @@ Chest CT scans of patients affected by this condition have shown peculiar patter
 of Ground Glass Opacities (GGO) and Consolidation (CS) related to the severity
 and the stage of the disease.
 
-In this scenario, the correct and fast identification of these patterns is a
-fundamental task.
+In this scenario, the correct and fast identification of these patterns is a fundamental task.
 Up to now, this task is mainly performed using manual or semi-automatic techniques,
 which are time-consuming (hours or days) and subjected to the operator expertise.
 
 This project provides an automated pipeline for the segmentation of
 GGO areas on chest CT scans of patient affected by COVID-19.
 The segmentation is achieved with a color quantization algorithm, based on k-means
-clustering, which groups the voxels by color and texture similarity
+clustering, which groups the voxels by color and texture similarity. This
+approach is preceeded by the lung segmentation, achieved by a public available
+U-Net model [@Hofmanninger2020@] [@lungmask@]
 
 The pipeline performances has been tested on 15 labeled chest CT scans dataset.
 These scans were segmented and validated by expert radiologist.
