@@ -41,7 +41,7 @@ def integer_stack_strategy(draw) :
 
 
 @given(integer_stack_strategy(), st.integers(1, 6))
-@settings(max_examples =4, deadline=None)
+@settings(max_examples=4, deadline=None)
 def test_imlabeling(stack, channels):
     '''
     Given :
@@ -81,7 +81,7 @@ def test_imlabeling_wWeigth(stack, channels):
     gt[gt != 0] = gt[gt != 0] - 1
 
     w = (stack[0] != 0).astype(np.uint8)
-    mc = np.stack([stack[0] for i in range(channels)], axis= 1)
+    mc = np.stack([stack[0] for i in range(channels)], axis=-1)
     centroids = np.stack([np.arange(stack[1]) for _ in range(channels)], axis=-1)
 
     labeled = imlabeling(mc, centroids, w)
