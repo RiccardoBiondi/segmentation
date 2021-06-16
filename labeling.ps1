@@ -5,7 +5,7 @@ Param
 (
   [parameter(mandatory=$true, position=0)][string]$input_dir,
   [parameter(mandatory=$true, position=1)][string]$label_dir,
-  [parameter(mandatory=$false, position=2)][string]$centroids
+  [parameter(mandatory=$false, position=2)][string]$centroids=""
 )
 
 
@@ -38,7 +38,7 @@ If ( $null -eq $label_dir)
   Write-Error -Message "Error! Output directory for label 1 not set"-Category NotSpecified
   exit 1
 }
-ElseIf ( -not (Test-Path -Path $label1_dir -PathType Container) )
+ElseIf ( -not (Test-Path -Path $label_dir -PathType Container) )
 {
   Write-Error -Message "Error! Output directory for label1 not found" -Category ObjectNotFound
   exit 1
@@ -58,11 +58,11 @@ For ($i = 0; $i -lt $files.Length; $i++)
   Write-Output  "* Processing " $files[$i]
   $BaseName = Get-Item $files[$i] | Select-Object -ExpandProperty BaseName
   $BaseName = $BaseName -replace "\..+"
-  $label_name = $label_dir + $BaseName
+  $label_name = $label_dir + $BaseName +".nrrd"
 
 
 
-  python -m CTLungSeg.labeling --input $files[$i] --centroids $centroids --label $label_name
+  python -m CTLungSeg.labeling --input $files[$i] --centroids $centroids --output $label_name
 
   If ( $? )
   {

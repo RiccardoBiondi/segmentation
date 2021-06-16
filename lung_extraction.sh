@@ -50,8 +50,8 @@ for file in $input_files; do
 
   printf "* Processing $file ...       "
 
-  f="${file%%.n*}"
-  python3 -m CTLungSeg.lung_extraction --input="$input_dir$file" --output="$output_dir$f"
+  f="${file%%.nrrd}"
+  python3 -m CTLungSeg.lung_extraction --input="$input_dir$file" --output="$output_dir$f.nrrd"
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

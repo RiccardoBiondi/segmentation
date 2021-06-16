@@ -86,8 +86,6 @@ rule prepare_train_data :
         config['threads_lung_extraction']
     resources :
         memory = config['memory_lung_extraction']
-    log :
-        "LOG/{sample}.log"
     shell :
         "CTLungSeg/lung_extraction.py --input='{input.in_}' --output='{output.out}'"
 

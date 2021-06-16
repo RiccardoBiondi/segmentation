@@ -70,7 +70,7 @@ for file in $input_files; do
   printf "* Processing $file ...       "
   f="${file%%.*}"
 
-  python3 -m CTLungSeg.labeling --input="$input_dir$file"  --centroids="$centroids" --output="$label_dir$f"
+  python3 -m CTLungSeg.labeling --input="$input_dir$file"  --centroids="$centroids" --output="$label_dir$f.nrrd"
 
   if [ "$?" = 0 ]; then
     echo -e "${green}[done]${reset}"

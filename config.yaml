@@ -20,7 +20,7 @@ train_path : # Path to the folder which contains the training scans
 # If no centroid file is provided, It will be used the default
 # one.
 centroid_path :
-  "centroid.pkl.npy"
+  "./centroids.pkl.npy"
 
 # training parameters. See the training documentation for further information.
 n_subsamples : 100

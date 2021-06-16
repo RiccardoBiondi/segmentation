@@ -177,7 +177,7 @@ Execute from command line
 
 ```bash
   snakemake --cores 1 --config input_path='/path/to/INPUT/'
-  --output_path='/path/to/OUTPUT/'
+  output_path='/path/to/OUTPUT/'
 ```
 
 **Note**: It will create a folder named **LUNG** inside the INPUT,
@@ -234,7 +234,7 @@ Now run Snakemake with the following configuration parameters :
 
 ```bash
   snakemake --cores 1 --config input_path='/path/to/INPUT/'
-  --output_path='/path/to/OUTPUT/' --train_path='/path/to/TRAIN/' --centroid_path='/path/to/save/your/centorid/set.pkl.npy'
+  output_path='/path/to/OUTPUT/' train_path='/path/to/TRAIN/' centroid_path='/path/to/save/your/centorid/set.pkl.npy'
 ```
 
 #### Bash and PowerShell scrirpt

@@ -48,8 +48,7 @@ def main(image) :
     mask.CopyInformation(image)
 
     masked = apply_mask(image=image, mask=mask, outside_value=-1000)
-
-    print('Remove Vessels', flush=True)
+    
     wo_vessels = remove_vessels(image=masked)
     out = shift_and_crop(image=wo_vessels)
 
@@ -63,6 +62,7 @@ if __name__ == '__main__' :
     args = parse_args()
     volume = read_image(filename=args.input)
     lung = main(image=volume)
+    print(args.output)
     write_volume(image=lung, output_filename=args.output)
 
     stop = time()

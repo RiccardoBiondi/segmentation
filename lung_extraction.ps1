@@ -43,7 +43,7 @@ For ($i = 0; $i -lt $files.Length; $i++)
   Write-Output  "* Processing " $files[$i]
   $BaseName = Get-Item $files[$i] | Select-Object -ExpandProperty BaseName
   $BaseName = $BaseName -replace "\..+"
-  $lung_name = $output_dir + $BaseName
+  $lung_name = $output_dir + $BaseName + +".nrrd"
 
   python -m CTLungSeg.lung_extraction --input $files[$i] --output $lung_name
   If ( $? )
