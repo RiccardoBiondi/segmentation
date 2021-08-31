@@ -30,6 +30,7 @@ def remove_vessels(image, sigma=2., thr=8) :
         sigma of the gaussian smoothing filter
     thr : float
         fixed threshold value
+
     Return
     ------
     wo_vessels : SimpleITK image
@@ -49,7 +50,6 @@ def imlabeling(image, centroids, weight=None) :
 
     Parameters
     ----------
-
     image : array-like of shape (n_images, height, width, n_channels)
         image stack to label
 
@@ -111,7 +111,6 @@ def kmeans_on_subsamples(imgs,
 
     Parameters
     ----------
-
     imgs : array-like of shape (n_subsamples, n_imgs, heigth, width, n_channels)
         array of images tensor
     n_centroids : int

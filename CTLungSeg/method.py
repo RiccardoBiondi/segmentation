@@ -222,7 +222,6 @@ def threshold(image, upper, lower, inside=1, outside=0):
         lower threshold value
     inside : int
         value to assign to the voxels with GL in [lower, upper]
-
     outside : int
         value to assign to the voxels with GL outside [lower, upper]
 

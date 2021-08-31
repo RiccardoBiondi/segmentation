@@ -11,6 +11,11 @@ The full list of prerequisites is the following:
 - tdqm
 - SimpleITK
 
+And, for testing:
+
+- PyTest>=3.0.7
+- Hypothesis>=4.13.0
+
 The lung extraction is performed by using pre-trained UNet, so please ensure to
 have installed the lungmask_ package. For more information about how the network
 is trained, please refers here_
@@ -40,7 +45,17 @@ Testing
 -------
 
 Testing routines use pytest_ and hypothesis_ packages. please install
-these packages to perform the test.
+these packages to perform the test:
+
+.. code-block:: bash
+
+  pip install pytest>=3.0.7
+  pip install hypothesis>=4.13.0
+
+.. warning::
+  Pytest versions above 6.1.2 are not available for python 3.5
+
+
 All the full set of test is provided in the testing_ directory.
 You can run the full list of test with:
 

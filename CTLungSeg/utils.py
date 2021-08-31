@@ -37,9 +37,9 @@ def load_pickle(filename):
 def _read_dicom_series(filedir):
     '''
     Define and initialize the SimpleITK reader for the image series
+
     Parameters
     ----------
-
     filedir: str
         path to the directory that contains the DICOM series
 
@@ -78,10 +78,15 @@ def _read_image(filename):
 def read_image(filename):
     '''
     Read an image or a series from a format supported by SimpleITK.
-    .. note: Will raise FileNotFoundError if the image path is incorrect
-    or the image file does not exist.
-    .. warn: If you want to read a DICOM series, please ensure that the folder
+
+    .. note:
+        Will raise FileNotFoundError if the image path is incorrect
+        or the image file does not exist.
+
+    .. warn:
+        If you want to read a DICOM series, please ensure that the folder
         contains only the .dcm file of a single series
+
     Parameters
     ----------
     filename: str
@@ -144,7 +149,7 @@ def write_volume(image, output_filename):
     >>> output_name = 'path/to/output/filename.nrrd'
     >>> write_volume(image, output_name)
     >>> #or write the image as nifti
-    >>  output_name = 'path/to/output/filename.nii'
+    >>>  output_name = 'path/to/output/filename.nii'
     >>> write_volume(image, output_name)
     '''
     writer = sitk.ImageFileWriter()
@@ -158,12 +163,10 @@ def save_pickle(filename, data):
 
     Parameters
     ----------
-
     filename: str
         file name or path to dump as pickle file
     data: array-like
         image or stack to save
-
     '''
     with open(filename, 'wb') as fp:
         pickle.dump(data, fp)
@@ -176,13 +179,11 @@ def normalize(image) :
 
     Parameters
     ----------
-
     image : SimpleITK image object
         image to normalize
 
     Returns
     -------
-
     normalized : SimpleITK image
         normalized image
     '''
@@ -233,7 +234,6 @@ def shuffle_and_split(data, number_of_subarrays):
 
     Returns
     -------
-
     out: list of array-like
         list of random subsamples
     '''
@@ -246,13 +246,13 @@ def deep_copy(image) :
     '''
     Return a copy of the input image
 
-    Parameter
-    ---------
+    Parameters
+    ----------
     image : SimpleITK image
         Image to Copy
 
-    Return
-    ------
+    Returns
+    -------
     copy : SimpleITK image
         copy of the input image
     '''

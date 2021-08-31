@@ -37,7 +37,7 @@ methods
    :private-members:
    :special-members:
 
-segmentation
+Segmentation
 ------------
 
 This module contains the implementation of the functions used to perform the

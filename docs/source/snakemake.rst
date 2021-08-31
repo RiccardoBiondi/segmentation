@@ -20,10 +20,10 @@ Now simply execute from command line
 
   snakemake --cores 1 --config input_path='/path/to/INPUT/' --output_path='/path/to/OUTPUT/'
 
-..note::
+.. note::
 
-It will create a folder named **LUNG** inside the INPUT, which
-contains the results of the lung extraction step.
+  It will create a folder named **LUNG** inside the INPUT, which
+  contains the results of the lung extraction step.
 
 Train a Centroid Set
 --------------------
@@ -42,10 +42,10 @@ Now run Snakemake with the following configuration parameters :
 
 This will train the centroid set and use them to segment the input scans.
 
-..Note::
+.. note::
 
-This will create a folder named LUNG inside INPUT and TRAIN which
-contains the scans after lung extraction.
+  This will create a folder named LUNG inside INPUT and TRAIN which
+  contains the scans after lung extraction.
 
 .. warning::
 
