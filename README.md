@@ -91,7 +91,7 @@ To refer to modules documentation:
 
 For each script described below, there are a PowerShell and a shell script that
 allows their execution on multiple patients scans. Moreover it also provide a
-snekemake pipeline.
+snakemake pipeline.
 
 ## Prerequisites
 
@@ -111,31 +111,36 @@ to https://doi.org/10.1186/s41747-020-00173-2.
 > :warning: The OpenCV requirement binds the minimum Python version of this project
 > to Python 3.5!
 
+To run the tests you need to install ```PyTest``` and ```Hypothesis```.
+Installation instructions are available at: [PyTest](https://docs.pytest.org/en/6.2.x/getting-started.html), [Hypothesis](https://docs.pytest.org/en/6.2.x/getting-started.html)
+
+
+
 ## Installation
 
 Download the project or the latest release:
 
 ```bash
 git clone https://github.com/RiccardoBiondi/segmentation
-cd segmentation
 ```
 
-Now you can simply install all the required packages with the command:
+Now you can install the package using pip:
 
 ```bash
-pip install -r requirements.txt
+pip install segmentation/
 ```
 
-and build the package using the command:
 
-```bash
-python setup.py install
-```
+
 
 ### Testing
 
 Testing routines use ```PyTest``` and ```Hypothesis``` packages. please install
 these packages to perform the test.
+
+The minimum required versions are: PyTest 3.0.7 and Hypothesis 4.13.0
+> :warning: pytest versions above 6.1.2 are not supported by python 3.5
+
 A full set of test is provided in [testing](https://github.com/RiccardoBiondi/segmentation/blob/master/testing) directory.
 You can run the full list of test with:
 
@@ -229,6 +234,8 @@ Prepare three folders :
   - INPUT: will contains all the scans to segment
   - OUTPUT: will contain the segmented scans
   - TRAIN: will contain all the scans of the training set. (**NOTE** Cannot be the INPUT folder)
+
+> :warning: INPUT and TRAIN folder cannot be the same
 
 Now run Snakemake with the following configuration parameters :
 
