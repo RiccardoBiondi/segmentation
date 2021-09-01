@@ -4,9 +4,9 @@ tdqm
 SimpleITK
 matplotlib
 
-sphinx==1.8
+sphinx==4.1.2
 sphinx-rtd-theme
 sphinxcontrib-napoleon
 sphinxcontrib-programoutput
-nbsphinx==0.7.0
+nbsphinx==0.8.7
 IPython
