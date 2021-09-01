@@ -32,7 +32,9 @@ master_doc = 'index'
 extensions = [
               'sphinx.ext.autodoc',
               'sphinx.ext.napoleon',
-              'sphinx.ext.viewcode']
+              'sphinx.ext.viewcode',
+              'nbsphinx',
+              'IPython.sphinxext.ipython_console_highlighting']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = []
@@ -57,6 +59,9 @@ exclude_patterns = []
 #
 html_theme =  'sphinx_rtd_theme'
 
+nbsphinx_input_prompt = 'In [%s]:'
+nbsphinx_kernel_name = 'python3'
+nbsphinx_output_prompt = 'Out[%s]:'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
