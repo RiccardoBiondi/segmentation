@@ -8,5 +8,5 @@ sphinx==1.8
 sphinx-rtd-theme
 sphinxcontrib-napoleon
 sphinxcontrib-programoutput
-nbsphinx
+nbsphinx==0.7.0
 IPython
