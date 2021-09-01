@@ -2,6 +2,7 @@ numpy>=1.17
 opencv-python
 tdqm
 SimpleITK
+matplotlib
 
 sphinx==1.8
 sphinx-rtd-theme

@@ -87,7 +87,7 @@ as '.nrrd' and run the bash or PowerShell script.
   modules
   snakemake
   script
-  examples/modules
+  ./examples/pipeline_workflow
   references
 
 
