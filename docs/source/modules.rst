@@ -43,8 +43,7 @@ Segmentation
 This module contains the implementation of the functions used to perform the
 tasks on each script.
 
-
-.. automodule:: segmentation
+.. automodule:: CTLungSeg.segmentation
    :members:
    :undoc-members:
    :show-inheritance:

@@ -114,8 +114,6 @@ to https://doi.org/10.1186/s41747-020-00173-2.
 To run the tests you need to install ```PyTest``` and ```Hypothesis```.
 Installation instructions are available at: [PyTest](https://docs.pytest.org/en/6.2.x/getting-started.html), [Hypothesis](https://docs.pytest.org/en/6.2.x/getting-started.html)
 
-
-
 ## Installation
 
 Download the project or the latest release:
@@ -130,15 +128,15 @@ Now you can install the package using pip:
 pip install segmentation/
 ```
 
-
-
-
 ### Testing
 
 Testing routines use ```PyTest``` and ```Hypothesis``` packages. please install
-these packages to perform the test.
+these packages to perform the test. o install the package in development mode you need to add also this requirement:
 
-The minimum required versions are: PyTest 3.0.7 and Hypothesis 4.13.0
+- pytest >= 3.0.7
+
+- hypothesis >= 4.13.0
+
 > :warning: pytest versions above 6.1.2 are not supported by python 3.5
 
 A full set of test is provided in [testing](https://github.com/RiccardoBiondi/segmentation/blob/master/testing) directory.
@@ -150,9 +148,36 @@ python -m pytest
 
 ## Usage
 
-### Single Scan
+This modules provides some script to segment a single scan, to automate the segmentation for multiple patients and to train your centroid set.
+In the following paragraph, we will see how to use all the features. To achieve this purpose,
+we will use, as example, the public dataset *COVID-19 CT Lung and Infection Segmentation Dataset*, published by Zenodo[5].
 
-Once you have installed it, you can directly start to segment the images.
+### Download Data
+
+Firstly, we have to download and prepare the data.
+All the data will be stored and organized in a folder named *Example*.
+
+Download data into the Examples folder
+
+using Bash:
+
+```bash
+  $ mkdir Examples
+  $ wget https://zenodo.org/record/3757476/files/COVID-19-CT-Seg_20cases.zip -P ./Examples
+  $ unzip ./Examples/COVID-19-CT-Seg_20cases.zip -d ./Examples/COVID-19-CT
+```
+
+Or PowerShell:
+
+```PowerShell
+
+  PS \> New-Item  -Path . -Name "Examples" -ItemType "directory"
+  PS \> Start-BitsTransfer -Source https://zenodo.org/record/3757476/files/COVID-19-CT-Seg_20cases.zip -Destination .\Examples\
+  PS \> Expand-Archive -LiteralPath .\Examples\COVID-19-CT-Seg_20cases.zip -DestinationPath .\Examples\COVID-19-CT -Force
+```
+
+### Single Scan
+Once you have download the data and installed the module, you can start to segment the images.
 Input CT scans must be in Hounsfield units(HU) since grey-scale
 images are not allowed.
 The input allowed formats are the ones supported by SimpleITK.
@@ -164,106 +189,172 @@ As output will save the segmentation as *nrrd*.
 To segment a single CT scan run the following from the bash or PowerShell:
 
 ```bash
-   python -m CTLungSeg --input='/path/to/input/series/'  --output='/path/to/output/file/'
+   python -m CTLungSeg --input='./Examples/COVID-19-CT/coronacases_003.nii.gz'  --output='./Examples/coronacases_003_label.nrrd'
 ```
 
 ### Multiple Scans
 
-We have provided a snakemake pipeline and bash(or PowerShell) scripts to
-automate the process and make it  easier to segment many scans.
+In the case of multiple patients segmentation, you have to repeat the segmentation process many times:  We have automated this process using bash(for Linux) and PowerShell(for Windows) scripts.
+We have also provided a snakemake pipeline for the whole segmentation procedure in a multi-processing environment.
+In the following paragraph, we will explain how to organize your data to benefits from this automation.
 
-#### Snakemake
+#### Script
 
-First of all, you have to create two folders :
-  - INPUT : contains all and only the CT scans to segment
-  - OUTPUT : empty folder, will contain the segmented scans as *nrrd*.
-
-Execute from command line
-
-```bash
-  snakemake --cores 1 --config input_path='/path/to/INPUT/'
-  output_path='/path/to/OUTPUT/'
-```
-
-**Note**: It will create a folder named **LUNG** inside the INPUT,
-which contains the results of the lung extraction step.
-
-#### Bash and Powershell script
-
-It is possible to achieve the same results as before.
-First of all, you have to create three folders :
+To run the scripts,, you have to organize the data into three folders:
 
 - input folder: contains all and only the CT scans to segment
 - temporary folder: empty folder. Will contain the scans after the lung segmentation
 - output folder: empty folder, will contain the labels files.
 
-Now you can proceed with the lung segmentation. To achieve this purpose simply run
+As examples we will segmenta the *coronacases_002* and the *coronacases_005* patients.
+
+From bash:
+
+```bash
+  $ mkdir ./Examples/INPUT
+  $ mkdir ./Examples/LUNG
+  $ mkdir ./Examples/OUTPUT
+  $ mv ./Examples/COVID-19-CT/coronacases_002.nii.gz ./Examples/COVID-19-CT/coronacases_005.nii.gz ./Examples/INPUT
+```
+or from PowerShell
+
+```PowerShell
+  PS \> New-Item -Path "Examples" -Name "INPUT" -ItemType "directory"
+  PS \> New-Item -Path "Examples" -Name "LUNG" -ItemType "directory"
+  PS \> New-Item -Path "Examples" -Name "OUTPUT" -ItemType "directory"
+  PS \> Move-Item -Path "Examples\COVID-19-CT\coronacases_002.nii.gz" -Destination "Examples\INPUT"
+  PS \> Move-Item -Path "Examples\COVID-19-CT\coronacases_005.nii.gz" -Destination "Examples\INPUT"
+```
+
+Now you can proceed with the **lung segmentation**. To achieve this purpose run
 from PowerShell the  script:
 
  ```PowerShell
-  PS \> ./lung_extraction.ps1 path/to/input/folder/ path/to/temporary/folder/
+  PS \> ./lung_extraction.ps1 ./Examples/INPUT ./Examples/LUNG
  ```
 
 Or its equivalent bash version:
 
 ```bash
-  $ ./lung_extraction.sh path/to/input/folder/ path/to/temporary/folder/
+  $ ./lung_extraction.sh./Examples/INPUT ./Examples/LUNG
 ```
 
 Once you have successfully isolated the lung, you are ready to perform the GGO
 segmentation. Run the labelling scrip from PowerShell :
 
 ```PowerShell
-  PS /> ./labeling.ps1 path/to/temporary/folder/ p /path/to/output/folder/
+  PS /> ./labeling.ps1 ./Examples/LUNG ./Examples/OUTPUT
 ```
 
 Or its corresponding bash version:
 
 ```bash
-$ ./labeling.sh path/to/temporary/folder/ p /path/to/output/folder/
+$ ./labeling.sh ./Examples/LUNG ./Examples/OUTPUT
 ```
 
-### Train your own centroids set
+##### Train your own centroid set
 
 It is possible to train your centroid set instead of using the pre-trained one.
-To do that, you can use a snakemake or a bash or PowerShell script.
+
+In this case you have to prepare these folders :
+  - TRAIN : will contain the scans in the training set
+  - TLUNG : will stores the scans after lung extraction
+
+We will use *coronaceses_003* and *coronaceses_008* as training set.
+
+From bash:
+
+```bash
+  $ mkdir ./Examples/TRAIN
+  $ mkdir ./Examples/TLUNG
+  $ mv ./Examples/COVID-19-CT/coronacases_003.nii.gz ./Examples/COVID-19-CT/coronacases_008.nii.gz ./Examples/TRAIN
+```
+
+or Powershell:
+
+```PowerShell
+  PS \> New-Item -Path ".\Examples" -Name "TRAIN" -ItemType "directory"
+  PS \> New-Item -Path ".\Examples" -Name "TLUNG" -ItemType "directory"
+  PS \> Move-Item -Path ".\Examples\COVID-19-CT\coronacases_003.nii.gz" -Destination "Examples\TRAIN"
+  PS \> Move-Item -Path ".\Examples\COVID-19-CT\coronacases_008.nii.gz" -Destination "Examples\TRAIN"
+```
+
+First of all, you have to perform the lung extraction on the train scans,
+as before run:
+
+```bash
+  $ ./lung_extraction.sh ./Examples/TRAIN/ ./Examples/TLUNG/
+```
+
+or its corresponding PowerShell version. Now, to estimate the centroid set, run:
+
+```bash
+  $ ./train.sh ./Examples/TLUNG/ ./centroid.pkl.npy
+```
+
+or its corresponding PowerShell version.
 
 #### Snakemake
 
-Prepare three folders :
+If you have not installed snakemake, you can find the instruction [here](https://snakemake.readthedocs.io/en/stable/).
+To use the snakemake pipeline, you have to create two folders:
+
+  - INPUT : contains all and only the CT scans to segment
+  - OUTPUT : empty folder, will contain the segmented scans as *nrrd*.
+
+As before we will use as examples *coronacases_002* and *coronacases_005* patients
+
+> :notes: If you already run the script version, these folder are ready
+
+Execute from bash
+
+```bash
+  $ mkdir ./Examples/INPUT
+  $ mkdir ./Examples/OUTPUT
+  $ mv ./Examples/COVID-19-CT/coronacases_002.nii.gz ./Examples/COVID-19-CT/coronacases_005.nii.gz ./Examples/INPUT
+```
+
+or PowerShell
+
+```PowerShell
+  PS \> New-Item -Path "Examples" -Name "INPUT" -ItemType "directory"
+  PS \> New-Item -Path "Examples" -Name "OUTPUT" -ItemType "directory"
+  PS \> Move-Item -Path ".\Examples\COVID-19-CT\coronacases_002.nii.gz" -Destination "Examples\INPUT"
+  PS \> Move-Item -Path ".\Examples\COVID-19-CT\coronacases_005.nii.gz" -Destination "Examples\INPUT"
+
+```
+
+Now, from command line, execute:
+
+```bash
+  snakemake --cores 1 --config input_path='./Examples/INPUT/'
+  output_path='./Examples/OUTPUT/'
+```
+
+> :notes: This command works both for Bash and Powershell
+
+> :warning: It will create a folder named **LUNG** inside the INPUT,
+> which contains the results of the lung extraction step.
+
+#### Train Your Centroids
+
+As before, you can decide to train your centroid set. To achieve this purpose, using the snakemake pipeline, you have to prepare three folders :
+
   - INPUT: will contains all the scans to segment
   - OUTPUT: will contain the segmented scans
   - TRAIN: will contain all the scans of the training set. (**NOTE** Cannot be the INPUT folder)
 
 > :warning: INPUT and TRAIN folder cannot be the same
 
+> :notes: This will train the centroid set, and after that perform the segmentation on the scans in the input folder.
+> So the INPUT folder is organized as before.
+
 Now run Snakemake with the following configuration parameters :
 
 ```bash
-  snakemake --cores 1 --config input_path='/path/to/INPUT/'
-  output_path='/path/to/OUTPUT/' train_path='/path/to/TRAIN/' centroid_path='/path/to/save/your/centorid/set.pkl.npy'
+  snakemake --cores 1 --config input_path='./Examples/INPUT/'
+  output_path='.Examples/OUTPUT/' train_path='./Examples/TRAIN/' centroid_path='./Examples/centorids.pkl.npy'
 ```
-
-#### Bash and PowerShell scrirpt
-
-In this case you have to prepare two folder :
-  - TRAIN : will contain the scans in the training set
-  - LUNG : will stores the scans after lung extraction
-
-First of all, you have to perform the lung extraction on the train scans,
-as before run:
-
-```bash
-  $ ./lung_extraction.sh path/to/TRAIN/ path/to/LUNG/
-```
-
-or its corresponding PowerShell version. Now, to estimate the centroid set, run:
-
-```bash
-  $ ./train.sh path/to/LUNG/ path/to/centroid.pkl.npy
-```
-
-or its corresponding PowerShell version.
 
 ## License
 
@@ -289,6 +380,8 @@ for further informations about how to contribute with this project.
 <blockquote>3- Yaniv, Z., Lowekamp, B.C., Johnson, H.J. et al. SimpleITK Image-Analysis Notebooks: a Collaborative Environment for Education and Reproducible Research. J Digit Imaging 31, 290–303 (2018). https://doi.org/10.1007/s10278-017-0037-8.</blockquote>
 
 <blockquote>4- Lowekamp Bradley, Chen David, Ibanez Luis, Blezek Daniel The Design of SimpleITK  Frontiers in Neuroinformatics 7, 45 (2013) https://www.frontiersin.org/article/10.3389/fninf.2013.00045.</blockquote>
+
+<blockquote>5- Ma Jun, Ge Cheng, Wang Yixin, An Xingle, Gao Jiantao, Yu Ziqi, Zhang Minqing, Liu Xin, Deng Xueyuan, Cao Shucheng, Wei Hao, Mei Sen, Yang Xiaoyu, Nie Ziwei, Li Chen, Tian Lu, Zhu Yuntao, Zhu Qiongjie, Dong Guoqiang, & He Jian. (2020). COVID-19 CT Lung and Infection Segmentation Dataset (Verson 1.0) [Data set]. Zenodo. https://doi.org/10.5281/zenodo.3757476.</blockquote>
 
 ## Authors
 

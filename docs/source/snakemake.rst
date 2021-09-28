@@ -7,10 +7,13 @@ other set of centroids and use it for the segmentation. This file allows to
 customize the usage of the hardware resources, like the number of threads and the
 amount of memory.
 
+As before, this examples will use he data previously downloaded from the public dataset
+
 Segment Multiple Scan
 ---------------------
 
 First of all, you have to create two folders:
+
   - INPUT : contains all and only the CT scans to segment
   - OUTPUT : empty folder, will contain the segmented scans as *nrrd*.
 
@@ -18,7 +21,7 @@ Now simply execute from command line
 
 .. code-block:: bash
 
-  snakemake --cores 1 --config input_path='/path/to/INPUT/' --output_path='/path/to/OUTPUT/'
+  snakemake --cores 1 --config input_path='./Examples/INPUT/' --output_path='./Examples/OUTPUT/'
 
 .. note::
 
@@ -37,8 +40,8 @@ Now run Snakemake with the following configuration parameters :
 
 .. code-block:: bash
 
-  snakemake --cores 1 --config input_path='/path/to/INPUT/' --output_path='/path/to/OUTPUT/'
-  --train_path='/path/to/TRAIN/' --centroid_path='/path/to/save/your/centorid/set.pkl.npy'
+  snakemake --cores 1 --config input_path='./Examples/INPUT/' --output_path='./Examples/OUTPUT/'
+  --train_path='./Examples/TRAIN/' --centroid_path='.Examples/centorid_set.pkl.npy'
 
 This will train the centroid set and use them to segment the input scans.
 

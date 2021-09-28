@@ -18,8 +18,8 @@ sys.path.insert(0, os.path.abspath('../../CTLungSeg/'))
 # -- Project information -----------------------------------------------------
 
 project = 'CTLungSeg'
-copyright = '2020, RiccardoBiondi, Nico Curti'
-author = 'RiccardoBiondi, Nico Curti'
+copyright = '2020, Riccardo Biondi, Nico Curti'
+author = 'Riccardo Biondi, Nico Curti'
 
 # The full version, including alpha/beta/rc tags
 release = '2.0.0'

@@ -26,6 +26,31 @@ Once you have installed you can directly start to segment the images.
 Input CT scans must be in Hounsfield units(HU), gray-scale images are not allowed.
 The input allowed formats are the ones supported by SimpleITK_ .
 
+Example Data
+------------
+
+As Example data, we will use the ones of the public dataset  *COVID-19 CT Lung and Infection Segmentation Dataset*, published by Zenodo.
+How to organize them depends on the purpose and will be explained for each tutorial.
+
+Firstly, create the Examples folder, which will contain the dataset and the results.
+After, you will download the .zip containing the data and unzip it.
+
+So, run from bash:
+
+.. code-block:: bash
+
+  mkdir Examples
+  wget https://zenodo.org/record/3757476/files/COVID-19-CT-Seg_20cases.zip -P ./Examples
+  unzip ./Examples/COVID-19-CT-Seg_20cases.zip -d ./Examples/COVID-19-CT
+
+or PowerShell:
+
+.. code-block:: powershell
+
+    New-Item  -Path . -Name "Examples" -ItemType "directory"
+    Start-BitsTransfer -Source https://zenodo.org/record/3757476/files/COVID-19-CT-Seg_20cases.zip -Destination .\Examples\
+    Expand-Archive -LiteralPath .\Examples\COVID-19-CT-Seg_20cases.zip -DestinationPath .\Examples\COVID-19-CT -Force
+
 Single Patient Example
 ----------------------
 
@@ -34,7 +59,7 @@ PowerShell :
 
 .. code-block:: bash
 
-   python -m CTLungSeg --input='/path/to/input/series'  --output='/path/to/output/file'
+   python -m CTLungSeg --input='.Examples/COVID-19-CT/coronacases_002.nii.gz'  --output='./Examples/coronacases_002_label.nrrd'
 
 Which takes as input the CT scan in each format supported by SimpleITK_. If the
 input is a Dicom series, simply pass the path to the directory which contains
@@ -45,34 +70,8 @@ The output label will be saved as '.nrrd'.
 Multiple Patient Example
 ------------------------
 
-Segmenting many patients can be time-consuming, so a series of bash and
-PowerShell scripts are provided, to automatize the procedure for more
-then one patient.
-In this case, the segmentation is divided into two different steps :
-
-- lung extraction
-- labelling
-
-First of all, you have to organize all the input scans into the input folder,
-and create an empty folder in which the results of the first step will be saved
-as '.nii'.
-After that simply run the bash or the PowerShell script:
-
-.. code-block:: bash
-
-   ./lung_extraction.sh /path/to/input/folder/ /path/to/lung/folder/
-
-.. code-block:: bash
-
-  ./lung_extraction.sh /path/to/input/folder/ /path/to/output/folder/
-
-Once this step is completed, you can perform the actual segmentation. First of
-all create an empty output folder in which the resulting labels will be saved
-as '.nrrd' and run the bash or PowerShell script.
-
-.. code-block:: bash
-
-  ./labeling.sh /path/to/lung/folder/ /path/to/output/folder/
+The segmentation of multiple patients can be time-consuming and tedious, so we have provided a series of scripts to automate this procedure.  Moreover, we have provided a snakemake pipeline.
+To see their usage, please refer to script and snakemake contents.
 
 
 .. _SimpleITK: https://simpleitk.org/
@@ -85,9 +84,9 @@ as '.nrrd' and run the bash or PowerShell script.
   installation
   theory
   modules
-  snakemake
   script
-  ./examples/pipeline_workflow
+  snakemake
+  ./examples/examples
   references
 
 

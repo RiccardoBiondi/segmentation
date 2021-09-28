@@ -93,6 +93,8 @@ the following Table.
 
 The proposed unsupervised segmentation pipeline is able to approximate the gold
 standard with satisfactory results.
+Given that the amount of information required for the k-means method training is considerably lower than CNN methods, while still retaining good results, this segmentation can be implemented with in-patient training[@app11125438@];
+as a reference, a 3D U-Net-based method [@yan2020covid19@] required two order of magnitude training samples to achieve comparable results.
 With this work we aimed to prove that semi-supervised approaches to segmentation are promising,
 as they would combine the best effort of highly trained physicians to develop true gold standard
 segmentation and the expertise of data analysts to augment those segmentation in full blown models.

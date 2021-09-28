@@ -31,15 +31,12 @@ To install this package first of all you have to clone the repositories from Git
 .. code-block:: bash
 
   git clone https://github.com/RiccardoBiondi/segmentation
-  cd segmentation
 
-The installation is managed by setup.py, which will install also the full dependency.
-So, from the segmentation folder simply run
+Now you can install tha package using pip
 
 .. code-block:: bash
 
-  pip install -r requirements.txt
-  python setup.py install
+  pip install segmentation/
 
 Testing
 -------
@@ -57,10 +54,11 @@ these packages to perform the test:
 
 
 All the full set of test is provided in the testing_ directory.
-You can run the full list of test with:
+You can run the full list of test from the segmentation folder:
 
 .. code-block:: bash
 
+  cd segmentation
   python -m pytest
 
 
