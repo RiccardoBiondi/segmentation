@@ -77,17 +77,17 @@ To refer to script documentation:
 
 | **Script** | **Description** |
 |:----------:|:---------------:|
-| [lung_extraction](./docs/pipeline/lung_extraction.md) | Extract lung from CT scans 										 																																				|
-| [train](./docs/pipeline/train.md) | Apply colour quantization on a series of stacks to estimate the centroid to use for segmentation																																													|
-| [labeling](./docs/pipeline/labeling.md) |Segment the input image by using pre-estimated centroids or user-provided set|
+| [lung_extraction](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/script.html#lung-extraction) | Extract lung from CT scans 										 																																				|
+| [train](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/script.html#train) | Apply colour quantization on a series of stacks to estimate the centroid to use for segmentation																																													|
+| [labeling](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/script.html#labeling) |Segment the input image by using pre-estimated centroids or user-provided set|
 
 To refer to modules documentation:
 
 | **Module**| **Description**|
 |:---------:|:--------------:|
-| [utils](./docs/CTLungSeg/utils.md) | method to load, save and preprocess stack																																										|
-| [method](./docs/CTLungSeg/method.md) | method to filter the image tensor |
-| [segmentation](./docs/CTLungSeg/segmentation.md) | contains useful function to segment stack of images and select ROI																										|
+| [utils](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/modules.html#utils) | method to load, save and preprocess stack																																										|
+| [method](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/modules.html#method) | method to filter the image tensor |
+| [segmentation](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/modules.html#segmentation) | contains useful function to segment stack of images and select ROI																										|
 
 For each script described below, there are a PowerShell and a shell script that
 allows their execution on multiple patients scans. Moreover it also provide a
