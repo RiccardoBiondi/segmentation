@@ -46,13 +46,13 @@ to several CT scans (in a multi-processing environment) is included into
 the project.
 
 A detailed description of the whole pipeline of processing has been already discussed
-in [@app11125438@], in which we have showed also the results obtained on public
-datasets [@zenodo@].
+in @app11125438, where we have showed also the results obtained on public
+datasets [@zenodo].
 In that work we proved the efficiency of the proposed unsupervised method for the
 identification of GGO areas and extraction of informative radiomic features.
 Radiomic features were collected and used to predict clinically relevant
 scores, with particular focus on mortality and the PREDI-CO score
-[@Bartoletti2020@].
+[@Bartoletti2020].
 
 # Statement of Need
 
@@ -64,28 +64,28 @@ of Ground Glass Opacities (GGO) and Consolidation (CS) related to the severity
 and the stage of the disease.
 
 The correct and fast identification of these patterns is a fundamental task.
-Up to now, this task is mainly performed using manual or semi-automatic techniques,
-which are time-consuming (hours or days) and subjected to the operator expertise.
+Up to now, this task has mainly been performed using manual or semi-automatic techniques,
+which are time-consuming (hours or days), with results dependent on the operator's expertise.
 
 This project provides an automated pipeline for the segmentation of
 GGO areas on chest CT scans of patient affected by COVID-19.
 The segmentation is achieved with a color quantization algorithm, based on k-means
 clustering, which groups the voxels by color and texture similarity. This
 approach is preceeded by the lung segmentation, achieved by a public available
-U-Net model [@Hofmanninger2020@] [@lungmask@]
+U-Net model [@Hofmanninger2020;@lungmask].
 
-The pipeline performances has been tested on 15 labeled chest CT scans dataset.
-These scans were segmented and validated by expert radiologist.
+The pipeline's performance has been tested on a dataset of 15 labeled chest CT scans.
+These scans were segmented and validated by an expert radiologist.
 Ten of these scans were extracted from the public dataset
-*COVID-19 CT Lung and Infection Segmentation Dataset* [@zenodo@]
+*COVID-19 CT Lung and Infection Segmentation Dataset* [@zenodo]
 published on Zenodo.
-Department of Diagnostic and Preventive Medicine of the IRCCS Policlinic Sant'Orsola-Malpighi
-provided others 82 scans, with the 5 labeled used for the evaluation.
+The Department of Diagnostic and Preventive Medicine of the IRCCS Policlinic Sant'Orsola-Malpighi
+provided another 82 scans, with the 5 labeled scans used for the evaluation.
 
 We tested the segmentation performances using the dice coefficient and specificity,
-sensitivity and precision scores.
+sensitivity, and precision scores.
 The average value and the corresponding standard deviation at $1\sigma$ are reported in
-the following Table.
+the following table.
 
 |  Dice Score  |  Sensitivity |    Specificity   |   Precision  |
 |:------------:|:------------:|:----------------:|:------------:|
@@ -93,12 +93,12 @@ the following Table.
 
 The proposed unsupervised segmentation pipeline is able to approximate the gold
 standard with satisfactory results.
-Given that the amount of information required for the k-means method training is considerably lower than CNN methods, while still retaining good results, this segmentation can be implemented with in-patient training[@app11125438@];
-as a reference, a 3D U-Net-based method [@yan2020covid19@] required two order of magnitude training samples to achieve comparable results.
+Given that the amount of information required for the k-means method training is considerably lower than for CNN methods, while still retaining good results, this segmentation can be implemented with in-patient training [@app11125438];
+as a reference, a 3D U-Net-based method [@yan2020covid19] required two order of magnitude more training samples to achieve comparable results.
 With this work we aimed to prove that semi-supervised approaches to segmentation are promising,
 as they would combine the best effort of highly trained physicians to develop true gold standard
 segmentation and the expertise of data analysts to augment those segmentation in full blown models.
-While the proposed pipeline is not yet at the accuracy level necessary for assisted diagnostic,
+While the proposed pipeline is not yet at the accuracy level necessary for assisted diagnostics,
 we surmise that our pipeline can be successfully used as starting point for more specific and
 performing segmentation methods.
 
