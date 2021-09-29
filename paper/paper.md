@@ -33,7 +33,7 @@ bibliography: paper.bib
 
 # Summary
 
-The `COVID-19 Lung Segmentation` project provides a novel, non-supervised and
+The `COVID-19 Lung Segmentation` project provides a novel, unsupervised and
 fully automated pipeline for the semantic segmentation of ground-glass opacity
 (GGO) areas in chest Computer Tomography (CT) scans of patients affected by COVID-19.
 In the project we provide a series of scripts and functions for the automated
@@ -58,12 +58,12 @@ scores, with particular focus on mortality and the PREDI-CO score
 
 COronaVirus Disease (COVID-19) has widely spread all over the world since the
 beginning of 2020.
-It is acute, highly contagious, viral infection mainly involving the respiratory system.
+It is an acute, highly contagious, viral infection mainly involving the respiratory system.
 Chest CT scans of patients affected by this condition have shown peculiar patterns
 of Ground Glass Opacities (GGO) and Consolidation (CS) related to the severity
 and the stage of the disease.
 
-In this scenario, the correct and fast identification of these patterns is a fundamental task.
+The correct and fast identification of these patterns is a fundamental task.
 Up to now, this task is mainly performed using manual or semi-automatic techniques,
 which are time-consuming (hours or days) and subjected to the operator expertise.
 
