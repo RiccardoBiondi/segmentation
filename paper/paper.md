@@ -99,8 +99,7 @@ With this work we aimed to prove that semi-supervised approaches to segmentation
 as they would combine the best effort of highly trained physicians to develop true gold standard
 segmentation and the expertise of data analysts to augment those segmentation in full blown models.
 While the proposed pipeline is not yet at the accuracy level necessary for assisted diagnostics,
-we surmise that our pipeline can be successfully used as starting point for more specific and
-performing segmentation methods.
+we surmise that our pipeline can be successfully used as a first segmentation method to be used as training for other, more specific methods.
 
 # Acknowledgments
 
