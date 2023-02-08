@@ -1,0 +1,38 @@
+name: Ubuntu CI
+
+on:
+  # Triggers the workflow on push or pull request events but only for the master branch
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    name: ubuntu-latest
+    strategy:
+      matrix:
+        python-version:  [3.7, 3.8, 3.9, '3.10', '3.11']
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+        submodules: recursive
+    - name: Set Up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install Requirements
+      run: |
+        python -m pip install --upgrade pip
+        python -m pip install flake8 pytest
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Install segmentation
+      run: |
+        python setup.py develop --user
+    - name: Test with pytest
+      run: |
+            python -m pytest
