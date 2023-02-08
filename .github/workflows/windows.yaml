@@ -32,9 +32,14 @@ jobs:
         python -m pip install flake8 pytest
         python -m pip install -r requirements.txt
 
+    - name: Install testing dependencies
+      run: |
+        python -m pip install hypothesis>=4.13.0 codecov pytest-cov
+  
     - name: Install segmentation Processing Tools
       run: |
         python setup.py develop --user
+
     - name: Test with pytest
       run: |
             python -m pytest
