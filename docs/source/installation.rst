@@ -4,6 +4,8 @@ Installation
 Supported python versions :
 |python version|
 
+Also python 3.5, 3.6, 3.7 are supported but not  tested 
+
 The full list of prerequisites is the following:
 
 - numpy>=1.17
@@ -62,7 +64,7 @@ You can run the full list of test from the segmentation folder:
   python -m pytest
 
 
-.. |python version| image:: https://img.shields.io/badge/python-3.5|3.6|3.7|3.8-blue.svg
+.. |python version| image:: https://img.shields.io/badge/python-|3.8|3.9|3.10-blue.svg
 .. _pytest: https://pypi.org/project/pytest/6.0.2/
 .. _hypothesis: https://hypothesis.readthedocs.io/en/latest/
 .. _testing: https://github.com/RiccardoBiondi/segmentation/tree/master/testing

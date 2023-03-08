@@ -8,59 +8,61 @@ try:
     from setuptools import find_packages
 
 except ImportError:
-  from distutils.core import setup
-  from distutils.core import find_packages
+    from distutils.core import setup
+    from distutils.core import find_packages
 
-def get_requires (requirements_filename):
-  '''
-  What packages are required for this module to be executed?
 
-  Parameters
-  ----------
+def get_requires(requirements_filename):
+    '''
+    What packages are required for this module to be executed?
+
+    Parameters
+    ----------
     requirements_filename : str
-      filename of requirements (e.g requirements.txt)
+        filename of requirements (e.g requirements.txt)
 
-  Returns
-  -------
+    Returns
+    -------
     requirements : list
-      list of required packages
-  '''
-  with open(requirements_filename, 'r') as fp:
-    requirements = fp.read()
+        list of required packages
+    '''
+    with open(requirements_filename, 'r') as fp:
+        requirements = fp.read()
 
-  return list(filter(lambda x: x != '', requirements.split()))
+    return list(filter(lambda x: x != '', requirements.split()))
 
 
+def read_description(readme_filename):
+    '''
+    Description package from filename
 
-def read_description (readme_filename):
-  '''
-  Description package from filename
-
-  Parameters
-  ----------
+    Parameters
+    ----------
     readme_filename : str
-      filename with readme information (e.g README.md)
+        filename with readme information (e.g README.md)
 
-  Returns
-  -------
+    Returns
+    -------
     description : str
-      str with description
-  '''
+        str with description
+    '''
 
-  try:
+    try:
 
-    with open(readme_filename, 'r') as fp:
-      description = '\n'
-      description += fp.read()
+        with open(readme_filename, 'r') as fp:
+            description = '\n'
+            description += fp.read()
 
-    return description
+        return description
 
-  except IOError:
-    return ''
+    except IOError:
+        return ''
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 
-#Package-Metadata
+
+# Package-Metadata
 NAME = "CTLungSeg"
 DESCRIPTION = 'Package for GGO and CS segmentation in lung CT scans'
 URL = 'https://github.com/RiccardoBiondi/segmentation'
@@ -75,17 +77,17 @@ README_FILENAME = os.path.join(here, 'README.md')
 # Import the README and use it as the long-description.
 # Note: this will only work if 'README.md' is present in your MANIFEST.in file!
 try:
-  LONG_DESCRIPTION = read_description(README_FILENAME)
+    LONG_DESCRIPTION = read_description(README_FILENAME)
 
 except IOError:
-  LONG_DESCRIPTION = DESCRIPTION
+    LONG_DESCRIPTION = DESCRIPTION
 
 
 # Load the package's __version__.py module as a dictionary.
 about = {}
 if not VERSION:
-  with open(VERSION_FILENAME) as fp:
-    exec(fp.read(), about)
+    with open(VERSION_FILENAME) as fp:
+        exec(fp.read(), about)
 
 else:
   about['__version__'] = VERSION

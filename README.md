@@ -95,7 +95,8 @@ snakemake pipeline.
 
 ## Prerequisites
 
-Supported python version: ![Python version](https://img.shields.io/badge/python-3.5|3.6|3.7|3.8|3.9|3.10|3.11-blue.svg)
+Supported python version: ![Python version](https://img.shields.io/badge/python-3.8|3.9|3.10-blue.svg).
+Also python 3.5, 3.6, 3.7 are supported but not  tested.
 
 First of all ensure to have the right python version installed.
 
