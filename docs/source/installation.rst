@@ -64,7 +64,7 @@ You can run the full list of test from the segmentation folder:
   python -m pytest
 
 
-.. |python version| image:: https://img.shields.io/badge/python-|3.8|3.9|3.10-blue.svg
+.. |python version| image:: https://img.shields.io/badge/python-3.8|3.9|3.10|3.11-blue.svg
 .. _pytest: https://pypi.org/project/pytest/6.0.2/
 .. _hypothesis: https://hypothesis.readthedocs.io/en/latest/
 .. _testing: https://github.com/RiccardoBiondi/segmentation/tree/master/testing
