@@ -32,5 +32,4 @@ MANIFEST
 # Pipeline Automatization
 
 .snakemake/
-# Ingore testing images folder
-/testing/images/*
+
