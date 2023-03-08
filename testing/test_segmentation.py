@@ -100,7 +100,8 @@ def test_imlabeling_raise_weight_exception(stack, dim):
     Assert :
         - Exception is raised
     '''
-    mc = np.stack(stack for _ in range(3))
+    mc = np.stack([stack[0] for _ in range(3)])
+    print(mc.shape)
     centroids = ones((5, 3), dtype=np.uint8)
     weight = ones((dim, dim, dim), dtype=np.uint8)
     with pytest.raises(Exception) as exc:
@@ -119,8 +120,8 @@ def test_imlabeling_raise_centroids_exception(stack) :
     Assert :
         - Exception is raise
     '''
-    mc = np.stack(stack for _ in range(3))
-    centroids = ones((5, 4), dtype = np.uint8)
+    mc = np.stack([stack[0] for _ in range(3)])
+    centroids = ones((5, 4), dtype= np.uint8)
 
     with pytest.raises(Exception) :
         assert imlabeling(mc, centroids)

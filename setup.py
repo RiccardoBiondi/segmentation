@@ -6,6 +6,7 @@ import os
 try:
     from setuptools import setup
     from setuptools import find_packages
+    
 
 except ImportError:
     from distutils.core import setup
@@ -101,8 +102,6 @@ setup(
     version=about['__version__'],
     author=AUTHOR,
     author_email=EMAIL,
-    mantainer=AUTHOR,
-    mantainer_email=EMAIL,
     description=DESCRIPTION,
     long_description=LONG_DESCRIPTION,
     long_description_content_type="text/markdown",
@@ -113,14 +112,6 @@ setup(
     include_package_data=True, # no absolute paths are allowed
     platforms='any',
     install_requires=get_requires(REQUIREMENTS_FILENAME),
-
-    entry_points={
-        'console_scripts': [
-        'lung_extraction = CTLungSeg.lung_extraction:main',
-        'labeling = CTLungSeg.labeling:main',
-        'train = CTLungSeg.train:main'
-        'CTLungSeg = CTLungSeg.__main__:main'
-    ]},
 
     classifiers=[
         "Programming Language :: Python :: 3",

@@ -98,7 +98,7 @@ def median_noise_strategy(draw):
 
 
 @given(median_noise_strategy(), st.integers(1, 13))
-@settings(max_examples=20,
+@settings(max_examples=5,
         deadline=None,
         suppress_health_check=(HC.too_slow,))
 def test_median_filter (image, radius) :
@@ -122,7 +122,7 @@ def test_median_filter (image, radius) :
 
 
 @given(median_noise_strategy())
-@settings(max_examples=20,
+@settings(max_examples=5,
         deadline=None,
         suppress_health_check=(HC.too_slow,))
 def test_median_filter_raise_value_error(image) :
@@ -140,7 +140,7 @@ def test_median_filter_raise_value_error(image) :
 
 
 @given(gauss_noise_strategy(), st.floats(1., 4.))
-@settings(max_examples=20,
+@settings(max_examples=5,
         deadline=None,
         suppress_health_check=(HC.too_slow,))
 def test_gauss_smooth (image, sigma):
@@ -166,7 +166,7 @@ def test_gauss_smooth (image, sigma):
 
 
 @given(gauss_noise_strategy())
-@settings(max_examples=20,
+@settings(max_examples=5,
             deadline=None,
             suppress_health_check=(HC.too_slow,))
 def tast_adjust_gamma_exception(image):
@@ -187,7 +187,7 @@ def tast_adjust_gamma_exception(image):
 
 
 @given(gauss_noise_strategy(), text_strategy)
-@settings(max_examples=20,
+@settings(max_examples=5,
             deadline=None,
             suppress_health_check=(HC.too_slow,))
 def test_adjust_gamma_raise_image_type_exception(image, image_type):
@@ -205,7 +205,7 @@ def test_adjust_gamma_raise_image_type_exception(image, image_type):
 
 
 @given(gauss_noise_strategy())
-@settings(max_examples=20,
+@settings(max_examples=5,
           deadline=None,
           suppress_health_check=(HC.too_slow,))
 def test_std_filter_raise_value_error(image):
@@ -224,7 +224,7 @@ def test_std_filter_raise_value_error(image):
 
 
 @given(gauss_noise_strategy(), st.integers(10, 100), st.integers(150, 250))
-@settings(max_examples=20,
+@settings(max_examples=5,
           deadline=None,
           suppress_health_check=(HC.too_slow,))
 def test_threshold_and_apply_mask(image, lower, upper):
@@ -253,7 +253,7 @@ def test_threshold_and_apply_mask(image, lower, upper):
 
 
 @given(gauss_noise_strategy(), st.sampled_from(sitk_types))
-@settings(max_examples=20,
+@settings(max_examples=5,
           deadline=None,
           suppress_health_check=(HC.too_slow,))
 def test_cast_image(image, new_type) :

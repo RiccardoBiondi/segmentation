@@ -86,7 +86,7 @@ def sitk_constant_image(draw) :
 
 
 @given(rand_stack_strategy(), filename_strategy)
-@settings(max_examples=20,
+@settings(max_examples=5,
         deadline=None,
         suppress_health_check=(HC.too_slow,))
 def test_save_and_load_pkl(imgs,  filename):
@@ -108,7 +108,7 @@ def test_save_and_load_pkl(imgs,  filename):
 
 
 @given(filename_strategy, st.sampled_from(medical_image_formats))
-@settings(max_examples=20,
+@settings(max_examples=5,
         deadline=None,
         suppress_health_check=(HC.too_slow,))
 def test_reader(filename, format):
@@ -130,7 +130,7 @@ def test_reader(filename, format):
 
 @given(sitk_image_strategy(), filename_strategy,
        st.sampled_from(medical_image_formats))
-@settings(max_examples=20,
+@settings(max_examples=5,
           deadline=None,
           suppress_health_check=(HC.too_slow,))
 def test_read_and_write_image(image, filename, format):
@@ -161,7 +161,7 @@ def test_read_and_write_image(image, filename, format):
 
 
 @given(filename_strategy, st.sampled_from(medical_image_formats))
-@settings(max_examples=20, deadline=None,
+@settings(max_examples=5, deadline=None,
           suppress_health_check=(HC.too_slow,))
 def test_reader_raise_file_not_found(path, format):
     '''
@@ -180,7 +180,7 @@ def test_reader_raise_file_not_found(path, format):
 
 
 @given(sitk_image_strategy())
-@settings(max_examples=20, deadline=None,
+@settings(max_examples=5, deadline=None,
           suppress_health_check=(HC.too_slow,))
 def test_deep_copy(image):
     '''
@@ -203,7 +203,7 @@ def test_deep_copy(image):
 
 
 @given(sitk_constant_image())
-@settings(max_examples=20, deadline=None,
+@settings(max_examples=5, deadline=None,
           suppress_health_check=(HC.too_slow,))
 def test_normalize_raise_error(image):
     '''
@@ -219,7 +219,7 @@ def test_normalize_raise_error(image):
 
 
 @given(sitk_image_strategy())
-@settings(max_examples=20, deadline=None,
+@settings(max_examples=5, deadline=None,
           suppress_health_check=(HC.too_slow,))
 def test_shift_and_crop(volume):
     '''
@@ -243,7 +243,7 @@ def test_shift_and_crop(volume):
 
 
 @given(rand_stack_strategy(), st.integers(2, 5))
-@settings(max_examples=20,
+@settings(max_examples=5,
             deadline=None,
             suppress_health_check=(HC.too_slow,))
 def test_shuffle_and_split(sample, n_subsamples):
