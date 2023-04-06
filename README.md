@@ -21,17 +21,27 @@ clustering.
 This package provides a series of scripts to isolate lung regions, pre-process
 the images, estimate K-means centroids and labels of the lung regions.
 
-1. [Overview](#Overview)
-2. [Contents](#Contents)
-3. [Prerequisites](#Prerequisites)
-4. [Installation](#Installation)
-5. [Usage](#Usage)
-6. [License](#License)
-7. [Contribution](#Contribution)
-8. [References](#References)
-9. [Authors](#Authors)
-10. [Acknowledgments](#Acknowledgments)
-11. [Citation](#Citation)
+- [COVID-19 Lung Segmentation](#covid-19-lung-segmentation)
+  - [Overview](#overview)
+  - [Contents](#contents)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+    - [Testing](#testing)
+  - [Usage](#usage)
+    - [Download Data](#download-data)
+    - [Single Scan](#single-scan)
+    - [Multiple Scans](#multiple-scans)
+      - [Script](#script)
+        - [Train your own centroid set](#train-your-own-centroid-set)
+      - [Snakemake](#snakemake)
+      - [Train Your Centroids](#train-your-centroids)
+    - [Evaluation](#evaluation)
+  - [License](#license)
+  - [Contribution](#contribution)
+  - [References](#references)
+  - [Authors](#authors)
+  - [Acknowledgments](#acknowledgments)
+  - [Citation](#citation)
 
 ## Overview
 
@@ -80,6 +90,8 @@ To refer to script documentation:
 | [lung_extraction](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/script.html#lung-extraction) | Extract lung from CT scans 										 																																				|
 | [train](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/script.html#train) | Apply colour quantization on a series of stacks to estimate the centroid to use for segmentation																																													|
 | [labeling](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/script.html#labeling) |Segment the input image by using pre-estimated centroids or user-provided set|
+| [evaluate](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/script.html#evaluate) |Compute metrics to evaluate the prediction agains a ground truth|
+
 
 To refer to modules documentation:
 
@@ -87,7 +99,8 @@ To refer to modules documentation:
 |:---------:|:--------------:|
 | [utils](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/modules.html#utils) | method to load, save and preprocess stack																																										|
 | [method](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/modules.html#method) | method to filter the image tensor |
-| [segmentation](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/modules.html#segmentation) | contains useful function to segment stack of images and select ROI																										|
+| [segmentation](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/modules.html#segmentation) | contains useful function to segment stack of images and select ROI																										| 
+| [metrics](https://covid-19-ggo-segmentation.readthedocs.io/en/latest/modules.html#metrics) | contains  the implementation of the evaluation metrics| 
 
 For each script described below, there are a PowerShell and a shell script that
 allows their execution on multiple patients scans. Moreover it also provide a
@@ -198,6 +211,7 @@ To segment a single CT scan run the following from the bash or PowerShell:
 In the case of multiple patients segmentation, you have to repeat the segmentation process many times:  We have automated this process using bash(for Linux) and PowerShell(for Windows) scripts.
 We have also provided a snakemake pipeline for the whole segmentation procedure in a multi-processing environment.
 In the following paragraph, we will explain how to organize your data to benefits from this automation.
+
 
 #### Script
 
@@ -356,6 +370,27 @@ Now run Snakemake with the following configuration parameters :
   snakemake --cores 1 --config input_path='./Examples/INPUT/'
   output_path='.Examples/OUTPUT/' train_path='./Examples/TRAIN/' centroid_path='./Examples/centorids.pkl.npy'
 ```
+
+###  Evaluation
+
+This project provides also a script to evaluate the goodnes of the segmentation against the ground truth.
+The evaluation is carried out by different metrics: Dice Coefficient, Sensitivity, Recall, Precision and Accuracy.
+To run te evaluation procedure, run the following command from bash or PowerShell
+
+```bash
+   python -m CTLungSeg.evaluate --gt='/Path/To/GroundTruth.nii'  --pred='/Path/To/Prediction.nii'
+```
+
+This will print on the command line the achieved results.
+To store the results to a comma spaced csv file, use the following command
+from bash or PowerShell
+
+```bash
+   python -m CTLungSeg.evaluate --gt='/Path/To/GroundTruth.nii'  --pred='/Path/To/Prediction.nii' --output='/Path/To/Output.csv'
+```
+
+Notice that both ground truth and prdiction must have the same shape. The
+images will be evaluated as binary images with a background value of 0.
 
 ## License
 

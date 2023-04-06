@@ -43,7 +43,20 @@ Segmentation
 This module contains the implementation of the functions used to perform the
 tasks on each script.
 
-.. automodule:: CTLungSeg.segmentation
+.. automodule:: segmentation
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :private-members:
+   :special-members:
+
+Metrics
+-------
+
+This module contains the implementation of some metrics used to perform the segmentation
+evaluation.
+
+.. automodule:: metrics
    :members:
    :undoc-members:
    :show-inheritance:

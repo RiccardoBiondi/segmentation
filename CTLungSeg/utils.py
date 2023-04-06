@@ -119,7 +119,7 @@ def read_image(filename):
 
         image = reader.Execute()
     else :
-        raise FileNotFoundError()
+        raise FileNotFoundError(f"Could not find: {filename}")
     return image
 
 

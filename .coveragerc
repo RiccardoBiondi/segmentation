@@ -7,3 +7,4 @@ omit =
     */CTLungSeg/lung_extraction.py
     */CTLungSeg/train.py
     */CTLungSeg/labeling.py
+    */CTLungSeg/evaluate.py

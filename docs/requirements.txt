@@ -3,6 +3,7 @@ opencv-python
 tdqm
 SimpleITK
 matplotlib
+pandas
 
 sphinx==4.1.2
 sphinx-rtd-theme

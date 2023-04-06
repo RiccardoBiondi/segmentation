@@ -124,6 +124,31 @@ format.
 
   please notice that this process may be time consuming and computational expansive
 
+
+Evaluation
+----------
+
+This project provides also a script to evaluate the goodnes of the segmentation against the ground truth.
+The evaluation is carried out by different metrics: Dice Coefficient, Sensitivity, Recall, Precision and Accuracy.
+To run te evaluation procedure, run the following command from bash or PowerShell
+
+.. code-block:: bash
+
+   python -m CTLungSeg.evaluate --gt='/Path/To/GroundTruth.nii'  --pred='/Path/To/Prediction.nii'
+
+
+This will print on the command line the achieved results.
+To store the results to a comma spaced csv file, use the following command
+from bash or PowerShell
+
+.. code-block:: bash
+
+   python -m CTLungSeg.evaluate --gt='/Path/To/GroundTruth.nii'  --pred='/Path/To/Prediction.nii' --output='/Path/To/Output.csv'
+
+
+Notice that both ground truth and prdiction must have the same shape. The
+images will be evaluated as binary images with a background value of 0.
+
 .. _SimpleITK: https://simpleitk.readthedocs.io/en/master/IO.html
 .. _this: https://github.com/JoHof/lungmask
 .. _here: https://eurradiolexp.springeropen.com/articles/10.1186/s41747-020-00173-2
