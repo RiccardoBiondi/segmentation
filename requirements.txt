@@ -3,3 +3,4 @@ opencv-python
 tdqm
 SimpleITK
 torch
+git+https://github.com/JoHof/lungmask
