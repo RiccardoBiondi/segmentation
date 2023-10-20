@@ -32,6 +32,35 @@ def get_requires(requirements_filename):
 
     return list(filter(lambda x: x != '', requirements.split()))
 
+def format_requires(requirement):
+    '''
+    Check if the specified requirements is a package or a link to github report.
+    If it is a link to a github repo, it will format it according to the specification 
+    Of install requirements. 
+    The git hub repo url is assumed to be in the form:
+    git+https://github.com/UserName/RepoName
+
+    and will be formatted as 
+    RepoName @ git+https://github.com/UserName/RepoName
+
+    Parameters
+    ----------
+    requirement : str
+        str with the reuirement to be analyzed
+    
+    Returns
+    -------
+    foramt_requirement: str
+        requirement formatted according to install_requires specs
+    '''
+
+    if "http" not in requirement:
+        return requirement
+
+    package_name = requirement.split('/')[-1]
+    return f'{package_name} @ {requirement}'
+
+
 
 def read_description(readme_filename):
     '''
@@ -96,6 +125,9 @@ else:
 # parse version variables and add them to command line as definitions
 Version = about['__version__'].split('.')
 
+requirements = list(map(lambda x: format_requires(x), get_requires(REQUIREMENTS_FILENAME)))
+
+print(requirements)
 
 setup(
     name=NAME,
@@ -111,7 +143,7 @@ setup(
     packages=find_packages(include=['CTLungSeg','CTLungSeg.*'], exclude=('test', 'testing')),
     include_package_data=True, # no absolute paths are allowed
     platforms='any',
-    install_requires=get_requires(REQUIREMENTS_FILENAME),
+    install_requires=requirements,#get_requires(REQUIREMENTS_FILENAME),
 
     classifiers=[
         "Programming Language :: Python :: 3",
